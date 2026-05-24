@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FIRE Retirement Calculator — Find Your Number</title>
+  <meta name="description" content="An interactive, real-time FIRE retirement calculator. Enter your income, savings, and spending — drag the slider to find the retirement age that actually works for you.">
+  <meta property="og:title" content="FIRE Retirement Calculator — Find Your Number">
+  <meta property="og:description" content="Enter your numbers. Pull the retirement slider. See exactly what it takes to retire early.">
+  <meta property="og:type" content="website">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css">
+  <style>
+    :root {
+      --green:       #00a550;
+      --green-light: #e6f7ef;
+      --amber:       #d97706;
+      --amber-light: #fffbeb;
+      --blue:        #1a6fe8;
+      --blue-light:  #eff6ff;
+      --gray-bg:     #f4f6f9;
+      --card-shadow: 0 2px 16px rgba(0,0,0,.08);
+    }
+
+    body {
+      background: var(--gray-bg);
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      color: #1a202c;
+    }
+
+    /* ── Cards ── */
+    .calc-card {
+      background: #fff;
+      border-radius: 16px;
+      box-shadow: var(--card-shadow);
+      padding: 1.75rem;
+    }
+
+    /* ── Scenarios ── */
+    .scenario-chip {
+      background: #f0f7ff; border: 1px solid #bfdbfe;
+      color: #1d4ed8; font-size: .78rem; font-weight: 600;
+      padding: .25rem .65rem; border-radius: 20px;
+      transition: background .15s;
+    }
+    .scenario-chip:hover { background: #dbeafe; border-color: #93c5fd; color: #1d4ed8; }
+    .scenario-chip .del { opacity:.5; margin-left:.3rem; font-size:.7rem; }
+    .scenario-chip .del:hover { opacity:1; }
+    #scenario-input-wrap input:focus { box-shadow: 0 0 0 3px rgba(29,78,216,.15); }
+
+    /* ── Field labels ── */
+    .field-label {
+      font-size: .82rem;
+      font-weight: 600;
+      color: #4a5568;
+      margin-bottom: .15rem;
+    }
+    .field-subdesc {
+      font-size: .76rem;
+      color: #64748b;
+      margin-bottom: .45rem;
+      line-height: 1.45;
+    }
+    .learn-more-link {
+      color: var(--blue);
+      text-decoration: none;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+    .learn-more-link:hover { text-decoration: underline; }
+    .popover-rich { max-width: 340px; font-size: .82rem; line-height: 1.55; }
+    .popover-rich .popover-header { font-weight: 700; font-size: .85rem; }
+    .popover-rich p { margin-bottom: .6rem; }
+    .popover-rich p:last-child { margin-bottom: 0; }
+    .popover-rich a { color: var(--blue); }
+
+    /* ── Toggle $/%  ── */
+    .mode-group { display: flex; border-radius: 6px; overflow: hidden; border: 1px solid #cbd5e0; }
+    .mode-btn {
+      padding: .2rem .65rem;
+      font-size: .78rem;
+      font-weight: 600;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: #718096;
+      transition: background .15s, color .15s;
+    }
+    .mode-btn.active { background: var(--blue); color: #fff; }
+
+    /* ── Result cards ── */
+    .res-card {
+      border-radius: 12px;
+      padding: 1.1rem 1.25rem;
+    }
+    .res-card.have {
+      background: var(--green-light);
+      border: 1.5px solid #b7e4c7;
+    }
+    .res-card.need {
+      background: var(--blue-light);
+      border: 1.5px solid #bfdbfe;
+    }
+    .res-label {
+      font-size: .72rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+      color: #718096;
+      margin-bottom: .2rem;
+    }
+    .res-amount {
+      font-size: 1.9rem;
+      font-weight: 800;
+      line-height: 1.1;
+    }
+    .res-card.have .res-amount { color: #1a6fe8; }
+    .res-card.need .res-amount { color: #d97706; }
+
+    /* ── Progress bar ── */
+    .prog-track {
+      height: 10px;
+      border-radius: 5px;
+      background: #e2e8f0;
+      overflow: hidden;
+    }
+    .prog-fill {
+      height: 100%;
+      border-radius: 5px;
+      transition: width .5s ease, background .3s;
+    }
+
+    /* ── Slider section ── */
+    .slider-section {
+      background: linear-gradient(135deg, #eff6ff 0%, #f0fdf4 100%);
+      border: 1.5px solid #bfdbfe;
+      border-radius: 16px;
+      padding: 1.5rem;
+    }
+
+    #slider-retire {
+      accent-color: var(--blue);
+    }
+
+    .retire-age-display {
+      font-size: 3rem;
+      font-weight: 900;
+      color: var(--blue);
+      line-height: 1;
+      min-width: 80px;
+      text-align: right;
+    }
+
+    .age-ticks {
+      display: flex;
+      justify-content: space-between;
+      font-size: .7rem;
+      color: #94a3b8;
+      margin-top: 2.2rem;
+      padding: 0 0.5rem;
+    }
+    /* ── Triple-handle life timeline slider ── */
+    .triple-wrap {
+      position: relative;
+      height: 1.5rem;
+      margin-top: 1.6rem;
+    }
+    .thumb-label {
+      position: absolute;
+      top: -1.5rem;
+      transform: translateX(-50%);
+      color: #fff;
+      font-size: .68rem;
+      font-weight: 700;
+      padding: 1px 5px;
+      border-radius: 4px;
+      pointer-events: none;
+      white-space: nowrap;
+      line-height: 1.5;
+    }
+    .thumb-label-below {
+      top: auto;
+      bottom: -1.5rem;
+    }
+    .triple-track {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      height: 7px; border-radius: 4px;
+      background: #cbd5e1;
+      left: 0; right: 0; pointer-events: none;
+    }
+    .triple-seg {
+      position: absolute;
+      top: 50%; transform: translateY(-50%);
+      height: 7px; border-radius: 2px;
+      pointer-events: none;
+    }
+    .triple-wrap input[type=range] {
+      position: absolute;
+      width: 100%; top: 0; height: 100%;
+      background: transparent;
+      pointer-events: none;
+      -webkit-appearance: none; appearance: none;
+    }
+    .triple-wrap input[type=range]::-webkit-slider-thumb {
+      pointer-events: all; cursor: pointer;
+      -webkit-appearance: none; appearance: none;
+      width: 1.1rem; height: 1.1rem;
+      border-radius: 50%; border: 2.5px solid #fff;
+      margin-top: -6px;
+      box-shadow: 0 2px 6px rgba(0,0,0,.30);
+    }
+    #slider-age::-webkit-slider-thumb    { background: #1d4ed8; }
+    #slider-retire::-webkit-slider-thumb { background: #d97706; }
+    #slider-life::-webkit-slider-thumb   { background: #334155; }
+    .triple-wrap input[type=range]::-webkit-slider-runnable-track {
+      background: transparent;
+      height: 4px;
+    }
+    .triple-labels { font-size: .78rem; }
+    .triple-dot {
+      display: inline-block; width: 9px; height: 9px;
+      border-radius: 50%; margin-right: 4px; vertical-align: middle;
+    }
+
+    /* ── Mini stats ── */
+    .mini-stat-card {
+      background: #fff;
+      border-radius: 10px;
+      padding: .75rem 1rem;
+      text-align: center;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+    }
+    .mini-stat-label { font-size: .72rem; color: #718096; margin-bottom: .15rem; }
+    .mini-stat-val   { font-size: 1.15rem; font-weight: 800; }
+
+    /* ── Input cards & section titles ── */
+    .input-card {
+      background: #fff;
+      border-radius: 12px;
+      padding: .9rem 1rem;
+      box-shadow: 0 1px 4px rgba(0,0,0,.06);
+      border: 1px solid #f1f5f9;
+    }
+    .section-title {
+      font-size: .68rem;
+      font-weight: 700;
+      letter-spacing: .09em;
+      text-transform: uppercase;
+      color: #94a3b8;
+      margin: 1rem 0 .4rem;
+    }
+
+    /* ── Equiv hint ── */
+    .equiv-hint { font-size: .74rem; color: #64748b; min-height: 1.1rem; font-weight: 500; }
+    .field-tip   { font-size: .72rem; color: #94a3b8; font-style: italic; min-height: 1rem; }
+
+    /* ── Chart ── */
+    #chart-area { position: relative; height: 270px; }
+
+    /* ── Inputs ── */
+    .form-control {
+      border-color: #cbd5e0;
+      font-size: .9rem;
+    }
+    .form-control:focus {
+      border-color: var(--blue);
+      box-shadow: 0 0 0 3px rgba(26,111,232,.12);
+    }
+    .input-group-text {
+      border-color: #cbd5e0;
+      background: #f8fafc;
+      color: #718096;
+      font-size: .85rem;
+    }
+
+    /* ── Disclaimer ── */
+    .disclaimer { font-size: .72rem; color: #94a3b8; }
+
+    /* ── Info icon ── */
+    .info-icon {
+      font-size: .82rem;
+      color: #94a3b8;
+      cursor: pointer;
+      flex-shrink: 0;
+      vertical-align: middle;
+    }
+    .info-icon:hover { color: var(--blue); }
+    .popover { max-width: 300px; font-size: .82rem; }
+    .popover-header { font-size: .82rem; font-weight: 700; }
+
+    @media (max-width: 767px) {
+      .res-amount  { font-size: 1.5rem; }
+      .calc-card   { padding: 1.25rem; }
+    }
+  </style>
+</head>
+<body>
+<div class="container py-4 py-lg-5" style="max-width:1060px;">
+
+  <!-- Header -->
+  <div class="mb-4">
+    <div class="mb-1" style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);opacity:.7;">Retirement Calculator</div>
+    <h1 class="fw-bold mb-2" style="font-size:2rem;line-height:1.15;">Find Your FIRE Date</h1>
+    <p class="text-muted mb-2" style="font-size:.9rem;">
+      Put in your numbers. Pull the retirement slider. That's it.
+    </p>
+    <p class="mb-0" style="font-size:.75rem;color:#94a3b8;">
+      <i class="bi bi-shield-lock me-1"></i>No data stored &nbsp;·&nbsp; <i class="bi bi-cloud-slash me-1"></i>No backend &nbsp;·&nbsp; <i class="bi bi-github me-1"></i>Open source &nbsp;·&nbsp; <i class="bi bi-shield-check me-1"></i>Educational only — not financial advice &nbsp;·&nbsp; <a href="https://github.com/apiarya/fire-calculator/issues" target="_blank" rel="noopener" style="color:inherit;"><i class="bi bi-chat-dots me-1"></i>Questions or feedback</a>
+    </p>
+  </div>
+
+  <div class="row g-4 align-items-start">
+    <!-- ╔═════════════════════╗ -->
+    <!-- ║   INPUT PANEL        ║ -->
+    <!-- ╚═════════════════════╝ -->
+    <div class="col-lg-5">
+
+      <!-- Filing status -->
+      <div class="input-card mb-2">
+        <div class="field-label">Filing status</div>
+        <div class="field-subdesc">
+          Affects income tax brackets, standard deduction, Social Security estimate, and 401(k)/IRA/HSA contribution limits.
+          <a href="#" class="learn-more-link" tabindex="0"
+             data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="right"
+             data-bs-custom-class="popover-rich" data-bs-html="true"
+             data-bs-title="Filing status"
+             data-bs-content="&lt;p&gt;Are you filing taxes as married or single?&lt;/p&gt;&lt;p&gt;Married filing jointly gets wider tax brackets and higher standard deductions. It also doubles most contribution limits — e.g., two spouses can each max a 401(k) and IRA.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;If married:&lt;/strong&gt; enter all income and savings as household combined totals throughout the calculator.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.irs.gov/newsroom/choose-the-right-filing-status' target='_blank' rel='noopener'&gt;Filing status guide &amp;rarr; IRS&lt;/a&gt;&lt;/p&gt;"
+             onclick="return false;">Learn more &rarr;</a>
+        </div>
+        <div class="btn-group btn-group-sm" role="group" aria-label="Filing status">
+          <input type="radio" class="btn-check" name="filing" id="filing-married" onchange="update()" checked autocomplete="off">
+          <label class="btn btn-outline-primary" for="filing-married">
+            <i class="bi bi-people-fill me-1"></i>Married
+          </label>
+          <input type="radio" class="btn-check" name="filing" id="filing-single" onchange="update()" autocomplete="off">
+          <label class="btn btn-outline-primary" for="filing-single">
+            <i class="bi bi-person-fill me-1"></i>Single
+          </label>
+        </div>
+        <div class="equiv-hint mt-2" id="filing-note">All inputs are household combined totals.</div>
+      </div>
+
+
+
+      <div class="section-title">Income &amp; savings</div>
+
+      <!-- Annual Income -->
+      <div class="input-card mb-2">
+        <div class="field-label">Annual pre-tax income</div>
+        <div class="field-subdesc">
+          Gross household salary, bonus, and RSU — before taxes.
+          <a href="#" class="learn-more-link" tabindex="0"
+             data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="right"
+             data-bs-custom-class="popover-rich" data-bs-html="true"
+             data-bs-title="Annual pre-tax income"
+             data-bs-content="&lt;p&gt;What is your total household income before taxes?&lt;/p&gt;&lt;p&gt;Enter your gross (pre-tax) salary including bonus and RSU income you expect to continue. If married, enter your combined household total.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Why it matters:&lt;/strong&gt;&lt;br&gt;Savings rate matters more than raw income — a $500k earner saving 10% reaches FIRE slower than a $200k earner saving 50%.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.nerdwallet.com/article/investing/what-is-fire-financial-independence-retire-early' target='_blank' rel='noopener'&gt;Savings rate &amp; FIRE &amp;rarr; NerdWallet&lt;/a&gt;&lt;/p&gt;"
+             onclick="return false;">Learn more &rarr;</a>
+        </div>
+        <div class="input-group">
+          <span class="input-group-text">$</span>
+          <input type="text" inputmode="numeric" class="form-control" id="inp-income" value="480,000" oninput="formatNumLive(this)" onblur="onBlurNum(this)">
+        </div>
+        <div class="equiv-hint mt-1" id="income-hint"></div>
+      </div>
+
+      <!-- Current Savings -->
+      <div class="input-card mb-2">
+        <div class="field-label">Current retirement savings</div>
+        <div class="field-subdesc">
+          401(k), IRA, Roth, and brokerage — not home equity or cars.
+          <a href="#" class="learn-more-link" tabindex="0"
+             data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="right"
+             data-bs-custom-class="popover-rich" data-bs-html="true"
+             data-bs-title="Current retirement savings"
+             data-bs-content="&lt;p&gt;How much have you already saved and invested across all accounts?&lt;/p&gt;&lt;p&gt;&lt;strong&gt;What to include:&lt;/strong&gt;&lt;br&gt;401(k), traditional IRA, Roth IRA, and taxable brokerage accounts — Fidelity, Schwab, Vanguard, Robinhood, etc.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;What to leave out:&lt;/strong&gt;&lt;br&gt;Home equity, cars, illiquid real estate, or anything you can&amp;rsquo;t sell in a few days.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Why it matters:&lt;/strong&gt;&lt;br&gt;$1M at age 47 grows to ~$2.4M by 60 at 6% — with zero additional contributions. Your existing balance is your most powerful compounding asset.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.investopedia.com/terms/c/compoundinterest.asp' target='_blank' rel='noopener'&gt;How compounding works &amp;rarr; Investopedia&lt;/a&gt;&lt;/p&gt;"
+             onclick="return false;">Learn more &rarr;</a>
+        </div>
+        <div class="input-group">
+          <span class="input-group-text">$</span>
+          <input type="text" inputmode="numeric" class="form-control" id="inp-savings" value="500,000" oninput="formatNumLive(this)" onblur="onBlurNum(this)">
+        </div>
+        <div class="equiv-hint mt-1" id="savings-hint"></div>
+      </div>
+
+      <div class="section-title">Monthly contributions</div>
+
+      <!-- Retirement accounts -->
+      <div class="input-card mb-2">
+        <div class="field-label">Retirement accounts</div>
+        <div class="field-subdesc">
+          401(k), IRA, Roth, HSA, and backdoor Roth — monthly contributions.
+          <a href="#" class="learn-more-link" tabindex="0"
+             data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="right"
+             data-bs-custom-class="popover-rich" data-bs-html="true"
+             data-bs-title="Retirement account contributions"
+             data-bs-content="&lt;p&gt;How much do you contribute each month to tax-advantaged retirement accounts?&lt;/p&gt;&lt;p&gt;&lt;strong&gt;2026 limits per person:&lt;/strong&gt;&lt;br&gt;401(k): $23,500 &amp;middot; IRA: $7,000 &amp;middot; HSA: $4,300 (single) or $8,550 (family). Married couples can contribute per spouse.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Mega Backdoor Roth:&lt;/strong&gt;&lt;br&gt;If your employer allows after-tax 401(k) contributions, you can contribute up to $46,500 more per plan — then convert to Roth tax-free.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.investopedia.com/terms/b/backdoor-roth-ira.asp' target='_blank' rel='noopener'&gt;Backdoor Roth IRA &amp;rarr; Investopedia&lt;/a&gt;&lt;/p&gt;"
+             onclick="return false;">Learn more &rarr;</a>
+        </div>
+        <div class="input-group">
+          <span class="input-group-text">$</span>
+          <input type="text" inputmode="numeric" class="form-control" id="inp-retire-contrib" value="10,000" oninput="formatNumLive(this)" onblur="onBlurNum(this)">
+          <span class="input-group-text">/mo</span>
+        </div>
+        <div class="equiv-hint mt-1" id="retire-contrib-hint"></div>
+        <div class="field-tip" id="retire-contrib-tip"></div>
+      </div>
+
+      <!-- Brokerage -->
+      <div class="input-card mb-2">
+        <div class="field-label">Brokerage</div>
+        <div class="field-subdesc">
+          Taxable account (Fidelity, Schwab, Vanguard, Robinhood) — monthly investments.
+          <a href="#" class="learn-more-link" tabindex="0"
+             data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="right"
+             data-bs-custom-class="popover-rich" data-bs-html="true"
+             data-bs-title="Brokerage contributions"
+             data-bs-content="&lt;p&gt;How much do you invest each month in a taxable brokerage account?&lt;/p&gt;&lt;p&gt;Include every recurring transfer to Fidelity, Schwab, Vanguard, Robinhood, or similar — stocks, ETFs, index funds. There is no contribution cap.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Early retirement superpower:&lt;/strong&gt;&lt;br&gt;No penalty for withdrawals before age 59½, making this essential for early retirees who need income before retirement accounts unlock.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.investopedia.com/articles/personal-finance/101515/comparing-longterm-vs-shortterm-capital-gain-tax-rates.asp' target='_blank' rel='noopener'&gt;Capital gains tax rates &amp;rarr; Investopedia&lt;/a&gt;&lt;/p&gt;"
+             onclick="return false;">Learn more &rarr;</a>
+        </div>
+        <div class="input-group">
+          <span class="input-group-text">$</span>
+          <input type="text" inputmode="numeric" class="form-control" id="inp-brokerage" value="5,000" oninput="formatNumLive(this)" onblur="onBlurNum(this)">
+          <span class="input-group-text">/mo</span>
+        </div>
+        <div class="equiv-hint mt-1" id="brokerage-hint"></div>
+      </div>
+
+      <div class="section-title">Monthly budget in retirement</div>
+
+      <!-- Monthly expenses -->
+      <div class="input-card mb-2">
+        <div class="field-label"><span id="budget-field-label">Monthly expenses starting at 55</span></div>
+        <div class="field-subdesc">
+          In today’s dollars — automatically inflated to your retirement date. Mortgage still running at age <span id="budget-retire-age-inline">55</span>? Include it here. Paid off by then? Leave it out.
+          <a href="#" class="learn-more-link" tabindex="0"
+             data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="right"
+             data-bs-custom-class="popover-rich" data-bs-html="true"
+             data-bs-title="Monthly expenses in retirement"
+             data-bs-content="&lt;p&gt;How much do you plan to spend each month in retirement?&lt;/p&gt;&lt;p&gt;Enter in today&amp;rsquo;s dollars — the calculator automatically inflates this to your retirement date. A common starting point is 70–80% of your current income.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Mortgage:&lt;/strong&gt;&lt;br&gt;Will it be paid off by your retirement age? If not, include it. A $3,000/mo payment adds ~$720K to your required portfolio.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Also budget for:&lt;/strong&gt;&lt;br&gt;Healthcare ($1,000–2,000/mo pre-Medicare), travel, and hobbies. Every $1,000/mo less here cuts your required portfolio by ~$240K.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.investopedia.com/terms/f/four-percent-rule.asp' target='_blank' rel='noopener'&gt;The 4% rule explained &amp;rarr; Investopedia&lt;/a&gt;&lt;/p&gt;"
+             onclick="return false;">Learn more &rarr;</a>
+        </div>
+        <div class="input-group">
+          <span class="input-group-text">$</span>
+          <input type="text" inputmode="numeric" class="form-control" id="inp-budget" value="15,000" oninput="formatNumLive(this)" onblur="onBlurNum(this)">
+          <span class="input-group-text">/mo</span>
+        </div>
+        <div class="equiv-hint mt-1" id="budget-hint"></div>
+      </div>
+
+      <div class="section-title">Guaranteed income</div>
+
+      <!-- Social Security -->
+      <div class="input-card mb-2">
+        <div class="field-label">Social Security</div>
+        <div class="field-subdesc">
+          Auto-estimated from income and retirement age — or enter your actual SSA amount.
+          <a href="#" class="learn-more-link" tabindex="0"
+             data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="right"
+             data-bs-custom-class="popover-rich" data-bs-html="true"
+             data-bs-title="Social Security"
+             data-bs-content="&lt;p&gt;How much will you receive monthly from Social Security?&lt;/p&gt;&lt;p&gt;Leave blank to auto-estimate using the SSA bend-point formula based on your income and retirement age. High earners receive less proportionally due to the progressive formula.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Override tip:&lt;/strong&gt;&lt;br&gt;Enter your actual SSA statement amount if you have it. Each $1,000/mo of SS reduces your required portfolio by ~$240K.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.ssa.gov/OACT/quickcalc/' target='_blank' rel='noopener'&gt;SSA Quick Calculator &amp;rarr;&lt;/a&gt;&lt;/p&gt;"
+             onclick="return false;">Learn more &rarr;</a>
+        </div>
+        <div class="input-group">
+          <span class="input-group-text">$</span>
+          <input type="text" inputmode="numeric" class="form-control" id="inp-ss" value="3,500" oninput="formatNumLive(this)" onblur="onBlurNum(this)">
+          <span class="input-group-text">/mo</span>
+        </div>
+        <div class="equiv-hint mt-1" id="ss-hint"></div>
+        <div class="field-tip" id="ss-tip"></div>
+      </div>
+
+      <!-- Other income -->
+      <div class="input-card mb-2">
+        <div class="field-label">Other income</div>
+        <div class="field-subdesc">
+          Pension, rental, or annuity — guaranteed monthly income beyond Social Security.
+          <a href="#" class="learn-more-link" tabindex="0"
+             data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="right"
+             data-bs-custom-class="popover-rich" data-bs-html="true"
+             data-bs-title="Other guaranteed income"
+             data-bs-content="&lt;p&gt;Do you have other guaranteed income in retirement beyond Social Security?&lt;/p&gt;&lt;p&gt;Include pensions (employer-defined benefit), rental income, or annuities. Pension amounts depend on your employer and years vested.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Why it matters:&lt;/strong&gt;&lt;br&gt;Every $1,000/mo of guaranteed income reduces your required portfolio by ~$240K at a 4% withdrawal rate — it directly offsets how much you need saved.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.nerdwallet.com/article/investing/retirement-income-strategies' target='_blank' rel='noopener'&gt;Retirement income strategies &amp;rarr; NerdWallet&lt;/a&gt;&lt;/p&gt;"
+             onclick="return false;">Learn more &rarr;</a>
+        </div>
+        <div class="input-group">
+          <span class="input-group-text">$</span>
+          <input type="text" inputmode="numeric" class="form-control" id="inp-other" value="" placeholder="0" oninput="formatNumLive(this)" onblur="onBlurNum(this)">
+          <span class="input-group-text">/mo</span>
+        </div>
+        <div class="equiv-hint mt-1" id="other-income-hint"></div>
+      </div>
+
+      <div class="section-title">Advanced details</div>
+
+      <!-- Pre-retirement return -->
+      <div class="input-card mb-2">
+        <div class="field-label">Pre-retirement return</div>
+        <div class="field-subdesc">
+          Annual return on investments before you retire. Default 6%.
+          <a href="#" class="learn-more-link" tabindex="0"
+             data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="right"
+             data-bs-custom-class="popover-rich" data-bs-html="true"
+             data-bs-title="Pre-retirement rate of return"
+             data-bs-content="&lt;p&gt;What annual return do you expect on your investments before retirement?&lt;/p&gt;&lt;p&gt;US stocks have averaged ~10% historically, but a diversified portfolio realistically returns 6–8% after fees. Every 1% higher return can boost your final balance by 15–20% over 13 years.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Caution:&lt;/strong&gt;&lt;br&gt;Avoid going above 8% — overly optimistic assumptions mask real risk and give a false sense of security.&lt;/p&gt;&lt;p&gt;&lt;a href='https://investor.vanguard.com/investor-resources-education/education/model-portfolio-allocation' target='_blank' rel='noopener'&gt;Portfolio allocation models &amp;rarr; Vanguard&lt;/a&gt;&lt;/p&gt;"
+             onclick="return false;">Learn more &rarr;</a>
+        </div>
+        <div class="input-group">
+          <input type="text" inputmode="numeric" class="form-control" id="inp-pre-rate" value="6" oninput="update()">
+          <span class="input-group-text">%</span>
+        </div>
+        <div class="equiv-hint mt-1">↑ Higher = larger projected balance. Use 6–7% for a balanced portfolio.</div>
+      </div>
+
+      <!-- Post-retirement return -->
+      <div class="input-card mb-2">
+        <div class="field-label">Post-retirement return</div>
+        <div class="field-subdesc">
+          Annual return in retirement — typically lower due to bonds. Default 5%.
+          <a href="#" class="learn-more-link" tabindex="0"
+             data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="right"
+             data-bs-custom-class="popover-rich" data-bs-html="true"
+             data-bs-title="Post-retirement rate of return"
+             data-bs-content="&lt;p&gt;What annual return do you expect after you retire?&lt;/p&gt;&lt;p&gt;Retirees typically shift toward bonds and stable assets, which lowers overall returns. A lower rate means you need a larger nest egg — but it&amp;rsquo;s the safer assumption.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Sequence of returns risk:&lt;/strong&gt;&lt;br&gt;Bad markets in your first 5–10 retirement years can permanently damage your portfolio, even if long-term averages recover. This is why retirees hold more bonds.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.investopedia.com/terms/s/sequence-risk.asp' target='_blank' rel='noopener'&gt;Sequence of returns risk &amp;rarr; Investopedia&lt;/a&gt;&lt;/p&gt;"
+             onclick="return false;">Learn more &rarr;</a>
+        </div>
+        <div class="input-group">
+          <input type="text" inputmode="numeric" class="form-control" id="inp-post-rate" value="5" oninput="update()">
+          <span class="input-group-text">%</span>
+        </div>
+        <div class="equiv-hint mt-1">↓ Lower = safer but requires a larger portfolio. Default 5%.</div>
+      </div>
+
+      <!-- Inflation -->
+      <div class="input-card mb-2">
+        <div class="field-label">Inflation rate</div>
+        <div class="field-subdesc">
+          How fast prices rise each year — affects how big your nest egg needs to be. Default 3%.
+          <a href="#" class="learn-more-link" tabindex="0"
+             data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="right"
+             data-bs-custom-class="popover-rich" data-bs-html="true"
+             data-bs-title="Inflation rate"
+             data-bs-content="&lt;p&gt;How fast do you expect prices to rise each year?&lt;/p&gt;&lt;p&gt;Inflation silently erodes purchasing power. At 3%, prices double every 24 years — your $15K/month budget today needs ~$21K/month at age 65.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Why it matters:&lt;/strong&gt;&lt;br&gt;Higher inflation means a larger required portfolio AND faster-growing withdrawals. 3% is a reasonable long-term assumption.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.investopedia.com/terms/r/ruleof72.asp' target='_blank' rel='noopener'&gt;Rule of 72 &amp;rarr; Investopedia&lt;/a&gt;&lt;/p&gt;"
+             onclick="return false;">Learn more &rarr;</a>
+        </div>
+        <div class="input-group">
+          <input type="text" inputmode="numeric" class="form-control" id="inp-inflation" value="3" oninput="update()">
+          <span class="input-group-text">%</span>
+        </div>
+        <div class="equiv-hint mt-1">↑ Higher = larger required portfolio. Prices double every 24 yrs at 3%.</div>
+      </div>
+
+    </div>
+    <!-- /input panel -->
+
+    <!-- ╔══════════════════════╗ -->
+    <!-- ║   RESULTS PANEL      ║ -->
+    <!-- ╚══════════════════════╝ -->
+    <div class="col-lg-7">
+
+      <!-- Scenarios -->
+      <div id="scenarios-wrap" class="mb-3">
+        <div class="d-flex align-items-center gap-2 flex-wrap">
+          <button class="btn btn-sm scenario-chip" id="btn-save-scenario">
+            <i class="bi bi-bookmark-plus me-1"></i>Save as scenario
+          </button>
+          <div id="scenario-input-wrap" class="d-none d-flex align-items-center gap-2">
+            <input type="text" id="scenario-label-inp" class="form-control form-control-sm"
+              placeholder="Name this scenario…" style="width:200px;font-size:.82rem;"
+              onkeydown="if(event.key==='Enter')confirmSaveScenario();if(event.key==='Escape')cancelSaveScenario();">
+            <button class="btn btn-primary btn-sm" onclick="confirmSaveScenario()">Save</button>
+            <button class="btn btn-outline-secondary btn-sm" onclick="cancelSaveScenario()">Cancel</button>
+          </div>
+        </div>
+        <div id="scenarios-list" class="d-flex flex-wrap gap-2 mt-2"></div>
+        <div class="mt-1" style="font-size:.7rem;color:#94a3b8;">
+          <i class="bi bi-clock-history me-1"></i>Scenarios last only while this tab is open — not saved between sessions.
+        </div>
+      </div>
+
+      <!-- Result cards -->
+      <div class="calc-card mb-3">
+
+        <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
+          <div>
+            <div class="text-muted mb-1" style="font-size:.8rem;">
+              Retirement savings at age <strong id="res-retire-age">67</strong>
+            </div>
+          </div>
+          <div id="res-badge"></div>
+        </div>
+
+        <div class="row g-3 mb-4">
+          <div class="col-6">
+            <div class="res-card have">
+              <div class="res-label d-flex align-items-center gap-1">
+                <span style="display:inline-block;width:18px;height:0;border-top:2.5px solid #1a6fe8;flex-shrink:0;"></span>
+                What you'll have
+              </div>
+              <div class="res-amount" id="res-have">—</div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="res-card need">
+              <div class="res-label d-flex align-items-center gap-1">
+                <span style="display:inline-block;width:18px;height:0;border-top:2px dashed #d97706;flex-shrink:0;"></span>
+                What you'll need
+              </div>
+              <div class="res-amount" id="res-need">—</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Progress bar -->
+        <div class="d-flex justify-content-between mb-1">
+          <span class="small text-muted">Progress toward goal</span>
+          <span class="small fw-bold" id="res-pct">0%</span>
+        </div>
+        <div class="prog-track mb-3">
+          <div class="prog-fill" id="res-bar" style="width:0%;"></div>
+        </div>
+        <div class="small mb-4" id="res-gap-msg"></div>
+
+        <!-- Chart -->
+        <div id="chart-area">
+          <canvas id="ret-chart"></canvas>
+        </div>
+        <div class="text-center mt-1" style="font-size:.72rem;color:#94a3b8;">Peak balance → draws down to zero at life expectancy</div>
+      </div>
+
+
+      <div class="input-card mb-2">
+        <div class="field-label">Adjust your timeline</div>
+        <div class="field-subdesc">
+          Drag the handles to change ages — the chart above updates instantly.
+          <a href="#" class="learn-more-link" tabindex="0"
+             data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="top"
+             data-bs-custom-class="popover-rich" data-bs-html="true"
+             data-bs-title="Life timeline"
+             data-bs-content="&lt;p&gt;What are the three key ages in your retirement story?&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Current age:&lt;/strong&gt; Where you are today.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Retirement age:&lt;/strong&gt; The biggest lever — each extra year working adds savings &amp;amp; removes a year of withdrawals. Even one extra year can shift your number dramatically.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Life expectancy:&lt;/strong&gt; Use 90+ to avoid outliving your money. The cost of guessing too low is much higher than guessing too high.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.investopedia.com/terms/f/financial-independence-retire-early-fire.asp' target='_blank' rel='noopener'&gt;What is FIRE? &amp;rarr; Investopedia&lt;/a&gt;&lt;/p&gt;"
+             onclick="return false;">Learn more &rarr;</a>
+        </div>
+        <div class="triple-wrap mb-1">
+          <div class="triple-track"></div>
+          <div class="triple-seg" id="seg-working" style="background:#1d4ed8;opacity:.55;"></div>
+          <div class="triple-seg" id="seg-retired" style="background:#d97706;opacity:.6;"></div>
+          <input type="range" id="slider-age"    min="30" max="100" value="43" oninput="onTripleSlider('age')">
+          <input type="range" id="slider-retire" min="30" max="100" value="58" oninput="onTripleSlider('retire')">
+          <input type="range" id="slider-life"   min="30" max="100" value="90" oninput="onTripleSlider('life')">
+          <div class="thumb-label" id="lbl-age"    style="background:#1d4ed8;">Now 43</div>
+          <div class="thumb-label thumb-label-below" id="lbl-retire" style="background:#d97706;">Retire 58</div>
+          <div class="thumb-label" id="lbl-life"   style="background:#334155;">Until 90</div>
+        </div>
+        <div class="age-ticks">
+          <span>30</span><span>40</span><span>50</span><span>60</span>
+          <span>70</span><span>80</span><span>90</span><span>100</span>
+        </div>
+        <span id="disp-age" class="d-none">47</span>
+        <span id="disp-retire" class="d-none">55</span>
+        <span id="disp-life" class="d-none">90</span>
+      </div>
+
+    </div>
+    <!-- /results panel -->
+
+  </div>
+  <!-- /row -->
+
+  <div class="mt-4 text-center disclaimer">
+    Results are estimates based on assumed rates of return and inflation. Actual results will vary.
+    Educational purposes only — not financial advice.
+  </div>
+
+</div>
+<!-- /container -->
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+'use strict';
+// ═══════════════════════════════════════════════════
+// STATE
+// ═══════════════════════════════════════════════════
+const S = {
+  married:     true,
+  age:         43,
+  income:      480000,
+  savings:     500000,
+  contribRetire:    10000,
+  contribBrokerage: 5000,
+  budgetVal:   15000,
+  otherIncome: 0,
+  ssIncome:    3500,
+  // Advanced
+  retireAge:   58,
+  lifeExpect:  90,
+  preRate:     0.06,
+  postRate:    0.05,
+  inflation:   0.03,
+  raise:       0.00
+};
+
+let _chart = null;
+const scenarios = [];
+
+// ═══════════════════════════════════════════════════
+// HELPERS
+// ═══════════════════════════════════════════════════
+const $id = id => document.getElementById(id);
+
+function clamp(v, lo, hi) { return Math.max(lo, Math.min(hi, v)); }
+
+function fmtFull(n) {
+  return '$' + Math.abs(Math.round(n)).toLocaleString();
+}
+
+function fmtShort(n) {
+  const abs = Math.abs(n);
+  if (abs >= 1e6) return '$' + (abs / 1e6).toFixed(2).replace(/\.?0+$/, '') + 'M';
+  if (abs >= 1e3) return '$' + Math.round(abs / 1e3) + 'K';
+  return '$' + Math.round(abs);
+}
+
+// ═══════════════════════════════════════════════════
+// CALCULATION
+// ═══════════════════════════════════════════════════
+function calc(retireAge) {
+  const age      = S.age;
+  const retire   = retireAge;
+  const lifeExp  = S.lifeExpect;
+
+  const yearsAccum  = retire - age;
+  const yearsRetire = lifeExp - retire;
+
+  if (yearsAccum <= 0 || yearsRetire <= 0) return null;
+
+  const mPreRate  = S.preRate  / 12;
+  const mPostRate = S.postRate / 12;
+  const mInfl     = S.inflation / 12;
+
+  // Monthly base contribution in $
+  const baseContrib = S.contribRetire + S.contribBrokerage;
+
+  // ── Accumulation phase ──
+  let balance = S.savings;
+  const growthSeries = [{ age, bal: balance }];
+
+  for (let y = 0; y < yearsAccum; y++) {
+    // Contributions scale with salary increases each year
+    const monthlyC = baseContrib * Math.pow(1 + S.raise, y);
+    for (let m = 0; m < 12; m++) {
+      balance = balance * (1 + mPreRate) + monthlyC;
+    }
+    growthSeries.push({ age: age + y + 1, bal: Math.round(balance) });
+  }
+
+  const willHave = Math.round(balance);
+
+  // ── Monthly retirement budget (in today's dollars) ──
+  const monthlyBudgetNow = S.budgetVal;
+
+  // Inflate to retirement date
+  const monthlyBudgetNominal = monthlyBudgetNow * Math.pow(1 + S.inflation, yearsAccum);
+  const otherNominal = (S.ssIncome + S.otherIncome) * Math.pow(1 + S.inflation, yearsAccum);
+  const netWithdrawal        = Math.max(0, monthlyBudgetNominal - otherNominal);
+
+  // ── What you'll need: PV of inflation-growing annuity at retirement ──
+  const nRetire = yearsRetire * 12;
+  let willNeed;
+  if (Math.abs(mPostRate - mInfl) < 0.000001) {
+    willNeed = netWithdrawal * nRetire;
+  } else {
+    willNeed = netWithdrawal *
+      (1 - Math.pow((1 + mInfl) / (1 + mPostRate), nRetire)) /
+      (mPostRate - mInfl);
+  }
+  willNeed = Math.max(0, Math.round(willNeed));
+
+  // ── Drawdown simulation ──
+  let drawBal = willHave;
+  const drawSeries = [{ age: retire, bal: drawBal }];
+  let currWithdrawal = netWithdrawal;
+
+  for (let y = 0; y < yearsRetire; y++) {
+    for (let m = 0; m < 12; m++) {
+      drawBal = drawBal * (1 + mPostRate) - currWithdrawal;
+      currWithdrawal *= (1 + mInfl);
+      if (drawBal < 0) drawBal = 0;
+    }
+    drawSeries.push({ age: retire + y + 1, bal: Math.round(drawBal) });
+  }
+
+  const gap = willHave - willNeed;
+  const pct = willNeed > 0 ? Math.round(willHave / willNeed * 100) : 100;
+
+  return {
+    willHave, willNeed, gap, pct,
+    yearsAccum, yearsRetire,
+    growthSeries, drawSeries,
+    monthlyBudgetNow, monthlyBudgetNominal, netWithdrawal
+  };
+}
+
+function estimateSS(income, retireAge) {
+  const WAGE_BASE = 176100; // 2026 taxable wage base
+  const BP1 = 1226, BP2 = 7391; // 2026 bend points
+  const FRA = 67;
+  const aime = Math.min(income, WAGE_BASE) / 12;
+  const pia  = 0.90 * Math.min(aime, BP1)
+             + 0.32 * Math.min(Math.max(aime - BP1, 0), BP2 - BP1)
+             + 0.15 * Math.max(aime - BP2, 0);
+  const claimAge = Math.max(62, Math.min(70, retireAge));
+  let adj;
+  if (claimAge >= FRA) {
+    adj = 1 + 0.08 * (claimAge - FRA);
+  } else {
+    const monthsEarly = (FRA - claimAge) * 12;
+    const first36 = Math.min(monthsEarly, 36);
+    const extra   = Math.max(monthsEarly - 36, 0);
+    adj = 1 - (first36 * 5/9 + extra * 5/12) / 100;
+  }
+  return Math.round(pia * adj);
+}
+
+function readNum(id) {
+  return parseFloat(($id(id).value || '').replace(/,/g, '')) || 0;
+}
+
+function formatNumLive(el) {
+  const cursorPos = el.selectionStart;
+  const rawBefore = el.value.slice(0, cursorPos).replace(/,/g, '').length;
+  const raw = el.value.replace(/[^0-9]/g, '');
+  if (!raw) { update(); return; }
+  const formatted = parseInt(raw, 10).toLocaleString();
+  el.value = formatted;
+  // Restore cursor by counting digits
+  let digitCount = 0, newPos = formatted.length;
+  for (let i = 0; i < formatted.length; i++) {
+    if (formatted[i] !== ',') digitCount++;
+    if (digitCount === rawBefore) { newPos = i + 1; break; }
+  }
+  el.setSelectionRange(newPos, newPos);
+  update();
+}
+
+function onBlurNum(el) {
+  const n = parseFloat((el.value || '').replace(/,/g, ''));
+  if (!isNaN(n) && n > 0) el.value = n.toLocaleString();
+  update();
+}
+
+// ═══════════════════════════════════════════════════
+// READ INPUTS
+// ═══════════════════════════════════════════════════
+function readInputs() {
+  S.married     = document.getElementById('filing-married').checked;
+  S.age         = clamp(parseInt($id('slider-age').value)    || 25, 30, 79);
+  S.income      = clamp(readNum('inp-income'),  0, 1e8);
+  S.savings     = clamp(readNum('inp-savings'), 0, 1e9);
+  S.contribRetire    = clamp(readNum('inp-retire-contrib'), 0, 1e7);
+  S.contribBrokerage = clamp(readNum('inp-brokerage'),      0, 1e7);
+  S.budgetVal   = clamp(readNum('inp-budget'),  0, 1e7);
+  S.otherIncome = clamp(readNum('inp-other'),   0, 1e6);
+  const ssField = readNum('inp-ss');
+  if (ssField > 0) {
+    S.ssIncome = ssField;
+  } else if (S.married) {
+    S.ssIncome = estimateSS(S.income / 2, S.retireAge) * 2;
+  } else {
+    S.ssIncome = estimateSS(S.income, S.retireAge);
+  }
+
+  S.retireAge  = clamp(parseInt($id('slider-retire').value) || 67, S.age, 99);
+  S.lifeExpect = clamp(parseInt($id('slider-life').value)   || 90, S.retireAge + 1, 100);
+  S.preRate    = clamp(parseFloat($id('inp-pre-rate').value)   || 6,  0, 25) / 100;
+  S.postRate   = clamp(parseFloat($id('inp-post-rate').value)  || 5,  0, 25) / 100;
+  S.inflation  = clamp(parseFloat($id('inp-inflation').value)  || 3,  0, 20) / 100;
+}
+
+function updateSegments() {
+  const MIN = 30, MAX = 100, RANGE = MAX - MIN;
+  const a = parseInt($id('slider-age').value);
+  const r = parseInt($id('slider-retire').value);
+  const l = parseInt($id('slider-life').value);
+  const aPct = (a - MIN) / RANGE * 100;
+  const rPct = (r - MIN) / RANGE * 100;
+  const lPct = (l - MIN) / RANGE * 100;
+  const s1 = $id('seg-working');
+  s1.style.left  = aPct + '%';
+  s1.style.width = (rPct - aPct) + '%';
+  const s2 = $id('seg-retired');
+  s2.style.left  = rPct + '%';
+  s2.style.width = (lPct - rPct) + '%';
+}
+
+function setThumbLabel(id, val, text) {
+  const pct = (val - 30) / (100 - 30) * 100;
+  const el = $id(id);
+  el.textContent = text;
+  el.style.left = `calc(${pct}% + ${8 - pct * 0.16}px)`;
+}
+
+function onTripleSlider(moved) {
+  let a = parseInt($id('slider-age').value);
+  let r = parseInt($id('slider-retire').value);
+  let l = parseInt($id('slider-life').value);
+  if (moved === 'age') {
+    if (a > r) { a = r; $id('slider-age').value = a; }
+  } else if (moved === 'retire') {
+    if (r < a) { r = a; $id('slider-retire').value = r; }
+    if (r >= l) { r = l - 1; $id('slider-retire').value = r; }
+  } else {
+    if (l <= r) { l = r + 1; $id('slider-life').value = l; }
+  }
+  $id('disp-age').textContent    = a;
+  $id('disp-retire').textContent = r;
+  $id('disp-life').textContent   = l;
+  const yrs = r - a;
+  setThumbLabel('lbl-age',    a, `Now ${a}`);
+  setThumbLabel('lbl-retire', r, `Retire at ${r} in ${yrs} yr${yrs !== 1 ? 's' : ''}`);
+  setThumbLabel('lbl-life',   l, `Until ${l}`);
+  updateSegments();
+  update();
+}
+
+// ═══════════════════════════════════════════════════
+// RENDER
+// ═══════════════════════════════════════════════════
+function render(r) {
+  if (!r) {
+    $id('res-have').textContent = '—';
+    $id('res-need').textContent = '—';
+    $id('res-pct').textContent  = '—';
+    $id('res-gap-msg').innerHTML = '';
+    return;
+  }
+
+  // Header
+  $id('res-retire-age').textContent = S.retireAge;
+  $id('budget-retire-age-inline').textContent = S.retireAge;
+
+  // Cards
+  $id('res-have').textContent = fmtFull(r.willHave);
+  $id('res-need').textContent = fmtFull(r.willNeed);
+
+  // Progress bar
+  const pct = clamp(r.pct, 0, 200);
+  const barW = clamp(r.pct, 0, 100);
+  $id('res-bar').style.width      = barW + '%';
+  $id('res-bar').style.background = r.gap >= 0 ? 'var(--green)' : '#f59e0b';
+  $id('res-pct').textContent      = r.pct + '%';
+
+  // Status badge
+  if (r.gap >= 0) {
+    $id('res-badge').innerHTML = `<span class="badge rounded-pill px-3 py-2"
+      style="background:#e6f7ef;color:var(--green);font-size:.78rem;">
+      <i class="bi bi-check-circle-fill me-1"></i>On track</span>`;
+  } else {
+    $id('res-badge').innerHTML = `<span class="badge rounded-pill px-3 py-2"
+      style="background:#fffbeb;color:var(--amber);font-size:.78rem;">
+      <i class="bi bi-exclamation-triangle-fill me-1"></i>Shortfall</span>`;
+  }
+
+  // Gap message
+  if (r.gap >= 0) {
+    $id('res-gap-msg').innerHTML =
+      `<i class="bi bi-arrow-up-right-circle-fill text-success me-1"></i>
+       <strong class="text-success">Surplus of ${fmtFull(r.gap)}</strong>
+       — You're on track to exceed your retirement goal.`;
+  } else {
+    $id('res-gap-msg').innerHTML =
+      `<i class="bi bi-arrow-down-right-circle-fill me-1" style="color:var(--amber)"></i>
+       <strong style="color:var(--amber)">Shortfall of ${fmtFull(Math.abs(r.gap))}</strong>
+       — Consider increasing contributions, retiring later, or adjusting your budget.`;
+  }
+
+  // Equiv hints
+  renderHints(r);
+
+  // Chart
+  renderChart(r);
+}
+
+function renderHints(r) {
+  const monthlyIncome = S.income / 12;
+
+  // Income
+  $id('income-hint').textContent = monthlyIncome > 0
+    ? `= $${Math.round(monthlyIncome).toLocaleString()}/month gross`
+    : '';
+
+  // Filing status note
+  $id('filing-note').textContent = S.married
+    ? 'All inputs are household combined totals.'
+    : 'Enter your individual amounts.';
+
+  // Savings — wealth multiple
+  const wealthMult = S.income > 0 ? (S.savings / S.income).toFixed(1) : '—';
+  $id('savings-hint').textContent = S.savings > 0
+    ? `= ${wealthMult}× your annual income`
+    : '';
+
+  // Contributions
+  const totalContrib = S.contribRetire + S.contribBrokerage;
+  const totalContribPct = monthlyIncome > 0
+    ? (totalContrib / monthlyIncome * 100).toFixed(1) : '0.0';
+
+  // 2026 IRS contribution limits (per person; married = 2× earners + family HSA)
+  // Single:  401k $23,500 + IRA $7,000 + HSA $4,300 = $34,800/yr = $2,900/mo
+  //          + mega backdoor $46,500 → $81,300/yr = $6,775/mo
+  // Married: 2×(401k+IRA) $61,000 + family HSA $8,550 = $69,550/yr = $5,796/mo
+  //          + 2× mega backdoor → $162,550/yr = $13,546/mo
+  const MAX_STD  = S.married
+    ? Math.round((2*23500 + 2*7000 + 8550)  / 12)   // $5,796/mo
+    : Math.round((23500  + 7000  + 4300)    / 12);   // $2,900/mo
+  const MAX_MEGA = S.married
+    ? Math.round((2*70000 + 2*7000 + 8550)  / 12)   // $13,546/mo
+    : Math.round((23500 + 46500 + 7000 + 4300) / 12); // $6,775/mo
+  const retirePct = monthlyIncome > 0
+    ? (S.contribRetire / monthlyIncome * 100).toFixed(1) : '0.0';
+  $id('retire-contrib-hint').textContent = `= ${retirePct}% of monthly income · $${(S.contribRetire * 12).toLocaleString()} annually`;
+  const overMax  = S.contribRetire > MAX_MEGA;
+  const atMega   = S.contribRetire >= MAX_STD && S.contribRetire <= MAX_MEGA;
+  const atStd    = S.contribRetire >= MAX_STD * 0.95 && S.contribRetire < MAX_MEGA;
+  $id('retire-contrib-tip').textContent = overMax
+    ? `Exceeds 2026 IRS limits ($${MAX_MEGA.toLocaleString()}/mo max with mega backdoor)`
+    : atMega
+    ? '\uD83D\uDD25 Maxed incl. mega backdoor Roth \u2014 top of IRS limits'
+    : atStd
+    ? '\u2713 Maxed standard limits (401k + IRA + HSA)'
+    : `Standard max: $${MAX_STD.toLocaleString()}/mo \u00b7 Mega backdoor: $${MAX_MEGA.toLocaleString()}/mo`;
+
+  const ltcg0 = S.married ? '$94,050' : '$47,025';
+  const brokeragePct = monthlyIncome > 0
+    ? (S.contribBrokerage / monthlyIncome * 100).toFixed(1) : '0.0';
+  $id('brokerage-hint').textContent = `= ${brokeragePct}% of monthly income · $${(S.contribBrokerage * 12).toLocaleString()} annually`;
+  // Budget
+  const budgetPct = monthlyIncome > 0
+    ? (S.budgetVal / monthlyIncome * 100).toFixed(1)
+    : '0.0';
+  $id('budget-field-label').textContent = `Monthly expenses starting at ${S.retireAge}`;
+  $id('budget-hint').textContent = `= ${budgetPct}% of monthly income · $${(S.budgetVal * 12).toLocaleString()} annually`;
+
+  // SS hint
+  const ssEst = S.married
+    ? estimateSS(S.income / 2, S.retireAge) * 2
+    : estimateSS(S.income, S.retireAge);
+  const ssFieldBlank = !$id('inp-ss').value.trim();
+  $id('inp-ss').placeholder = ssFieldBlank ? `${ssEst.toLocaleString()} (estimated)` : 'auto';
+  if (S.married) {
+    $id('ss-hint').textContent = ssFieldBlank
+      ? `\u2248 $${ssEst.toLocaleString()}/mo combined est. (both spouses at \u00bd income each)`
+      : `= $${readNum('inp-ss').toLocaleString()}/mo \u00b7 dual-earner est. was $${ssEst.toLocaleString()}/mo`;
+    $id('ss-tip').textContent = ssFieldBlank
+      ? 'Assumes both spouses earn equally. Override with your actual combined SSA amounts.'
+      : 'Clear to restore auto-estimate.';
+  } else {
+    $id('ss-hint').textContent = ssFieldBlank
+      ? `= $${ssEst.toLocaleString()}/mo estimated (SSA bend-point formula)`
+      : `= $${readNum('inp-ss').toLocaleString()}/mo \u00b7 est. was $${ssEst.toLocaleString()}/mo`;
+    $id('ss-tip').textContent = ssFieldBlank
+      ? 'Edit to override \u00b7 verify your actual amount at ssa.gov'
+      : 'Clear to restore auto-estimate.';
+  }
+
+  // Other income
+  const totalGuaranteed = S.ssIncome + S.otherIncome;
+  const portfolioReduction = Math.round(S.otherIncome * 300);
+  $id('other-income-hint').textContent = S.otherIncome > 0
+    ? `= $${S.otherIncome.toLocaleString()}/mo · reduces portfolio by ~$${portfolioReduction.toLocaleString()}`
+    : '';
+}
+
+// ═══════════════════════════════════════════════════
+// SCENARIOS
+// ═══════════════════════════════════════════════════
+const INPUT_IDS = ['inp-income','inp-savings','inp-retire-contrib','inp-brokerage',
+                   'inp-budget','inp-ss','inp-other','inp-pre-rate','inp-post-rate','inp-inflation'];
+
+function captureInputs() {
+  const v = {};
+  INPUT_IDS.forEach(id => v[id] = $id(id).value);
+  v['filing'] = $id('filing-married').checked ? 'married' : 'single';
+  v['slider-age']    = $id('slider-age').value;
+  v['slider-retire'] = $id('slider-retire').value;
+  v['slider-life']   = $id('slider-life').value;
+  return v;
+}
+
+function restoreInputs(v) {
+  INPUT_IDS.forEach(id => { $id(id).value = v[id]; });
+  $id('filing-married').checked = v['filing'] === 'married';
+  $id('filing-single').checked  = v['filing'] === 'single';
+  $id('slider-age').value    = v['slider-age'];
+  $id('slider-retire').value = v['slider-retire'];
+  $id('slider-life').value   = v['slider-life'];
+  onTripleSlider('age');
+  onTripleSlider('retire');
+  onTripleSlider('life');
+  update();
+}
+
+function renderScenarios() {
+  const list = $id('scenarios-list');
+  list.innerHTML = '';
+  scenarios.forEach((sc, i) => {
+    const chip = document.createElement('div');
+    chip.className = 'scenario-chip d-flex align-items-center gap-1';
+    chip.style.cursor = 'pointer';
+    chip.innerHTML = `<i class="bi bi-bookmark-fill" style="font-size:.75rem;"></i><span>${sc.label}</span><span class="del">✕</span>`;
+    chip.querySelector('span:first-of-type').onclick = () => restoreInputs(sc.inputs);
+    chip.querySelector('i').onclick = () => restoreInputs(sc.inputs);
+    chip.querySelector('.del').onclick = e => { e.stopPropagation(); scenarios.splice(i,1); renderScenarios(); };
+    list.appendChild(chip);
+  });
+}
+
+function confirmSaveScenario() {
+  const label = $id('scenario-label-inp').value.trim() || `Scenario ${scenarios.length + 1}`;
+  scenarios.push({ label, inputs: captureInputs() });
+  renderScenarios();
+  cancelSaveScenario();
+}
+function cancelSaveScenario() {
+  $id('scenario-input-wrap').classList.add('d-none');
+  $id('btn-save-scenario').classList.remove('d-none');
+  $id('scenario-label-inp').value = '';
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  $id('btn-save-scenario').addEventListener('click', () => {
+    $id('btn-save-scenario').classList.add('d-none');
+    $id('scenario-input-wrap').classList.remove('d-none');
+    $id('scenario-label-inp').focus();
+  });
+});
+
+// ═══════════════════════════════════════════════════
+// CHART
+// ═══════════════════════════════════════════════════
+function renderChart(r) {
+  const mPostRate = S.postRate / 12;
+  const mInfl     = S.inflation / 12;
+
+  // Build age-keyed maps from both series
+  const haveMap = new Map();
+  const needMap = new Map();
+
+  for (const p of r.growthSeries) {
+    haveMap.set(p.age, p.bal);
+    const yearsRemain = S.retireAge - p.age;
+    needMap.set(p.age, Math.round(r.willNeed / Math.pow(1 + S.preRate, yearsRemain)));
+  }
+  for (let i = 1; i < r.drawSeries.length; i++) {
+    const p = r.drawSeries[i];
+    haveMap.set(p.age, p.bal);
+    const nRemaining = (S.lifeExpect - p.age) * 12;
+    if (nRemaining <= 0) { needMap.set(p.age, 0); continue; }
+    const withdrawalNow = r.netWithdrawal * Math.pow(1 + mInfl, (p.age - S.retireAge) * 12);
+    let remainNeed;
+    if (Math.abs(mPostRate - mInfl) < 0.000001) {
+      remainNeed = withdrawalNow * nRemaining;
+    } else {
+      remainNeed = withdrawalNow *
+        (1 - Math.pow((1 + mInfl) / (1 + mPostRate), nRemaining)) /
+        (mPostRate - mInfl);
+    }
+    needMap.set(p.age, Math.max(0, Math.round(remainNeed)));
+  }
+
+  // Fixed x-axis: nearest 5-year floor of current age → nearest 5-year ceiling of life expectancy
+  const axisStart = Math.floor(S.age / 5) * 5;
+  const axisEnd   = Math.ceil(S.lifeExpect / 5) * 5;
+  const labels   = [];
+  const haveData = [];
+  const needLine = [];
+  for (let age = axisStart; age <= axisEnd; age++) {
+    labels.push(age);
+    haveData.push(haveMap.has(age) ? haveMap.get(age) : null);
+    needLine.push(needMap.has(age) ? needMap.get(age) : null);
+  }
+
+  if (_chart) { _chart.destroy(); _chart = null; }
+
+  _chart = new Chart($id('ret-chart'), {
+    type: 'line',
+    plugins: [{
+      id: 'phaseBands',
+      beforeDatasetsDraw(chart) {
+        const { ctx, chartArea, scales } = chart;
+        if (!chartArea) return;
+        const xScale = scales.x;
+        const nowIdx    = labels.indexOf(S.age);
+        const retireIdx = labels.indexOf(S.retireAge);
+        const lifeIdx   = labels.indexOf(S.lifeExpect);
+        if (nowIdx < 0 || retireIdx < 0) return;
+        const nowX    = xScale.getPixelForValue(nowIdx);
+        const retireX = xScale.getPixelForValue(retireIdx);
+        const lifeX   = lifeIdx >= 0 ? xScale.getPixelForValue(lifeIdx) : chartArea.right;
+        ctx.save();
+        // Accumulation band (now → retire): blue tint
+        ctx.fillStyle = 'rgba(26,111,232,0.05)';
+        ctx.fillRect(nowX, chartArea.top, retireX - nowX, chartArea.height);
+        // Drawdown band (retire → life expectancy): amber tint
+        ctx.fillStyle = 'rgba(217,119,6,0.07)';
+        ctx.fillRect(retireX, chartArea.top, lifeX - retireX, chartArea.height);
+        ctx.restore();
+      },
+      afterDatasetsDraw(chart) {
+        const { ctx, chartArea, scales } = chart;
+        if (!chartArea) return;
+        const xScale    = scales.x;
+        const nowIdx    = labels.indexOf(S.age);
+        const retireIdx = labels.indexOf(S.retireAge);
+        if (retireIdx < 0) return;
+
+        // ── "Now" vertical line ──
+        if (nowIdx >= 0) {
+          const nowX = xScale.getPixelForValue(nowIdx);
+          ctx.save();
+          ctx.strokeStyle = '#1d4ed8';
+          ctx.lineWidth   = 1.5;
+          ctx.setLineDash([5, 4]);
+          ctx.beginPath();
+          ctx.moveTo(nowX, chartArea.top);
+          ctx.lineTo(nowX, chartArea.bottom);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          const nowLabel = `Now ${S.age}`;
+          ctx.font = '600 10px system-ui,sans-serif';
+          const ntw = ctx.measureText(nowLabel).width;
+          const npx = 6, nby = chartArea.top + 6, nbw = ntw + npx * 2, nbh = 16;
+          const nbx = nowX - ntw / 2 - npx;
+          ctx.fillStyle = '#1d4ed8';
+          ctx.beginPath();
+          ctx.roundRect(nbx, nby, nbw, nbh, 4);
+          ctx.fill();
+          ctx.fillStyle = '#fff';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(nowLabel, nowX, nby + nbh / 2);
+          ctx.restore();
+        }
+
+        // ── "Retire" vertical line ──
+        const retireX = xScale.getPixelForValue(retireIdx);
+        ctx.save();
+        // Dashed vertical line at retirement age
+        ctx.strokeStyle = '#d97706';
+        ctx.lineWidth   = 1.5;
+        ctx.setLineDash([5, 4]);
+        ctx.beginPath();
+        ctx.moveTo(retireX, chartArea.top);
+        ctx.lineTo(retireX, chartArea.bottom);
+        ctx.stroke();
+        ctx.setLineDash([]);
+        // "Retire XX" pill label at top
+        const label = `Retire ${S.retireAge}`;
+        ctx.font      = '600 10px system-ui,sans-serif';
+        const tw      = ctx.measureText(label).width;
+        const px      = 6, py = 3, rx = 4;
+        const bx      = retireX - tw / 2 - px;
+        const by      = chartArea.top + 6;
+        const bw      = tw + px * 2;
+        const bh      = 16;
+        ctx.fillStyle = '#d97706';
+        ctx.beginPath();
+        ctx.roundRect(bx, by, bw, bh, rx);
+        ctx.fill();
+        ctx.fillStyle = '#fff';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(label, retireX, by + bh / 2);
+        ctx.restore();
+      }
+    }],
+    data: {
+      labels,
+      datasets: [
+        {
+          label: "What you'll have",
+          data: haveData,
+          borderColor: '#1a6fe8',
+          backgroundColor: 'rgba(26,111,232,.1)',
+          fill: true,
+          tension: 0.35,
+          pointRadius: 0,
+          pointHoverRadius: 5,
+          borderWidth: 2.5,
+          order: 2
+        },
+        {
+          label: "What you'll need",
+          data: needLine,
+          borderColor: '#f59e0b',
+          backgroundColor: 'transparent',
+          borderDash: [7, 4],
+          tension: 0,
+          pointRadius: 0,
+          pointHoverRadius: 0,
+          borderWidth: 2,
+          fill: false,
+          order: 1
+        }
+      ]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: ctx => `Age ${ctx[0].label}`,
+            label: ctx => {
+              if (ctx.raw === null) return null;
+              return ` ${ctx.dataset.label}: $${Math.round(ctx.raw).toLocaleString()}`;
+            },
+            afterBody: ctx => {
+              const have = ctx.find(c => c.datasetIndex === 0)?.raw;
+              const need = ctx.find(c => c.datasetIndex === 1)?.raw;
+              if (have == null || need == null) return [];
+              const diff = Math.round(have - need);
+              const sign = diff >= 0 ? '+' : '';
+              const word = diff >= 0 ? 'Surplus' : 'Deficit';
+              return [``, ` ${word}: ${sign}$${Math.abs(diff).toLocaleString()}`];
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: {
+            autoSkip: false,
+            callback: function(v) {
+              const age = parseInt(this.getLabelForValue(v));
+              return age % 5 === 0 ? age : '';
+            }
+          },
+          title: { display: true, text: 'Age', color: '#94a3b8', font: { size: 11 } }
+        },
+        y: {
+          grid: { color: '#f1f5f9' },
+          ticks: { callback: v => fmtShort(v) }
+        }
+      }
+    }
+  });
+}
+
+// ═══════════════════════════════════════════════════
+// MAIN UPDATE
+// ═══════════════════════════════════════════════════
+function update() {
+  readInputs();
+  const r = calc(S.retireAge);
+  render(r);
+}
+
+// ═══════════════════════════════════════════════════
+// INIT
+// ═══════════════════════════════════════════════════
+document.addEventListener('DOMContentLoaded', () => {
+  onTripleSlider('life');
+  update();
+  // Init all popovers
+  document.querySelectorAll('[data-bs-toggle="popover"]').forEach(el => {
+    new bootstrap.Popover(el, { trigger: 'click', html: true });
+  });
+  // Close open popovers when clicking outside
+  document.addEventListener('click', e => {
+    if (!e.target.closest('[data-bs-toggle="popover"]')) {
+      document.querySelectorAll('[data-bs-toggle="popover"]').forEach(el => {
+        bootstrap.Popover.getInstance(el)?.hide();
+      });
+    }
+  });
+});
+</script>
+</body>
+</html>
