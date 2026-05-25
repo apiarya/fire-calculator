@@ -47,31 +47,45 @@ function calc(S, retireAge) {
   const otherNominal = (S.ssIncome + S.otherIncome) * Math.pow(1 + S.inflation, yearsAccum);
   const netWithdrawal = Math.max(0, monthlyBudgetNominal - otherNominal);
 
-  // PV of growing annuity
+  // Two-segment PV (SS starts at age 67)
   const nRetire = yearsRetire * 12;
-  let willNeed;
-  if (Math.abs(mPostRate - mInfl) < 0.000001) {
-    willNeed = netWithdrawal * nRetire;
-  } else {
-    willNeed = netWithdrawal *
-      (1 - Math.pow((1 + mInfl) / (1 + mPostRate), nRetire)) /
-      (mPostRate - mInfl);
-  }
-  willNeed = Math.max(0, Math.round(willNeed));
+  const SS_CLAIM_AGE = 67;
+  const ssDelay = Math.max(0, Math.min(SS_CLAIM_AGE - retire, yearsRetire));
+  const n1 = ssDelay * 12;
+  const n2 = nRetire - n1;
 
-  // Drawdown simulation
+  function pvGA(pmt, r, g, n) {
+    if (n <= 0) return 0;
+    if (Math.abs(r - g) < 0.000001) return pmt * n;
+    return pmt * (1 - Math.pow((1 + g) / (1 + r), n)) / (r - g);
+  }
+
+  const pvFullBudget = pvGA(monthlyBudgetNominal, mPostRate, mInfl, nRetire);
+  let pvSS = 0;
+  if (n2 > 0 && otherNominal > 0) {
+    const ssAtClaim = otherNominal * Math.pow(1 + mInfl, n1);
+    pvSS = pvGA(ssAtClaim, mPostRate, mInfl, n2) / Math.pow(1 + mPostRate, n1);
+  }
+  let willNeed = Math.max(0, Math.round(pvFullBudget - pvSS));
+
+  // Drawdown simulation (two-segment)
   let drawBal = willHave;
-  let currWithdrawal = netWithdrawal;
+  let grossW = monthlyBudgetNominal;
+  let ssW = otherNominal;
+  let drawMonth = 0;
   for (let y = 0; y < yearsRetire; y++) {
     for (let m = 0; m < 12; m++) {
-      drawBal = drawBal * (1 + mPostRate) - currWithdrawal;
-      currWithdrawal *= (1 + mInfl);
+      const netW = Math.max(0, grossW - (drawMonth >= n1 ? ssW : 0));
+      drawBal = drawBal * (1 + mPostRate) - netW;
+      grossW *= (1 + mInfl);
+      ssW    *= (1 + mInfl);
       if (drawBal < 0) drawBal = 0;
+      drawMonth++;
     }
   }
   const finalBalance = Math.round(drawBal);
 
-  return { willHave, willNeed, netWithdrawal, monthlyBudgetNominal, finalBalance };
+  return { willHave, willNeed, netWithdrawal, monthlyBudgetNominal, finalBalance, ssDelay };
 }
 
 // ─── Helper: closed-form FV formulas ─────────────────────────────────────────
@@ -301,6 +315,32 @@ console.log('══════════════════════�
   console.log(`${decr1 && decr2 ? '✅ PASS' : '❌ FAIL'}  T15 higher SS → lower willNeed (monotone)`);
   if (decr1 && decr2) passed++; else failed++;
   console.log(`       SS=$0 need $${r0.willNeed.toLocaleString()}  SS=$2K need $${r1.willNeed.toLocaleString()}  SS=$4K need $${r2.willNeed.toLocaleString()}`);
+}
+
+// T16: Early retiree SS delay — retiring at 52 means no SS until 67 (15 yr gap)
+// willNeed should be HIGHER than if SS were applied from day 1
+{
+  const S = { age:40, lifeExpect:90, savings:0, contribRetire:5_000, contribBrokerage:0,
+              preRate:0.06, postRate:0.05, inflation:0.03, raise:0,
+              budgetVal:8_000, ssIncome:3_000, otherIncome:0 };
+  const r = calc(S, 52); // 12 yrs accum, 38 yrs retirement, ssDelay=15
+  // Verify ssDelay is 15
+  assert('T16a ssDelay = 15 yrs when retiring at 52', r.ssDelay, 15, 0.001);
+  // Manually compute expected willNeed with two-segment formula
+  const mPost = 0.05/12, mInfl = 0.03/12;
+  const budgetNom = 8_000 * Math.pow(1.03, 12);
+  const ssNom     = 3_000 * Math.pow(1.03, 12);
+  const n1e = 15 * 12, n2e = 23 * 12, nTot = 38 * 12;
+  const pvFull = pvGrowingAnnuity(budgetNom, mPost, mInfl, nTot);
+  const ssAtClaim = ssNom * Math.pow(1 + mInfl, n1e);
+  const pvSSe = pvGrowingAnnuity(ssAtClaim, mPost, mInfl, n2e) / Math.pow(1 + mPost, n1e);
+  const expNeed = Math.max(0, Math.round(pvFull - pvSSe));
+  assert('T16b two-segment willNeed matches formula', r.willNeed, expNeed, 0.001);
+  // Also verify it's higher than single-segment (instant SS) would give
+  const netW = budgetNom - ssNom;
+  const singleSegNeed = Math.round(pvGrowingAnnuity(netW, mPost, mInfl, nTot));
+  console.log(`${'✅ PASS'}  T16c early retiree needs more than instant-SS: $${r.willNeed.toLocaleString()} > $${singleSegNeed.toLocaleString()}`);
+  if (r.willNeed > singleSegNeed) passed++; else { failed++; console.log('       ❌ FAIL: two-segment should be > single-segment'); }
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════

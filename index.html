@@ -96,8 +96,11 @@
       transition: box-shadow .15s, transform .15s;
     }
     .res-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,.1); transform: translateY(-1px); }
-    .res-card.active-breakdown { box-shadow: 0 0 0 2px var(--blue); }
-    .expand-hint { font-size: .65rem; color: #94a3b8; text-align: center; margin-top: .35rem; letter-spacing: .02em; }
+    .res-card.have.active-breakdown { box-shadow: 0 0 0 2px #22c55e; }
+    .res-card.need.active-breakdown { box-shadow: 0 0 0 2px var(--amber); }
+    .expand-hint { font-size: .65rem; color: #64748b; text-align: center; margin-top: .35rem; letter-spacing: .02em; }
+    .res-card.have .expand-hint { color: #4b7a5c; }
+    .res-card.need .expand-hint { color: #92600a; }
     .expand-hint .bi { transition: transform .2s; display: inline-block; }
     .res-card.active-breakdown .expand-hint .bi { transform: rotate(180deg); }
     .res-card.have {
@@ -105,8 +108,8 @@
       border: 1.5px solid #b7e4c7;
     }
     .res-card.need {
-      background: var(--blue-light);
-      border: 1.5px solid #bfdbfe;
+      background: var(--amber-light);
+      border: 1.5px solid #fde68a;
     }
     .res-label {
       font-size: .72rem;
@@ -116,6 +119,8 @@
       color: #718096;
       margin-bottom: .2rem;
     }
+    .res-card.have .res-label { color: #4b7a5c; }
+    .res-card.need .res-label { color: #92600a; }
     .res-amount {
       font-size: 1.9rem;
       font-weight: 800;
@@ -235,16 +240,21 @@
       max-height: 0;
       transition: max-height .35s ease, opacity .35s ease;
       opacity: 0;
+      border-radius: 12px;
+      padding: 0;
     }
-    #res-breakdown.open { max-height: 600px; opacity: 1; }
-    .breakdown-row { display: flex; justify-content: space-between; align-items: flex-start; gap: .5rem; padding: .45rem 0; border-bottom: 1px solid #f1f5f9; }
+    #res-breakdown.open { max-height: 1200px; opacity: 1; padding: .6rem 1rem; }
+    #res-breakdown.have-bd { background: var(--green-light); border: 1.5px solid #b7e4c7; }
+    #res-breakdown.need-bd { background: var(--amber-light); border: 1.5px solid #fde68a; }
+    .breakdown-row { display: flex; justify-content: space-between; align-items: flex-start; gap: .5rem; padding: .45rem 0; border-bottom: 1px solid rgba(0,0,0,.06); }
     .breakdown-row:last-child { border-bottom: none; }
+    .breakdown-row > span:first-child { flex: 1 1 0; min-width: 0; }
     .breakdown-label { font-size: .8rem; font-weight: 600; color: #1e293b; }
-    .breakdown-sub { font-size: .72rem; color: #94a3b8; line-height: 1.4; }
-    .breakdown-val { font-size: .82rem; font-weight: 600; color: #475569; white-space: nowrap; padding-top: .1rem; font-variant-numeric: tabular-nums; }
+    .breakdown-sub { font-size: .72rem; color: #475569; line-height: 1.4; }
+    .breakdown-val { font-size: .82rem; font-weight: 600; color: #1e293b; white-space: nowrap; padding-top: .1rem; font-variant-numeric: tabular-nums; }
     .breakdown-total .breakdown-label { font-size: .82rem; }
     .breakdown-total .breakdown-val { font-size: .9rem; color: #1e293b; }
-    .breakdown-formula { font-size: .7rem; color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 1px 5px; font-family: 'SF Mono', 'Fira Code', monospace; white-space: nowrap; }
+    .breakdown-formula { font-size: .7rem; color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 1px 5px; font-family: 'SF Mono', 'Fira Code', monospace; white-space: normal; word-break: break-word; display: inline-block; max-width: 100%; }
     .input-highlight { outline: 2px solid #f59e0b !important; outline-offset: 3px; background-color: #fffbeb !important; border-radius: 6px; }
     .mini-stat-card {
       background: #fff;
@@ -640,6 +650,12 @@
               onmouseout="this.style.background='#f0f7ff';this.style.borderColor='#bfdbfe'">
               <i class="bi bi-share me-1"></i>Share
             </button>
+            <button id="btn-reset" onclick="resetToDefaults()" title="Reset all inputs to defaults"
+              style="background:#f9fafb;border:1px solid #d1d5db;color:#6b7280;padding:.25rem .6rem;border-radius:20px;cursor:pointer;font-size:.78rem;font-weight:600;line-height:1.4;transition:background .15s,border-color .15s;"
+              onmouseover="this.style.background='#f3f4f6';this.style.borderColor='#9ca3af'"
+              onmouseout="this.style.background='#f9fafb';this.style.borderColor='#d1d5db'">
+              <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+            </button>
           </div>
         </div>
 
@@ -822,28 +838,42 @@ function calc(retireAge) {
   const otherNominal = (S.ssIncome + S.otherIncome) * Math.pow(1 + S.inflation, yearsAccum);
   const netWithdrawal        = Math.max(0, monthlyBudgetNominal - otherNominal);
 
-  // ── What you'll need: PV of inflation-growing annuity at retirement ──
+  // ── What you'll need: two-segment PV (before and after SS at age 67) ──
   const nRetire = yearsRetire * 12;
-  let willNeed;
-  if (Math.abs(mPostRate - mInfl) < 0.000001) {
-    willNeed = netWithdrawal * nRetire;
-  } else {
-    willNeed = netWithdrawal *
-      (1 - Math.pow((1 + mInfl) / (1 + mPostRate), nRetire)) /
-      (mPostRate - mInfl);
-  }
-  willNeed = Math.max(0, Math.round(willNeed));
+  const SS_CLAIM_AGE = 67;
+  const ssDelay = Math.max(0, Math.min(SS_CLAIM_AGE - retire, yearsRetire));
+  const n1 = ssDelay * 12;      // months before SS starts
+  const n2 = nRetire - n1;      // months with SS
 
-  // ── Drawdown simulation ──
+  function pvGA(pmt, r, g, n) {
+    if (n <= 0) return 0;
+    if (Math.abs(r - g) < 0.000001) return pmt * n;
+    return pmt * (1 - Math.pow((1 + g) / (1 + r), n)) / (r - g);
+  }
+
+  const pvFullBudget = pvGA(monthlyBudgetNominal, mPostRate, mInfl, nRetire);
+  let pvSS = 0;
+  if (n2 > 0 && otherNominal > 0) {
+    const ssAtClaim = otherNominal * Math.pow(1 + mInfl, n1);
+    pvSS = pvGA(ssAtClaim, mPostRate, mInfl, n2) / Math.pow(1 + mPostRate, n1);
+  }
+  let willNeed = Math.max(0, Math.round(pvFullBudget - pvSS));
+
+  // ── Drawdown simulation (two-segment: no SS before age 67, SS after) ──
   let drawBal = willHave;
   const drawSeries = [{ age: retire, bal: drawBal }];
-  let currWithdrawal = netWithdrawal;
+  let grossW    = monthlyBudgetNominal;
+  let ssW       = otherNominal;
+  let drawMonth = 0;
 
   for (let y = 0; y < yearsRetire; y++) {
     for (let m = 0; m < 12; m++) {
-      drawBal = drawBal * (1 + mPostRate) - currWithdrawal;
-      currWithdrawal *= (1 + mInfl);
+      const netW = Math.max(0, grossW - (drawMonth >= n1 ? ssW : 0));
+      drawBal = drawBal * (1 + mPostRate) - netW;
+      grossW *= (1 + mInfl);
+      ssW    *= (1 + mInfl);
       if (drawBal < 0) drawBal = 0;
+      drawMonth++;
     }
     drawSeries.push({ age: retire + y + 1, bal: Math.round(drawBal) });
   }
@@ -853,7 +883,7 @@ function calc(retireAge) {
 
   return {
     willHave, willNeed, gap, pct,
-    yearsAccum, yearsRetire,
+    yearsAccum, yearsRetire, ssDelay,
     growthSeries, drawSeries,
     monthlyBudgetNow, monthlyBudgetNominal, netWithdrawal
   };
@@ -928,7 +958,7 @@ function onBlurNum(el) {
   const max = el.dataset.max !== undefined ? parseFloat(el.dataset.max) : Infinity;
   const clamped = Math.min(Math.max(n, min), max);
   if (clamped !== n) flashClamped(el);
-  el.value = clamped > 0 ? clamped.toLocaleString() : (clamped === 0 && el.placeholder ? '' : '0');
+  el.value = clamped > 0 ? clamped.toLocaleString() : (clamped === 0 && el.placeholder && el.id !== 'inp-ss' ? '' : '0');
   update();
 }
 
@@ -962,9 +992,10 @@ function readInputs() {
   S.contribBrokerage = clamp(readNum('inp-brokerage'),      0, 1e7);
   S.budgetVal   = clamp(readNum('inp-budget'),  0, 1e7);
   S.otherIncome = clamp(readNum('inp-other'),   0, 1e6);
+  const ssRaw = $id('inp-ss').value.trim();
   const ssField = readNum('inp-ss');
-  if (ssField > 0) {
-    S.ssIncome = ssField;
+  if (ssRaw !== '') {
+    S.ssIncome = ssField; // user explicitly typed a value (including 0)
   } else if (S.married) {
     S.ssIncome = estimateSS(S.income / 2, S.retireAge) * 2;
   } else {
@@ -1026,7 +1057,7 @@ function toggleBreakdown(which) {
   const needCard = document.querySelector('.res-card.need');
   if (_breakdownOpen === which) {
     // collapse
-    panel.classList.remove('open');
+    panel.classList.remove('open', 'have-bd', 'need-bd');
     haveCard.classList.remove('active-breakdown');
     needCard.classList.remove('active-breakdown');
     _breakdownOpen = null;
@@ -1035,6 +1066,8 @@ function toggleBreakdown(which) {
     _breakdownOpen = which;
     renderBreakdownPanel(which);
     panel.classList.add('open');
+    panel.classList.toggle('have-bd', which === 'have');
+    panel.classList.toggle('need-bd', which === 'need');
     haveCard.classList.toggle('active-breakdown', which === 'have');
     needCard.classList.toggle('active-breakdown', which === 'need');
   }
@@ -1130,16 +1163,27 @@ function render(r) {
         formula: `${fmtFull(r.monthlyBudgetNow)} × (1 + ${(S.inflation*100).toFixed(0)}%)^${r.yearsAccum} = ${fmtFull(r.monthlyBudgetNominal)}/mo`,
         inputs: ['inp-budget', 'inp-inflation', 'inp-age'],
         val: fmtFull(r.monthlyBudgetNominal) + '/mo' },
-      { label: 'Guaranteed income',      sub: `SS + other income — reduces what portfolio must cover`,
-        formula: `${fmtFull(S.ssIncome)}/mo SS${S.otherIncome ? ` + ${fmtFull(S.otherIncome)}/mo other` : ''} = ${fmtFull(netSS)}/mo`,
+      { label: 'Guaranteed income',      sub: `SS + other income — starts at age ${Math.max(S.retireAge, 67)}${r.ssDelay > 0 ? ` (${r.ssDelay} yr delay)` : ', immediately'}`,
+        formula: `${fmtFull(S.ssIncome)}/mo SS${S.otherIncome ? ` + ${fmtFull(S.otherIncome)}/mo other` : ''} = ${fmtFull(netSS)}/mo (today's dollars)`,
         inputs: ['inp-ss', 'inp-other'],
         val: netSS > 0 ? '−' + fmtFull(netSS) + '/mo' : '$0/mo' },
-      { label: 'Net monthly withdrawal', sub: `Inflated budget minus guaranteed income`,
-        formula: `${fmtFull(r.monthlyBudgetNominal)} − ${fmtFull(netSS)} = ${fmtFull(r.netWithdrawal)}/mo`,
-        inputs: ['inp-budget', 'inp-inflation', 'inp-ss', 'inp-other', 'inp-age'],
-        val: fmtFull(r.netWithdrawal) + '/mo' },
-      { label: 'Lump sum needed',        sub: `PV of inflation-growing annuity over ${r.yearsRetire} yrs at ${(S.postRate*100).toFixed(0)}% post-retirement growth`,
-        formula: `r = ${(S.postRate*100).toFixed(1)}% ÷ 12 = ${+(S.postRate/12).toFixed(6)}  (post-retirement monthly return)\ng = ${(S.inflation*100).toFixed(1)}% ÷ 12 = ${+(S.inflation/12).toFixed(6)}  (monthly inflation)\nN = ${r.yearsRetire} yrs × 12 = ${nR} months\nPMT = ${fmtFull(r.netWithdrawal)}/mo  (net monthly withdrawal)\nPV = PMT × [1 − ((1+g)/(1+r))^N] / (r−g)\n   = ${fmtFull(r.netWithdrawal)} × [1 − ((1+${+(S.inflation/12).toFixed(6)})/(1+${+(S.postRate/12).toFixed(6)}))^${nR}] / (${+(S.postRate/12).toFixed(6)}−${+(S.inflation/12).toFixed(6)}) = ${fmtFull(r.willNeed)}`,
+      ...(r.ssDelay > 0 ? [
+        { label: `Phase 1: age ${S.retireAge}–67 (no SS yet)`, sub: `Full inflated budget for ${r.ssDelay} yr${r.ssDelay !== 1 ? 's' : ''} before SS starts`,
+          formula: `${fmtFull(r.monthlyBudgetNominal)}/mo (no SS offset yet)`,
+          inputs: ['inp-budget', 'inp-inflation', 'inp-ss', 'inp-age'],
+          val: fmtFull(r.monthlyBudgetNominal) + '/mo' },
+        { label: `Phase 2: age 67–${S.lifeExpect} (SS active)`, sub: `Budget minus SS for ${r.yearsRetire - r.ssDelay} yrs`,
+          formula: `${fmtFull(r.monthlyBudgetNominal)} − ${fmtFull(netSS)} = ${fmtFull(r.netWithdrawal)}/mo`,
+          inputs: ['inp-budget', 'inp-inflation', 'inp-ss', 'inp-other', 'inp-age'],
+          val: fmtFull(r.netWithdrawal) + '/mo' },
+      ] : [
+        { label: 'Net monthly withdrawal', sub: `Inflated budget minus SS — SS active from retirement`,
+          formula: `${fmtFull(r.monthlyBudgetNominal)} − ${fmtFull(netSS)} = ${fmtFull(r.netWithdrawal)}/mo`,
+          inputs: ['inp-budget', 'inp-inflation', 'inp-ss', 'inp-other', 'inp-age'],
+          val: fmtFull(r.netWithdrawal) + '/mo' },
+      ]),
+      { label: 'Lump sum needed',        sub: `Two-phase PV: ${r.ssDelay > 0 ? `${r.ssDelay} yrs full budget (no SS) + ${r.yearsRetire - r.ssDelay} yrs net` : `${r.yearsRetire} yrs net (SS from day 1)`} at ${(S.postRate*100).toFixed(0)}%`,
+        formula: `r = ${(S.postRate*100).toFixed(1)}% ÷ 12 = ${+(S.postRate/12).toFixed(6)}  (post-retirement monthly return)\ng = ${(S.inflation*100).toFixed(1)}% ÷ 12 = ${+(S.inflation/12).toFixed(6)}  (monthly inflation)\nN = ${r.yearsRetire} yrs × 12 = ${nR} months\n${r.ssDelay > 0 ? `SS starts month ${r.ssDelay * 12} (age 67) — phase 1: full budget for ${r.ssDelay * 12} months\n` : ''}PV = PV(full budget, ${nR} mo) − PV(SS offset from month ${r.ssDelay * 12}, ${nR - r.ssDelay * 12} mo) = ${fmtFull(r.willNeed)}`,
         inputs: ['inp-budget', 'inp-inflation', 'inp-ss', 'inp-other', 'inp-post-rate', 'inp-age'],
         val: fmtFull(r.willNeed), total: true },
     ],
@@ -1361,6 +1405,18 @@ function copyCurrentLink() {
   });
 }
 
+function resetToDefaults() {
+  history.replaceState(null, '', location.pathname);
+  const DEFAULTS = {
+    'filing': 'single', 'inp-age': '41', 'inp-income': '95,000', 'inp-savings': '42,000',
+    'inp-retire-contrib': '1,200', 'inp-brokerage': '300', 'inp-budget': '5,500',
+    'inp-other': '', 'inp-ss': '',
+    'slider-age': '41', 'slider-retire': '60', 'slider-life': '90',
+    'inp-pre-rate': '6', 'inp-post-rate': '5', 'inp-inflation': '3', 'inp-raise': '0'
+  };
+  restoreInputs(DEFAULTS);
+}
+
 function buildShareURL(inputs) {
   const p = new URLSearchParams();
   Object.entries(inputs).forEach(([k, v]) => p.set(k, v));
@@ -1393,14 +1449,33 @@ function renderChart(r) {
     haveMap.set(p.age, p.bal);
     const nRemaining = (S.lifeExpect - p.age) * 12;
     if (nRemaining <= 0) { needMap.set(p.age, 0); continue; }
-    const withdrawalNow = r.netWithdrawal * Math.pow(1 + mInfl, (p.age - S.retireAge) * 12);
+    const SS_CLAIM_AGE = 67;
+    const monthsSinceRetire = (p.age - S.retireAge) * 12;
+    // otherNominal at retirement = budgetNominal - netWithdrawal
+    const otherNominalAtRetire = r.monthlyBudgetNominal - r.netWithdrawal;
+    const budgetNow = r.monthlyBudgetNominal * Math.pow(1 + mInfl, monthsSinceRetire);
+    const ssNow     = otherNominalAtRetire * Math.pow(1 + mInfl, monthsSinceRetire);
+    function pvGA2(pmt, r2, g, n) {
+      if (n <= 0) return 0;
+      if (Math.abs(r2 - g) < 0.000001) return pmt * n;
+      return pmt * (1 - Math.pow((1 + g) / (1 + r2), n)) / (r2 - g);
+    }
     let remainNeed;
-    if (Math.abs(mPostRate - mInfl) < 0.000001) {
-      remainNeed = withdrawalNow * nRemaining;
+    if (p.age < SS_CLAIM_AGE && r.ssDelay > 0) {
+      // Before SS: two segments from current age
+      const n1r = (SS_CLAIM_AGE - p.age) * 12;
+      const n2r = nRemaining - n1r;
+      const pvFull = pvGA2(budgetNow, mPostRate, mInfl, nRemaining);
+      let pvSSr = 0;
+      if (n2r > 0 && ssNow > 0) {
+        const ssAtClaim = ssNow * Math.pow(1 + mInfl, n1r);
+        pvSSr = pvGA2(ssAtClaim, mPostRate, mInfl, n2r) / Math.pow(1 + mPostRate, n1r);
+      }
+      remainNeed = pvFull - pvSSr;
     } else {
-      remainNeed = withdrawalNow *
-        (1 - Math.pow((1 + mInfl) / (1 + mPostRate), nRemaining)) /
-        (mPostRate - mInfl);
+      // After SS (or no delay): single segment with net withdrawal
+      const netNow = Math.max(0, budgetNow - ssNow);
+      remainNeed = pvGA2(netNow, mPostRate, mInfl, nRemaining);
     }
     needMap.set(p.age, Math.max(0, Math.round(remainNeed)));
   }
@@ -1509,6 +1584,38 @@ function renderChart(r) {
         ctx.textBaseline = 'middle';
         ctx.fillText(label, retireX, by + bh / 2);
         ctx.restore();
+
+        // ── "SS starts" vertical line (only when SS is delayed past retirement) ──
+        if (r.ssDelay > 0 && S.ssIncome > 0) {
+          const ssAge = S.retireAge + r.ssDelay;
+          const ssIdx = labels.indexOf(ssAge);
+          if (ssIdx >= 0) {
+            const ssX = xScale.getPixelForValue(ssIdx);
+            ctx.save();
+            ctx.strokeStyle = '#00a550';
+            ctx.lineWidth   = 1.5;
+            ctx.setLineDash([4, 4]);
+            ctx.beginPath();
+            ctx.moveTo(ssX, chartArea.top);
+            ctx.lineTo(ssX, chartArea.bottom);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            const ssLabel = `SS ${ssAge}`;
+            ctx.font = '600 10px system-ui,sans-serif';
+            const stw = ctx.measureText(ssLabel).width;
+            const spx = 6, sby = chartArea.top + 6, sbw = stw + spx * 2, sbh = 16;
+            const sbx = ssX - stw / 2 - spx;
+            ctx.fillStyle = '#00a550';
+            ctx.beginPath();
+            ctx.roundRect(sbx, sby, sbw, sbh, 4);
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(ssLabel, ssX, sby + sbh / 2);
+            ctx.restore();
+          }
+        }
       }
     }],
     data: {
