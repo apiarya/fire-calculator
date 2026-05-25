@@ -1532,7 +1532,6 @@ function renderSnapshotChart(canvasEl, r) {
   }
 
   const peakHave = haveMap.get(S.retireAge) || 0;
-  const DPR = window.devicePixelRatio || 1;
 
   _snapChart = new Chart(canvasEl, {
     type: 'line',
@@ -1553,31 +1552,29 @@ function renderSnapshotChart(canvasEl, r) {
         const drawYrs = S.lifeExpect - S.retireAge;
 
         ctx.save();
-        // Accumulation band
         ctx.fillStyle = 'rgba(26,111,232,0.07)';
         ctx.fillRect(nowX, chartArea.top, retireX - nowX, chartArea.height);
-        // Drawdown band
         ctx.fillStyle = 'rgba(217,119,6,0.09)';
         ctx.fillRect(retireX, chartArea.top, lifeX - retireX, chartArea.height);
 
-        // Phase duration labels
-        const midY = chartArea.top + chartArea.height * 0.54;
+        // Phase labels — positioned in lower half of chart, clear of data peaks
+        const labelY = chartArea.top + chartArea.height * 0.72;
         ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        if (retireX - nowX > 70) {
+        if (retireX - nowX > 80) {
           const mx = (nowX + retireX) / 2;
-          ctx.fillStyle = 'rgba(26,111,232,0.22)';
-          ctx.font = `700 ${Math.round(20 * DPR)}px system-ui,sans-serif`;
-          ctx.fillText(accYrs + ' yrs', mx, midY - Math.round(13 * DPR));
-          ctx.font = `400 ${Math.round(12 * DPR)}px system-ui,sans-serif`;
-          ctx.fillText('Accumulation', mx, midY + Math.round(12 * DPR));
+          ctx.fillStyle = 'rgba(26,111,232,0.18)';
+          ctx.font = '700 18px system-ui,sans-serif';
+          ctx.fillText(accYrs + ' yrs', mx, labelY - 11);
+          ctx.font = '400 11px system-ui,sans-serif';
+          ctx.fillText('Accumulation', mx, labelY + 11);
         }
-        if (lifeX - retireX > 70) {
+        if (lifeX - retireX > 80) {
           const mx = (retireX + lifeX) / 2;
-          ctx.fillStyle = 'rgba(217,119,6,0.25)';
-          ctx.font = `700 ${Math.round(20 * DPR)}px system-ui,sans-serif`;
-          ctx.fillText(drawYrs + ' yrs', mx, midY - Math.round(13 * DPR));
-          ctx.font = `400 ${Math.round(12 * DPR)}px system-ui,sans-serif`;
-          ctx.fillText('Retirement', mx, midY + Math.round(12 * DPR));
+          ctx.fillStyle = 'rgba(217,119,6,0.22)';
+          ctx.font = '700 18px system-ui,sans-serif';
+          ctx.fillText(drawYrs + ' yrs', mx, labelY - 11);
+          ctx.font = '400 11px system-ui,sans-serif';
+          ctx.fillText('Retirement', mx, labelY + 11);
         }
         ctx.restore();
       },
@@ -1586,15 +1583,15 @@ function renderSnapshotChart(canvasEl, r) {
         if (!chartArea) return;
         const xs = scales.x, ys = scales.y;
         function vline(x, color) {
-          ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = 1.5 * DPR;
-          ctx.setLineDash([5 * DPR, 4 * DPR]);
+          ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = 1.5;
+          ctx.setLineDash([5, 4]);
           ctx.beginPath(); ctx.moveTo(x, chartArea.top); ctx.lineTo(x, chartArea.bottom); ctx.stroke();
           ctx.setLineDash([]); ctx.restore();
         }
         function pill(x, y, text, color) {
-          ctx.save(); ctx.font = `600 ${Math.round(10 * DPR)}px system-ui,sans-serif`;
+          ctx.save(); ctx.font = '600 11px system-ui,sans-serif';
           const tw = ctx.measureText(text).width;
-          const px = 6 * DPR, ph = 16 * DPR, pr = 4 * DPR;
+          const px = 7, ph = 18, pr = 5;
           ctx.fillStyle = color;
           ctx.beginPath(); ctx.roundRect(x - tw/2 - px, y, tw + px*2, ph, pr); ctx.fill();
           ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
@@ -1603,44 +1600,39 @@ function renderSnapshotChart(canvasEl, r) {
         const nowIdx    = labels.indexOf(S.age);
         const retireIdx = labels.indexOf(S.retireAge);
         if (retireIdx < 0) return;
-        // Now
         if (nowIdx >= 0) {
           const nx = xs.getPixelForValue(nowIdx);
-          vline(nx, '#1d4ed8'); pill(nx, chartArea.top + 6 * DPR, `Now ${S.age}`, '#1d4ed8');
+          vline(nx, '#1d4ed8'); pill(nx, chartArea.top + 6, `Now ${S.age}`, '#1d4ed8');
         }
-        // Retire
         const rx = xs.getPixelForValue(retireIdx);
-        vline(rx, '#d97706'); pill(rx, chartArea.top + 6 * DPR, `Retire ${S.retireAge}`, '#d97706');
-        // Peak value
+        vline(rx, '#d97706'); pill(rx, chartArea.top + 6, `Retire ${S.retireAge}`, '#d97706');
         if (peakHave > 0) {
           const peakY = ys.getPixelForValue(peakHave);
-          ctx.save(); ctx.font = `600 ${Math.round(10 * DPR)}px system-ui,sans-serif`;
+          ctx.save(); ctx.font = '600 11px system-ui,sans-serif';
           ctx.fillStyle = '#1a6fe8'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
-          ctx.fillText('Peak: ' + fmtFull(peakHave), rx + 8 * DPR, peakY - 4 * DPR);
+          ctx.fillText('Peak: ' + fmtFull(peakHave), rx + 8, peakY - 4);
           ctx.restore();
         }
-        // SS
         if (r.ssDelay > 0 && S.ssIncome > 0) {
           const ssAge = S.retireAge + r.ssDelay;
           const ssIdx = labels.indexOf(ssAge);
           if (ssIdx >= 0) {
             const sx = xs.getPixelForValue(ssIdx);
             vline(sx, '#00a550');
-            ctx.font = `600 ${Math.round(10 * DPR)}px system-ui,sans-serif`;
-            const retirePillRight = rx + ctx.measureText(`Retire ${S.retireAge}`).width/2 + 6 * DPR + 2;
-            const sby = sx - ctx.measureText(`SS ${ssAge}`).width/2 - 6 * DPR < retirePillRight
-              ? chartArea.top + (6 + 16 + 4) * DPR : chartArea.top + 6 * DPR;
+            ctx.font = '600 11px system-ui,sans-serif';
+            const retirePillRight = rx + ctx.measureText(`Retire ${S.retireAge}`).width/2 + 7 + 2;
+            const sby = sx - ctx.measureText(`SS ${ssAge}`).width/2 - 7 < retirePillRight
+              ? chartArea.top + 6 + 18 + 4 : chartArea.top + 6;
             pill(sx, sby, `SS ${ssAge}`, '#00a550');
           }
         }
-        // Depletes
         if (r.depleteAge !== null) {
           const df = Math.floor(r.depleteAge);
           const di = labels.indexOf(df);
           if (di >= 0) {
             const dx = xs.getPixelForValue(di);
             vline(dx, '#ef4444');
-            pill(dx, chartArea.bottom - (18 + 6) * DPR, `Depletes ${df}`, '#ef4444');
+            pill(dx, chartArea.bottom - 24, `Depletes ${df}`, '#ef4444');
           }
         }
       }
@@ -1678,23 +1670,22 @@ function renderSnapshotChart(canvasEl, r) {
       },
       scales: {
         x: {
-          grid: { display: false },
+          grid: { color: '#f3f4f6' },
           ticks: {
             autoSkip: false,
             maxRotation: 0,
+            font: { size: 11 },
             callback: function(v) {
               const age = parseInt(this.getLabelForValue(v));
-              // Every 2 years in snapshot (every year if range ≤ 30)
-              const step = (axisEnd - axisStart) <= 30 ? 1 : 2;
-              if (age % step !== 0) return '';
+              if (age % 5 !== 0) return '';
               const year = new Date().getFullYear() + (age - S.age);
-              return [age, String(year)];
+              return [String(age), String(year)];
             }
           }
         },
         y: {
-          grid: { color: '#f1f5f9' },
-          ticks: { callback: v => fmtShort(v) },
+          grid: { color: '#f3f4f6' },
+          ticks: { callback: v => fmtShort(v), font: { size: 11 } },
           grace: '18%',
           min: 0
         }
