@@ -98,7 +98,7 @@
     .res-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,.1); transform: translateY(-1px); }
     .res-card.have.active-breakdown { box-shadow: 0 0 0 2px #22c55e; }
     .res-card.need.active-breakdown { box-shadow: 0 0 0 2px var(--amber); }
-    .expand-hint { font-size: .65rem; color: #64748b; text-align: center; margin-top: .35rem; letter-spacing: .02em; }
+    .expand-hint { font-size: .65rem; color: #64748b; letter-spacing: .02em; }
     .res-card.have .expand-hint { color: #4b7a5c; }
     .res-card.need .expand-hint { color: #92600a; }
     .expand-hint .bi { transition: transform .2s; display: inline-block; }
@@ -359,13 +359,12 @@
 <div class="container-fluid py-4 py-lg-5" style="max-width:1400px;">
 
   <!-- Header -->
-  <div class="mb-4">
-    <div class="mb-1" style="font-size:.72rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);opacity:.7;">Retirement Calculator</div>
-    <h1 class="fw-bold mb-2" style="font-size:2rem;line-height:1.15;">Find Your FIRE Date</h1>
-    <p class="text-muted mb-2" style="font-size:.9rem;">
-      Put in your numbers. Pull the retirement slider. That's it.
-    </p>
-    <p class="mb-0" style="font-size:.75rem;color:#94a3b8;">
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+    <div>
+      <div style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);opacity:.7;">Retirement Calculator</div>
+      <h1 class="fw-bold mb-0" style="font-size:1.45rem;line-height:1.2;">Find Your FIRE Date <span class="fw-normal text-muted" style="font-size:.85rem;">— Put in your numbers. Pull the retirement slider. That's it.</span></h1>
+    </div>
+    <p class="mb-0 text-end" style="font-size:.73rem;color:#94a3b8;">
       <i class="bi bi-shield-lock me-1"></i>Your inputs stay in your browser &nbsp;·&nbsp; <i class="bi bi-graph-up me-1"></i><a href="https://www.cloudflare.com/web-analytics/" target="_blank" rel="noopener" style="color:inherit;">Cookie-free analytics</a> &nbsp;·&nbsp; <a href="https://github.com/apiarya/fire-calculator" target="_blank" rel="noopener" style="color:inherit;"><i class="bi bi-github me-1"></i>Open source</a> &nbsp;·&nbsp; <i class="bi bi-shield-check me-1"></i>Not financial advice &nbsp;·&nbsp; <a href="https://github.com/apiarya/fire-calculator/issues" target="_blank" rel="noopener" style="color:inherit;"><i class="bi bi-chat-dots me-1"></i>Questions or feedback</a>
     </p>
   </div>
@@ -399,22 +398,26 @@
         <div class="row g-2 mb-3">
           <div class="col-6">
             <div class="res-card have" onclick="toggleBreakdown('have')" title="Click for breakdown">
-              <div class="res-label d-flex align-items-center gap-1">
-                <span style="display:inline-block;width:18px;height:0;border-top:2.5px solid #1a6fe8;flex-shrink:0;"></span>
-                What you'll have
+              <div class="res-label d-flex align-items-center justify-content-between gap-1">
+                <div class="d-flex align-items-center gap-1">
+                  <span style="display:inline-block;width:18px;height:0;border-top:2.5px solid #1a6fe8;flex-shrink:0;"></span>
+                  What you'll have
+                </div>
+                <div class="expand-hint">breakdown <i class="bi bi-chevron-down"></i></div>
               </div>
               <div class="res-amount" id="res-have">—</div>
-              <div class="expand-hint">breakdown <i class="bi bi-chevron-down"></i></div>
             </div>
           </div>
           <div class="col-6">
             <div class="res-card need" onclick="toggleBreakdown('need')" title="Click for breakdown">
-              <div class="res-label d-flex align-items-center gap-1">
-                <span style="display:inline-block;width:18px;height:0;border-top:2px dashed #d97706;flex-shrink:0;"></span>
-                What you'll need
+              <div class="res-label d-flex align-items-center justify-content-between gap-1">
+                <div class="d-flex align-items-center gap-1">
+                  <span style="display:inline-block;width:18px;height:0;border-top:2px dashed #d97706;flex-shrink:0;"></span>
+                  What you'll need
+                </div>
+                <div class="expand-hint">breakdown <i class="bi bi-chevron-down"></i></div>
               </div>
               <div class="res-amount" id="res-need">—</div>
-              <div class="expand-hint">breakdown <i class="bi bi-chevron-down"></i></div>
             </div>
           </div>
         </div>
@@ -470,8 +473,16 @@
         <span id="disp-life" class="d-none">90</span>
 
         <!-- Life Events -->
+        <div style="max-width:480px;">
         <div class="field-label mt-4">Life events</div>
-        <div class="field-subdesc mb-2">Mark milestones on the chart — college, mortgage payoff, inheritance, etc.</div>
+
+        <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;">
+          <span style="font-size:11px;color:#9ca3af;align-self:center;margin-right:2px;">Quick add:</span>
+          <button onclick="$id('evt-label').value='Mortgage payoff';$id('evt-label').focus()" style="padding:2px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;font-size:12px;color:#475569;cursor:pointer;">Mortgage payoff</button>
+
+          <button onclick="$id('evt-label').value='Kids\' college';$id('evt-label').focus()" style="padding:2px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;font-size:12px;color:#475569;cursor:pointer;">Kids' college</button>
+          <button onclick="$id('evt-label').value='Inheritance';$id('evt-label').focus()" style="padding:2px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;font-size:12px;color:#475569;cursor:pointer;">Inheritance</button>
+        </div>
         <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
           <input id="evt-label" type="text" placeholder="Label" maxlength="20"
             style="flex:1;min-width:0;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
@@ -483,6 +494,7 @@
             style="padding:4px 12px;background:#8b5cf6;border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">Add</button>
         </div>
         <div id="evt-list" style="display:flex;flex-wrap:wrap;gap:6px;min-height:4px;"></div>
+        </div>
       </div>
     </div>
   </div>
@@ -1832,9 +1844,8 @@ function renderChart(r) {
             autoSkip: false,
             callback: function(v) {
               const age = parseInt(this.getLabelForValue(v));
-              if (age % 5 !== 0) return '';
               const year = new Date().getFullYear() + (age - S.age);
-              return [age, year];
+              return [age, `'${String(year).slice(2)}`];
             }
           },
           title: { display: false }
@@ -1863,7 +1874,9 @@ function update() {
 // INIT
 // ═══════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
-  $id('evt-year').value = new Date().getFullYear() + 15;
+  const _defaultYear = new Date().getFullYear() + (65 - S.age);
+  const _mortgageYear = new Date().getFullYear() + 15;
+  $id('evt-year').value = _mortgageYear;
   onTripleSlider('life');
   // Restore from URL params if a shared link was opened
   const _params = new URLSearchParams(location.search);
@@ -1886,6 +1899,8 @@ document.addEventListener('DOMContentLoaded', () => {
     } catch (_) {}
     restoreInputs(v);
   } else {
+    lifeEvents = [{ label: 'Medicare', year: _defaultYear }];
+    renderEvtChips();
     update();
   }
   // Init all popovers
