@@ -27,7 +27,7 @@ Most FIRE calculators are either too simple (a single number) or too complex (sp
 - Portfolio growth during accumulation (pre-retirement)
 - Inflation-adjusted drawdown during retirement
 - Social Security and other guaranteed income offsets
-- The 4% rule / 25× target, with a live chart showing your trajectory
+- Present value of an inflation-growing annuity for your exact retirement horizon (more conservative than the 4% rule for early retirees), with a live chart showing your trajectory
 - Save multiple scenarios in-memory to compare side by side
 
 ## Tech
@@ -38,7 +38,7 @@ Pure HTML/CSS/JS. No framework, no build step, no server, no tracking. Everythin
 
 - No taxes modeled (accumulation or drawdown)
 - No sequence-of-returns risk
-- Social Security is estimated from current income (not your actual SSA earnings record)
-- Single blended portfolio (no 401k vs Roth vs brokerage distinction)
+- Social Security defaults to an SSA bend-point estimate based on income; you can override with your actual statement amount (not your full earnings record)
+- Retirement and brokerage contributions are combined — no tax-treatment distinction between account types (401k pre-tax vs Roth vs taxable)
 
 > Educational only — not financial advice.
