@@ -648,6 +648,12 @@
               onmouseout="this.style.background='#f0f7ff';this.style.borderColor='#bfdbfe'">
               <i class="bi bi-share me-1"></i>Share
             </button>
+            <button id="btn-snapshot" onclick="saveSnapshot()" title="Save chart snapshot as image"
+              style="background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;padding:.25rem .6rem;border-radius:20px;cursor:pointer;font-size:.78rem;font-weight:600;line-height:1.4;transition:background .15s,border-color .15s;"
+              onmouseover="this.style.background='#dcfce7';this.style.borderColor='#86efac'"
+              onmouseout="this.style.background='#f0fdf4';this.style.borderColor='#bbf7d0'">
+              <i class="bi bi-image me-1"></i>Snapshot
+            </button>
             <button id="btn-reset" onclick="resetToDefaults()" title="Reset all inputs to defaults"
               style="background:#f9fafb;border:1px solid #d1d5db;color:#6b7280;padding:.25rem .6rem;border-radius:20px;cursor:pointer;font-size:.78rem;font-weight:600;line-height:1.4;transition:background .15s,border-color .15s;"
               onmouseover="this.style.background='#f3f4f6';this.style.borderColor='#9ca3af'"
@@ -1407,6 +1413,68 @@ function copyCurrentLink() {
   });
 }
 
+function saveSnapshot() {
+  const chartCanvas = $id('ret-chart');
+  const r = _lastResult;
+  if (!r) return;
+
+  const DPR    = window.devicePixelRatio || 1;
+  const cw     = chartCanvas.width;   // actual px (already DPR-scaled by Chart.js)
+  const ch     = chartCanvas.height;
+  const PAD    = 32 * DPR;
+  const HDR    = 100 * DPR;
+  const FTR    = 72 * DPR;
+  const W      = cw + PAD * 2;
+  const H      = HDR + ch + FTR + PAD;
+
+  const snap = document.createElement('canvas');
+  snap.width  = W;
+  snap.height = H;
+  const ctx = snap.getContext('2d');
+
+  // ── Background ──
+  ctx.fillStyle = '#ffffff';
+  ctx.fillRect(0, 0, W, H);
+
+  // ── Header bar ──
+  ctx.fillStyle = '#f8fafc';
+  ctx.fillRect(0, 0, W, HDR);
+  ctx.strokeStyle = '#e2e8f0';
+  ctx.lineWidth = DPR;
+  ctx.beginPath(); ctx.moveTo(0, HDR); ctx.lineTo(W, HDR); ctx.stroke();
+
+  // Title
+  ctx.fillStyle = '#0f172a';
+  ctx.font = `700 ${20 * DPR}px system-ui, -apple-system, sans-serif`;
+  ctx.textBaseline = 'middle';
+  ctx.fillText('FIRE Retirement Snapshot', PAD, HDR * 0.28);
+
+  // Subtitle
+  const yrs   = S.retireAge - S.age;
+  const yr    = new Date().getFullYear() + yrs;
+  const sub   = `Retire at ${S.retireAge} · ${yrs} yrs to go · ${yr}  ·  Have ${fmtFull(r.willHave)}  ·  Need ${fmtFull(r.willNeed)}  ·  ${r.gap >= 0 ? '+' : ''}${fmtFull(r.gap)} ${r.gap >= 0 ? '✓' : '⚠'}`;
+  ctx.font = `500 ${12 * DPR}px system-ui, -apple-system, sans-serif`;
+  ctx.fillStyle = '#64748b';
+  ctx.fillText(sub, PAD, HDR * 0.72);
+
+  // ── Chart ──
+  ctx.drawImage(chartCanvas, PAD, HDR);
+
+  // ── Footer ──
+  const fy = HDR + ch + PAD / 2;
+  ctx.fillStyle = '#94a3b8';
+  ctx.font = `400 ${10 * DPR}px system-ui, -apple-system, sans-serif`;
+  ctx.textBaseline = 'middle';
+  const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  ctx.fillText(`Generated ${date} · apiarya.github.io/fire-calculator · Not financial advice`, PAD, fy + FTR / 2);
+
+  // ── Download ──
+  const link = document.createElement('a');
+  link.download = `fire-snapshot-retire${S.retireAge}-${yr}.png`;
+  link.href = snap.toDataURL('image/png');
+  link.click();
+}
+
 function resetToDefaults() {
   history.replaceState(null, '', location.pathname);
   const DEFAULTS = {
@@ -1743,9 +1811,11 @@ function renderChart(r) {
 // ═══════════════════════════════════════════════════
 // MAIN UPDATE
 // ═══════════════════════════════════════════════════
+let _lastResult = null;
 function update() {
   readInputs();
   const r = calc(S.retireAge);
+  _lastResult = r;
   render(r);
 }
 
