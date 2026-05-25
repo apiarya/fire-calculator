@@ -1703,6 +1703,21 @@ function renderSnapshotChart(canvasEl, r) {
   });
 }
 
+let _snapFsHandler = null;
+
+function _snapRender(r) {
+  const body = $id('snap-body');
+  const DPR  = window.devicePixelRatio || 1;
+  const sc   = $id('snap-canvas');
+  const w    = Math.max(body.clientWidth  - 24, 300);
+  const h    = Math.max(body.clientHeight - 24, 200);
+  sc.width        = Math.round(w * DPR);
+  sc.height       = Math.round(h * DPR);
+  sc.style.width  = w + 'px';
+  sc.style.height = h + 'px';
+  renderSnapshotChart(sc, r);
+}
+
 function openSnapshot() {
   const r = _lastResult;
   if (!r) return;
@@ -1719,19 +1734,27 @@ function openSnapshot() {
   ov.style.display = 'flex';
   document.body.style.overflow = 'hidden';
 
-  // Size canvas explicitly then render — use rAF so overlay layout is computed
-  requestAnimationFrame(() => {
-    const body = $id('snap-body');
-    const DPR  = window.devicePixelRatio || 1;
-    const sc   = $id('snap-canvas');
-    const w    = Math.max(body.clientWidth  - 24, 300);
-    const h    = Math.max(body.clientHeight - 24, 200);
-    sc.width        = Math.round(w * DPR);
-    sc.height       = Math.round(h * DPR);
-    sc.style.width  = w + 'px';
-    sc.style.height = h + 'px';
-    renderSnapshotChart(sc, r);
-  });
+  // Always render immediately at current panel size (works everywhere including VS Code)
+  requestAnimationFrame(() => _snapRender(r));
+
+  // Also request native fullscreen — non-blocking; re-renders at larger size if it works
+  if (_snapFsHandler) document.removeEventListener('fullscreenchange', _snapFsHandler);
+  _snapFsHandler = () => {
+    if (document.fullscreenElement === ov) {
+      // Entered fullscreen: re-render at full-screen dimensions
+      requestAnimationFrame(() => _snapRender(r));
+    } else {
+      // Exited fullscreen (Esc in real browser): close overlay
+      ov.style.display = 'none';
+      document.body.style.overflow = '';
+      document.removeEventListener('fullscreenchange', _snapFsHandler);
+      _snapFsHandler = null;
+      if (_snapEscHandler) { document.removeEventListener('keydown', _snapEscHandler); _snapEscHandler = null; }
+    }
+  };
+  document.addEventListener('fullscreenchange', _snapFsHandler);
+  const fsReq = ov.requestFullscreen || ov.webkitRequestFullscreen;
+  if (fsReq) fsReq.call(ov).catch(() => {}); // ignore — panel render already done
 
   if (_snapEscHandler) document.removeEventListener('keydown', _snapEscHandler);
   _snapEscHandler = e => { if (e.key === 'Escape') closeSnapshot(); };
@@ -1740,8 +1763,10 @@ function openSnapshot() {
 
 function closeSnapshot() {
   if (_snapChart) { _snapChart.destroy(); _snapChart = null; }
+  if (document.fullscreenElement) document.exitFullscreen().catch(() => {});
   $id('snap-overlay').style.display = 'none';
   document.body.style.overflow = '';
+  if (_snapFsHandler) { document.removeEventListener('fullscreenchange', _snapFsHandler); _snapFsHandler = null; }
   if (_snapEscHandler) { document.removeEventListener('keydown', _snapEscHandler); _snapEscHandler = null; }
 }
 
