@@ -356,7 +356,7 @@
   </style>
 </head>
 <body>
-<div class="container py-4 py-lg-5" style="max-width:1060px;">
+<div class="container-fluid py-4 py-lg-5" style="max-width:1400px;">
 
   <!-- Header -->
   <div class="mb-4">
@@ -370,12 +370,128 @@
     </p>
   </div>
 
-  <div class="row g-4 align-items-start">
-    <!-- ╔═════════════════════╗ -->
-    <!-- ║   INPUT PANEL        ║ -->
-    <!-- ╚═════════════════════╝ -->
-    <div class="col-lg-5">
+  <!-- Row 1: Full-width chart + results -->
+  <div class="row g-4">
+    <div class="col-12">
+      <div class="calc-card mb-3">
 
+        <div class="d-flex align-items-start justify-content-between mb-2 gap-2">
+          <div class="d-flex align-items-center gap-2 flex-wrap">
+            <div id="res-years-to-fire" style="font-size:1.1rem;font-weight:700;color:#334155;"></div>
+            <div id="res-badge"></div>
+          </div>
+          <div class="d-flex align-items-center gap-2">
+            <button id="btn-copy-link" onclick="copyCurrentLink()" title="Copy shareable link"
+              style="background:#f0f7ff;border:1px solid #bfdbfe;color:#1d4ed8;padding:.25rem .6rem;border-radius:20px;cursor:pointer;font-size:.78rem;font-weight:600;line-height:1.4;transition:background .15s,border-color .15s;"
+              onmouseover="this.style.background='#dbeafe';this.style.borderColor='#93c5fd'"
+              onmouseout="this.style.background='#f0f7ff';this.style.borderColor='#bfdbfe'">
+              <i class="bi bi-share me-1"></i>Share
+            </button>
+            <button id="btn-reset" onclick="resetToDefaults()" title="Reset all inputs to defaults"
+              style="background:#f9fafb;border:1px solid #d1d5db;color:#6b7280;padding:.25rem .6rem;border-radius:20px;cursor:pointer;font-size:.78rem;font-weight:600;line-height:1.4;transition:background .15s,border-color .15s;"
+              onmouseover="this.style.background='#f3f4f6';this.style.borderColor='#9ca3af'"
+              onmouseout="this.style.background='#f9fafb';this.style.borderColor='#d1d5db'">
+              <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
+            </button>
+          </div>
+        </div>
+
+        <div class="row g-2 mb-3">
+          <div class="col-6">
+            <div class="res-card have" onclick="toggleBreakdown('have')" title="Click for breakdown">
+              <div class="res-label d-flex align-items-center gap-1">
+                <span style="display:inline-block;width:18px;height:0;border-top:2.5px solid #1a6fe8;flex-shrink:0;"></span>
+                What you'll have
+              </div>
+              <div class="res-amount" id="res-have">—</div>
+              <div class="expand-hint">breakdown <i class="bi bi-chevron-down"></i></div>
+            </div>
+          </div>
+          <div class="col-6">
+            <div class="res-card need" onclick="toggleBreakdown('need')" title="Click for breakdown">
+              <div class="res-label d-flex align-items-center gap-1">
+                <span style="display:inline-block;width:18px;height:0;border-top:2px dashed #d97706;flex-shrink:0;"></span>
+                What you'll need
+              </div>
+              <div class="res-amount" id="res-need">—</div>
+              <div class="expand-hint">breakdown <i class="bi bi-chevron-down"></i></div>
+            </div>
+          </div>
+        </div>
+        <div id="res-breakdown" class="mb-2 px-1"></div>
+
+        <!-- Progress bar -->
+        <div class="d-flex justify-content-between mb-1">
+          <span class="small text-muted">Progress toward goal</span>
+          <span class="small fw-bold" id="res-pct">0%</span>
+        </div>
+        <div class="prog-track mb-2">
+          <div class="prog-fill" id="res-bar" style="width:0%;"></div>
+        </div>
+        <div class="small mb-3" id="res-gap-msg"></div>
+
+        <!-- Chart -->
+        <div id="chart-area">
+          <canvas id="ret-chart"></canvas>
+        </div>
+
+        <div class="field-label mt-3">Adjust your timeline</div>
+        <div class="field-subdesc">
+          Drag the handles to change ages — the chart above updates instantly.
+          <a href="#" class="learn-more-link" tabindex="-1"
+             data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="top"
+             data-bs-custom-class="popover-rich" data-bs-html="true"
+             data-bs-title="Life timeline"
+             data-bs-content="&lt;p&gt;What are the three key ages in your retirement story?&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Current age:&lt;/strong&gt; Where you are today.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Retirement age:&lt;/strong&gt; The biggest lever — each extra year working adds savings &amp;amp; removes a year of withdrawals. Even one extra year can shift your number dramatically.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Life expectancy:&lt;/strong&gt; Use 90+ to avoid outliving your money. The cost of guessing too low is much higher than guessing too high.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.investopedia.com/terms/f/financial-independence-retire-early-fire.asp' target='_blank' rel='noopener'&gt;What is FIRE? &amp;rarr; Investopedia&lt;/a&gt;&lt;/p&gt;"
+             onclick="return false;">Learn more &rarr;</a>
+        </div>
+        <div class="triple-wrap mb-1">
+          <div class="triple-track"></div>
+          <div class="triple-seg" id="seg-working" style="background:#1d4ed8;opacity:.55;"></div>
+          <div class="triple-seg" id="seg-retired" style="background:#d97706;opacity:.6;"></div>
+          <input type="range" id="slider-age"    min="30" max="100" value="41" oninput="onTripleSlider('age')">
+          <input type="range" id="slider-retire" min="30" max="100" value="63" oninput="onTripleSlider('retire')">
+          <input type="range" id="slider-life"   min="30" max="100" value="90" oninput="onTripleSlider('life')">
+          <div class="thumb-label thumb-label-below" id="lbl-age"    style="background:#1d4ed8;">Now 43</div>
+          <div class="thumb-label" id="lbl-retire" style="background:#d97706;">Retire 58</div>
+          <div class="thumb-label thumb-label-below" id="lbl-life"   style="background:#334155;">Until 90</div>
+        </div>
+        <div class="age-ticks">
+          <span>30</span><span>40</span><span>50</span><span>60</span>
+          <span>70</span><span>80</span><span>90</span><span>100</span>
+        </div>
+        <div class="d-flex align-items-center justify-content-center gap-2 mt-2">
+          <button onclick="stepRetire(-1)" style="width:2.2rem;height:2.2rem;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;font-size:1.1rem;line-height:1;cursor:pointer;color:#475569;">−</button>
+          <span style="font-size:.82rem;color:#475569;min-width:7rem;text-align:center;">Retire age: <strong id="retire-stepper-label">60</strong></span>
+          <button onclick="stepRetire(1)"  style="width:2.2rem;height:2.2rem;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;font-size:1.1rem;line-height:1;cursor:pointer;color:#475569;">+</button>
+        </div>
+        <span id="disp-age" class="d-none">47</span>
+        <span id="disp-retire" class="d-none">55</span>
+        <span id="disp-life" class="d-none">90</span>
+
+        <!-- Life Events -->
+        <div class="field-label mt-4">Life events</div>
+        <div class="field-subdesc mb-2">Mark milestones on the chart — college, mortgage payoff, inheritance, etc.</div>
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
+          <input id="evt-label" type="text" placeholder="Label" maxlength="20"
+            style="flex:1;min-width:0;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
+            onkeydown="if(event.key==='Enter')addLifeEvent()" value="Mortgage payoff">
+          <input id="evt-year" type="number" placeholder="Year" min="2020" max="2100" step="1"
+            style="width:80px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
+            onkeydown="if(event.key==='Enter')addLifeEvent()">
+          <button onclick="addLifeEvent()"
+            style="padding:4px 12px;background:#8b5cf6;border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">Add</button>
+        </div>
+        <div id="evt-list" style="display:flex;flex-wrap:wrap;gap:6px;min-height:4px;"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Row 2: Input columns -->
+  <div class="row g-4 align-items-start mt-3">
+    <!-- 2A: About · Income · Contributions -->
+    <div class="col-lg-6">
+      <div class="calc-card">
       <div class="section-title">About you</div>
 
       <!-- Current Age -->
@@ -500,7 +616,12 @@
         </div>
         <div class="equiv-hint mt-1" id="brokerage-hint"></div>
       </div>
+      </div>
+    </div>
 
+    <!-- 2B: Budget · Guaranteed income · Advanced -->
+    <div class="col-lg-6">
+      <div class="calc-card">
       <div class="section-title">Monthly budget in retirement</div>
 
       <!-- Monthly expenses -->
@@ -625,132 +746,11 @@
         <div class="equiv-hint mt-1">↑ Higher = larger required portfolio. Prices double every 24 yrs at 3%.</div>
       </div>
 
-    </div>
-    <!-- /input panel -->
-
-    <!-- ╔══════════════════════╗ -->
-    <!-- ║   RESULTS PANEL      ║ -->
-    <!-- ╚══════════════════════╝ -->
-    <div class="col-lg-7">
-
-      <!-- Result cards -->
-      <div class="calc-card mb-3">
-
-        <div class="d-flex align-items-start justify-content-between mb-2 gap-2">
-          <div class="d-flex align-items-center gap-2 flex-wrap">
-            <div id="res-years-to-fire" style="font-size:1.1rem;font-weight:700;color:#334155;"></div>
-            <div id="res-badge"></div>
-          </div>
-          <div class="d-flex align-items-center gap-2">
-            <button id="btn-copy-link" onclick="copyCurrentLink()" title="Copy shareable link"
-              style="background:#f0f7ff;border:1px solid #bfdbfe;color:#1d4ed8;padding:.25rem .6rem;border-radius:20px;cursor:pointer;font-size:.78rem;font-weight:600;line-height:1.4;transition:background .15s,border-color .15s;"
-              onmouseover="this.style.background='#dbeafe';this.style.borderColor='#93c5fd'"
-              onmouseout="this.style.background='#f0f7ff';this.style.borderColor='#bfdbfe'">
-              <i class="bi bi-share me-1"></i>Share
-            </button>
-            <button id="btn-reset" onclick="resetToDefaults()" title="Reset all inputs to defaults"
-              style="background:#f9fafb;border:1px solid #d1d5db;color:#6b7280;padding:.25rem .6rem;border-radius:20px;cursor:pointer;font-size:.78rem;font-weight:600;line-height:1.4;transition:background .15s,border-color .15s;"
-              onmouseover="this.style.background='#f3f4f6';this.style.borderColor='#9ca3af'"
-              onmouseout="this.style.background='#f9fafb';this.style.borderColor='#d1d5db'">
-              <i class="bi bi-arrow-counterclockwise me-1"></i>Reset
-            </button>
-          </div>
-        </div>
-
-        <div class="row g-2 mb-3">
-          <div class="col-6">
-            <div class="res-card have" onclick="toggleBreakdown('have')" title="Click for breakdown">
-              <div class="res-label d-flex align-items-center gap-1">
-                <span style="display:inline-block;width:18px;height:0;border-top:2.5px solid #1a6fe8;flex-shrink:0;"></span>
-                What you'll have
-              </div>
-              <div class="res-amount" id="res-have">—</div>
-              <div class="expand-hint">breakdown <i class="bi bi-chevron-down"></i></div>
-            </div>
-          </div>
-          <div class="col-6">
-            <div class="res-card need" onclick="toggleBreakdown('need')" title="Click for breakdown">
-              <div class="res-label d-flex align-items-center gap-1">
-                <span style="display:inline-block;width:18px;height:0;border-top:2px dashed #d97706;flex-shrink:0;"></span>
-                What you'll need
-              </div>
-              <div class="res-amount" id="res-need">—</div>
-              <div class="expand-hint">breakdown <i class="bi bi-chevron-down"></i></div>
-            </div>
-          </div>
-        </div>
-        <div id="res-breakdown" class="mb-2 px-1"></div>
-
-        <!-- Progress bar -->
-        <div class="d-flex justify-content-between mb-1">
-          <span class="small text-muted">Progress toward goal</span>
-          <span class="small fw-bold" id="res-pct">0%</span>
-        </div>
-        <div class="prog-track mb-2">
-          <div class="prog-fill" id="res-bar" style="width:0%;"></div>
-        </div>
-        <div class="small mb-3" id="res-gap-msg"></div>
-
-        <!-- Chart -->
-        <div id="chart-area">
-          <canvas id="ret-chart"></canvas>
-        </div>
-
-        <div class="field-label mt-3">Adjust your timeline</div>
-        <div class="field-subdesc">
-          Drag the handles to change ages — the chart above updates instantly.
-          <a href="#" class="learn-more-link" tabindex="-1"
-             data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="top"
-             data-bs-custom-class="popover-rich" data-bs-html="true"
-             data-bs-title="Life timeline"
-             data-bs-content="&lt;p&gt;What are the three key ages in your retirement story?&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Current age:&lt;/strong&gt; Where you are today.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Retirement age:&lt;/strong&gt; The biggest lever — each extra year working adds savings &amp;amp; removes a year of withdrawals. Even one extra year can shift your number dramatically.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Life expectancy:&lt;/strong&gt; Use 90+ to avoid outliving your money. The cost of guessing too low is much higher than guessing too high.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.investopedia.com/terms/f/financial-independence-retire-early-fire.asp' target='_blank' rel='noopener'&gt;What is FIRE? &amp;rarr; Investopedia&lt;/a&gt;&lt;/p&gt;"
-             onclick="return false;">Learn more &rarr;</a>
-        </div>
-        <div class="triple-wrap mb-1">
-          <div class="triple-track"></div>
-          <div class="triple-seg" id="seg-working" style="background:#1d4ed8;opacity:.55;"></div>
-          <div class="triple-seg" id="seg-retired" style="background:#d97706;opacity:.6;"></div>
-          <input type="range" id="slider-age"    min="30" max="100" value="41" oninput="onTripleSlider('age')">
-          <input type="range" id="slider-retire" min="30" max="100" value="63" oninput="onTripleSlider('retire')">
-          <input type="range" id="slider-life"   min="30" max="100" value="90" oninput="onTripleSlider('life')">
-          <div class="thumb-label thumb-label-below" id="lbl-age"    style="background:#1d4ed8;">Now 43</div>
-          <div class="thumb-label" id="lbl-retire" style="background:#d97706;">Retire 58</div>
-          <div class="thumb-label thumb-label-below" id="lbl-life"   style="background:#334155;">Until 90</div>
-        </div>
-        <div class="age-ticks">
-          <span>30</span><span>40</span><span>50</span><span>60</span>
-          <span>70</span><span>80</span><span>90</span><span>100</span>
-        </div>
-        <div class="d-flex align-items-center justify-content-center gap-2 mt-2">
-          <button onclick="stepRetire(-1)" style="width:2.2rem;height:2.2rem;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;font-size:1.1rem;line-height:1;cursor:pointer;color:#475569;">−</button>
-          <span style="font-size:.82rem;color:#475569;min-width:7rem;text-align:center;">Retire age: <strong id="retire-stepper-label">60</strong></span>
-          <button onclick="stepRetire(1)"  style="width:2.2rem;height:2.2rem;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;font-size:1.1rem;line-height:1;cursor:pointer;color:#475569;">+</button>
-        </div>
-        <span id="disp-age" class="d-none">47</span>
-        <span id="disp-retire" class="d-none">55</span>
-        <span id="disp-life" class="d-none">90</span>
-
-        <!-- Life Events -->
-        <div class="field-label mt-4">Life events</div>
-        <div class="field-subdesc mb-2">Mark milestones on the chart — college, mortgage payoff, inheritance, etc.</div>
-        <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
-          <input id="evt-label" type="text" placeholder="Label" maxlength="20"
-            style="flex:1;min-width:0;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
-            onkeydown="if(event.key==='Enter')addLifeEvent()" value="Mortgage payoff">
-          <input id="evt-year" type="number" placeholder="Year" min="2020" max="2100" step="1"
-            style="width:80px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
-            onkeydown="if(event.key==='Enter')addLifeEvent()">
-          <button onclick="addLifeEvent()"
-            style="padding:4px 12px;background:#8b5cf6;border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">Add</button>
-        </div>
-        <div id="evt-list" style="display:flex;flex-wrap:wrap;gap:6px;min-height:4px;"></div>
       </div>
-
     </div>
-    <!-- /results panel -->
-
   </div>
-  <!-- /row -->
+  <!-- /row 2 -->
+
 
   <div class="mt-4 text-center disclaimer">
     Results are estimates based on assumed rates of return and inflation. Actual results will vary.
