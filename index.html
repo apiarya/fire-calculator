@@ -1139,7 +1139,7 @@ function render(r) {
         inputs: ['inp-budget', 'inp-inflation', 'inp-ss', 'inp-other', 'inp-age'],
         val: fmtFull(r.netWithdrawal) + '/mo' },
       { label: 'Lump sum needed',        sub: `PV of inflation-growing annuity over ${r.yearsRetire} yrs at ${(S.postRate*100).toFixed(0)}% post-retirement growth`,
-        formula: `PV = PMT × [1 − ((1+g)/(1+r))^${nR}] / (r−g)`,
+        formula: `r = ${(S.postRate*100).toFixed(1)}% ÷ 12 = ${+(S.postRate/12).toFixed(6)}  (post-retirement monthly return)\ng = ${(S.inflation*100).toFixed(1)}% ÷ 12 = ${+(S.inflation/12).toFixed(6)}  (monthly inflation)\nN = ${r.yearsRetire} yrs × 12 = ${nR} months\nPMT = ${fmtFull(r.netWithdrawal)}/mo  (net monthly withdrawal)\nPV = PMT × [1 − ((1+g)/(1+r))^N] / (r−g)\n   = ${fmtFull(r.netWithdrawal)} × [1 − ((1+${+(S.inflation/12).toFixed(6)})/(1+${+(S.postRate/12).toFixed(6)}))^${nR}] / (${+(S.postRate/12).toFixed(6)}−${+(S.inflation/12).toFixed(6)}) = ${fmtFull(r.willNeed)}`,
         inputs: ['inp-budget', 'inp-inflation', 'inp-ss', 'inp-other', 'inp-post-rate', 'inp-age'],
         val: fmtFull(r.willNeed), total: true },
     ],
