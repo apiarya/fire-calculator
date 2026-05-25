@@ -36,11 +36,19 @@
       padding: 1.75rem;
     }
     @media (max-width: 991px) {
-      .calc-card {
+      .calc-card:not(.calc-card-always), .calc-card-tinted:not(.calc-card-always) {
         background: transparent;
         border-radius: 0;
         box-shadow: none;
         padding: 0;
+      }
+    }
+    @media (min-width: 992px) {
+      .sidebar-stats {
+        border-bottom: none;
+        border-right: 1px solid #f1f5f9;
+        padding-bottom: 0;
+        margin-bottom: 0;
       }
     }
     .sidebar-stats {
@@ -49,11 +57,9 @@
       margin-bottom: 1.25rem;
     }
     @media (min-width: 992px) {
-      .sidebar-stats {
-        border-bottom: none;
-        border-right: 1px solid #f1f5f9;
-        padding-bottom: 0;
-        margin-bottom: 0;
+      .calc-card-tinted {
+        background: #f8fafc;
+        padding: 1rem 1.25rem 1.25rem;
       }
     }
 
@@ -461,7 +467,7 @@
 
           <!-- Chart + timeline -->
           <div class="col-lg-9 ps-lg-4">
-        <div class="calc-card mt-0 mb-0" style="background:#f8fafc;padding:1rem 1.25rem 1.25rem;">
+        <div class="calc-card calc-card-tinted mt-0 mb-0">
         <!-- Chart -->
         <div id="chart-area">
           <canvas id="ret-chart"></canvas>
@@ -503,7 +509,7 @@
         </div><!-- /timeline panel -->
 
         <!-- Life Events -->
-        <div class="calc-card mt-3 mb-0" style="background:#f8fafc;">
+        <div class="calc-card calc-card-tinted calc-card-always mt-3 mb-0">
         <div class="field-label" style="margin-bottom:6px;">Life events</div>
 
         <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;">
