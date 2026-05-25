@@ -695,6 +695,7 @@
         <div id="chart-area">
           <canvas id="ret-chart"></canvas>
         </div>
+
         <div class="field-label mt-3">Adjust your timeline</div>
         <div class="field-subdesc">
           Drag the handles to change ages — the chart above updates instantly.
@@ -728,6 +729,21 @@
         <span id="disp-age" class="d-none">47</span>
         <span id="disp-retire" class="d-none">55</span>
         <span id="disp-life" class="d-none">90</span>
+
+        <!-- Life Events -->
+        <div class="field-label mt-4">Life events</div>
+        <div class="field-subdesc mb-2">Mark milestones on the chart — college, mortgage payoff, inheritance, etc.</div>
+        <div style="display:flex;gap:6px;align-items:center;margin-bottom:8px;">
+          <input id="evt-label" type="text" placeholder="Label" maxlength="20"
+            style="flex:1;min-width:0;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
+            onkeydown="if(event.key==='Enter')addLifeEvent()" value="Mortgage payoff">
+          <input id="evt-year" type="number" placeholder="Year" min="2020" max="2100" step="1"
+            style="width:80px;padding:4px 8px;border:1px solid #d1d5db;border-radius:6px;font-size:13px;"
+            onkeydown="if(event.key==='Enter')addLifeEvent()">
+          <button onclick="addLifeEvent()"
+            style="padding:4px 12px;background:#8b5cf6;border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">Add</button>
+        </div>
+        <div id="evt-list" style="display:flex;flex-wrap:wrap;gap:6px;min-height:4px;"></div>
       </div>
 
     </div>
@@ -772,6 +788,7 @@ const S = {
 
 let _chart = null;
 let _breakdown = {};
+let lifeEvents = []; // [{ year, label }]
 let _breakdownOpen = null; // 'have' | 'need' | null
 
 
@@ -1407,6 +1424,37 @@ function copyCurrentLink() {
   });
 }
 
+function addLifeEvent() {
+  const labelEl = $id('evt-label');
+  const yearEl  = $id('evt-year');
+  const label = labelEl.value.trim();
+  const year  = parseInt(yearEl.value);
+  const curYear = new Date().getFullYear();
+  if (!label || !year || year < curYear - 10 || year > curYear + 80) return;
+  lifeEvents.push({ year, label });
+  lifeEvents.sort((a, b) => a.year - b.year);
+  labelEl.value = '';
+  yearEl.value  = '';
+  labelEl.focus();
+  renderEvtChips();
+  update();
+}
+
+function removeLifeEvent(i) {
+  lifeEvents.splice(i, 1);
+  renderEvtChips();
+  update();
+}
+
+function renderEvtChips() {
+  $id('evt-list').innerHTML = lifeEvents.map((e, i) =>
+    `<span style="display:inline-flex;align-items:center;gap:4px;padding:2px 8px 2px 10px;background:#ede9fe;border:1px solid #c4b5fd;border-radius:12px;font-size:12px;color:#6d28d9;white-space:nowrap;">
+      ${e.label}&nbsp;${e.year}
+      <button onclick="removeLifeEvent(${i})" style="background:none;border:none;cursor:pointer;color:#8b5cf6;padding:0 2px;font-size:14px;line-height:1;">×</button>
+    </span>`
+  ).join('');
+}
+
 function resetToDefaults() {
   history.replaceState(null, '', location.pathname);
   const DEFAULTS = {
@@ -1424,6 +1472,7 @@ function resetToDefaults() {
 function buildShareURL(inputs) {
   const p = new URLSearchParams();
   Object.entries(inputs).forEach(([k, v]) => p.set(k, v));
+  if (lifeEvents.length) p.set('le', JSON.stringify(lifeEvents));
   return `${location.origin}${location.pathname}?${p}`;
 }
 
@@ -1531,6 +1580,17 @@ function renderChart(r) {
         if (retireIdx < 0) return;
 
         // ── "Now" vertical line ──
+        ctx.font = '600 10px system-ui,sans-serif';
+        const _pillH = 16, _pillPx = 6, _pillRow0 = chartArea.top + 6, _pillRowH = _pillH + 4;
+        // Track right edge of each placed top pill to detect overlaps
+        const _topPillRights = []; // per-row right edges
+
+        function _topPillY(pillLeft) {
+          let row = 0;
+          while (_topPillRights[row] !== undefined && _topPillRights[row] > pillLeft - 4) row++;
+          return row;
+        }
+
         if (nowIdx >= 0) {
           const nowX = xScale.getPixelForValue(nowIdx);
           ctx.save();
@@ -1545,8 +1605,11 @@ function renderChart(r) {
           const nowLabel = `Now ${S.age}`;
           ctx.font = '600 10px system-ui,sans-serif';
           const ntw = ctx.measureText(nowLabel).width;
-          const npx = 6, nby = chartArea.top + 6, nbw = ntw + npx * 2, nbh = 16;
-          const nbx = nowX - ntw / 2 - npx;
+          const nbw = ntw + _pillPx * 2, nbh = _pillH;
+          const nbx = nowX - ntw / 2 - _pillPx;
+          const nRow = _topPillY(nbx);
+          const nby = _pillRow0 + nRow * _pillRowH;
+          _topPillRights[nRow] = nbx + nbw;
           ctx.fillStyle = '#1d4ed8';
           ctx.beginPath();
           ctx.roundRect(nbx, nby, nbw, nbh, 4);
@@ -1574,14 +1637,14 @@ function renderChart(r) {
         const label = `Retire ${S.retireAge}`;
         ctx.font      = '600 10px system-ui,sans-serif';
         const tw      = ctx.measureText(label).width;
-        const px      = 6, py = 3, rx = 4;
-        const bx      = retireX - tw / 2 - px;
-        const by      = chartArea.top + 6;
-        const bw      = tw + px * 2;
-        const bh      = 16;
+        const bw      = tw + _pillPx * 2, bh = _pillH;
+        const bx      = retireX - tw / 2 - _pillPx;
+        const bRow    = _topPillY(bx);
+        const by      = _pillRow0 + bRow * _pillRowH;
+        _topPillRights[bRow] = bx + bw;
         ctx.fillStyle = '#d97706';
         ctx.beginPath();
-        ctx.roundRect(bx, by, bw, bh, rx);
+        ctx.roundRect(bx, by, bw, bh, 4);
         ctx.fill();
         ctx.fillStyle = '#fff';
         ctx.textAlign = 'center';
@@ -1607,11 +1670,11 @@ function renderChart(r) {
             const ssLabel = `SS ${ssAge}`;
             ctx.font = '600 10px system-ui,sans-serif';
             const stw = ctx.measureText(ssLabel).width;
-            const spx = 6, sbw = stw + spx * 2, sbh = 16;
-            const sbx = ssX - stw / 2 - spx;
-            // Drop to second row if pill would overlap the Retire pill
-            const retirePillRight = retireX + ctx.measureText(`Retire ${S.retireAge}`).width / 2 + spx + 2;
-            const sby = (sbx < retirePillRight) ? chartArea.top + 6 + sbh + 4 : chartArea.top + 6;
+            const sbw = stw + _pillPx * 2, sbh = _pillH;
+            const sbx = ssX - stw / 2 - _pillPx;
+            const sRow = _topPillY(sbx);
+            const sby = _pillRow0 + sRow * _pillRowH;
+            _topPillRights[sRow] = sbx + sbw;
             ctx.fillStyle = '#00a550';
             ctx.beginPath();
             ctx.roundRect(sbx, sby, sbw, sbh, 4);
@@ -1631,7 +1694,6 @@ function renderChart(r) {
           if (depleteIdx >= 0) {
             const dx = xScale.getPixelForValue(depleteIdx);
             ctx.save();
-            // Red dashed vertical line
             ctx.strokeStyle = '#ef4444';
             ctx.lineWidth   = 1.5;
             ctx.setLineDash([4, 3]);
@@ -1640,7 +1702,6 @@ function renderChart(r) {
             ctx.lineTo(dx, chartArea.bottom);
             ctx.stroke();
             ctx.setLineDash([]);
-            // Pill at bottom of chart area
             const dLabel = `Depletes ${depleteFloor}`;
             ctx.font = '600 10px system-ui,sans-serif';
             const dtw = ctx.measureText(dLabel).width;
@@ -1657,6 +1718,55 @@ function renderChart(r) {
             ctx.fillText(dLabel, dx, dby + dbh / 2);
             ctx.restore();
           }
+        }
+
+        // ── Life events ──
+        const curYear = new Date().getFullYear();
+        const ebh = 16, epx = 6;
+        ctx.font = '600 10px system-ui,sans-serif';
+        // First pass: compute pill positions
+        const evtItems = [];
+        for (const evt of lifeEvents) {
+          const evtAge = S.age + (evt.year - curYear);
+          const evtIdx = labels.indexOf(evtAge);
+          if (evtIdx < 0) continue;
+          const ex = xScale.getPixelForValue(evtIdx);
+          const etw = ctx.measureText(evt.label).width;
+          const ebw = etw + epx * 2;
+          const ebx = ex - etw / 2 - epx;
+          evtItems.push({ evt, ex, ebx, ebw });
+        }
+        // Greedy row assignment to avoid horizontal overlap
+        const rowRights = [];
+        for (const item of evtItems) {
+          let row = 0;
+          while (rowRights[row] !== undefined && rowRights[row] > item.ebx - 4) row++;
+          item.row = row;
+          rowRights[row] = item.ebx + item.ebw;
+        }
+        // Second pass: draw lines then pills
+        const baseEby = chartArea.bottom - ebh - 6 - ebh - 4;
+        for (const { evt, ex, ebx, ebw, row } of evtItems) {
+          const eby = baseEby - row * (ebh + 4);
+          ctx.save();
+          ctx.strokeStyle = '#8b5cf6';
+          ctx.lineWidth = 1.5;
+          ctx.setLineDash([3, 3]);
+          ctx.beginPath();
+          ctx.moveTo(ex, chartArea.top);
+          ctx.lineTo(ex, chartArea.bottom);
+          ctx.stroke();
+          ctx.setLineDash([]);
+          ctx.fillStyle = '#8b5cf6';
+          ctx.beginPath();
+          ctx.roundRect(ebx, eby, ebw, ebh, 4);
+          ctx.fill();
+          ctx.fillStyle = '#fff';
+          ctx.font = '600 10px system-ui,sans-serif';
+          ctx.textAlign = 'center';
+          ctx.textBaseline = 'middle';
+          ctx.fillText(evt.label, ex, eby + ebh / 2);
+          ctx.restore();
         }
       }
     }],
@@ -1753,6 +1863,7 @@ function update() {
 // INIT
 // ═══════════════════════════════════════════════════
 document.addEventListener('DOMContentLoaded', () => {
+  $id('evt-year').value = new Date().getFullYear() + 15;
   onTripleSlider('life');
   // Restore from URL params if a shared link was opened
   const _params = new URLSearchParams(location.search);
@@ -1763,6 +1874,16 @@ document.addEventListener('DOMContentLoaded', () => {
     v['slider-age']    = _params.get('slider-age')    || '43';
     v['slider-retire'] = _params.get('slider-retire') || '58';
     v['slider-life']   = _params.get('slider-life')   || '90';
+    try {
+      const leRaw = _params.get('le');
+      if (leRaw) {
+        const parsed = JSON.parse(leRaw);
+        if (Array.isArray(parsed)) {
+          lifeEvents = parsed.filter(e => e && typeof e.label === 'string' && typeof e.year === 'number');
+          renderEvtChips();
+        }
+      }
+    } catch (_) {}
     restoreInputs(v);
   } else {
     update();
