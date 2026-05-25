@@ -35,6 +35,27 @@
       box-shadow: var(--card-shadow);
       padding: 1.75rem;
     }
+    @media (max-width: 991px) {
+      .calc-card {
+        background: transparent;
+        border-radius: 0;
+        box-shadow: none;
+        padding: 0;
+      }
+    }
+    .sidebar-stats {
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 1.25rem;
+      margin-bottom: 1.25rem;
+    }
+    @media (min-width: 992px) {
+      .sidebar-stats {
+        border-bottom: none;
+        border-right: 1px solid #f1f5f9;
+        padding-bottom: 0;
+        margin-bottom: 0;
+      }
+    }
 
     /* ── Scenarios ── */
     .scenario-chip {
@@ -301,7 +322,7 @@
     .field-tip   { font-size: .72rem; color: #94a3b8; font-style: italic; min-height: 1rem; }
 
     /* ── Chart ── */
-    #chart-area { position: relative; height: 270px; }
+    #chart-area { position: relative; height: 360px; }
 
     /* ── Inputs ── */
     .form-control {
@@ -403,7 +424,7 @@
         </div>
         <div class="row g-0">
           <!-- Stats sidebar -->
-          <div class="col-lg-3 pe-4 d-flex flex-column" style="border-right:1px solid #f1f5f9;">
+          <div class="col-lg-3 pe-lg-4 d-flex flex-column sidebar-stats">
 
         <div class="res-card have mb-2" onclick="toggleBreakdown('have')" title="Click for breakdown">
               <div class="res-label d-flex align-items-center justify-content-between gap-1">
@@ -441,13 +462,14 @@
           </div><!-- /sidebar -->
 
           <!-- Chart + timeline -->
-          <div class="col-lg-9 ps-4">
+          <div class="col-lg-9 ps-lg-4">
+        <div class="calc-card mt-0 mb-0" style="background:#f8fafc;padding:1rem 1.25rem 1.25rem;">
         <!-- Chart -->
         <div id="chart-area">
           <canvas id="ret-chart"></canvas>
         </div>
 
-        <div class="field-label mt-3">Adjust your timeline</div>
+        <div class="field-label mt-3" style="margin-bottom:2px;">Adjust your timeline</div>
         <div class="field-subdesc">
           Drag the handles to change ages — the chart above updates instantly.
           <a href="#" class="learn-more-link" tabindex="-1"
@@ -480,10 +502,11 @@
         <span id="disp-age" class="d-none">47</span>
         <span id="disp-retire" class="d-none">55</span>
         <span id="disp-life" class="d-none">90</span>
+        </div><!-- /timeline panel -->
 
         <!-- Life Events -->
-        <div style="max-width:480px;">
-        <div class="field-label mt-4">Life events</div>
+        <div class="calc-card mt-3 mb-0" style="background:#f8fafc;">
+        <div class="field-label" style="margin-bottom:6px;">Life events</div>
 
         <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;">
           <span style="font-size:11px;color:#9ca3af;align-self:center;margin-right:2px;">Quick add:</span>
@@ -503,7 +526,7 @@
             style="padding:4px 12px;background:#8b5cf6;border:none;border-radius:6px;color:#fff;font-size:13px;font-weight:600;cursor:pointer;white-space:nowrap;">Add</button>
         </div>
         <div id="evt-list" style="display:flex;flex-wrap:wrap;gap:6px;min-height:4px;"></div>
-        </div>
+        </div><!-- /life events panel -->
           </div><!-- /col-lg-9 -->
         </div><!-- /row g-0 -->
       </div>
@@ -1725,120 +1748,84 @@ function renderChart(r) {
         ctx.fillText(label, retireX, by + bh / 2);
         ctx.restore();
 
-        // ── "SS starts" vertical line (only when SS is delayed past retirement) ──
+        // ── Bottom pills: SS · Depletes · Life events (unified, stacked upward) ──
+        ctx.font = '600 10px system-ui,sans-serif';
+        const curYear = new Date().getFullYear();
+        const _bPH = 16, _bPX = 6;
+        const _botItems = [];
+
+        // SS
         if (r.ssDelay > 0 && S.ssIncome > 0) {
           const ssAge = S.retireAge + r.ssDelay;
           const ssIdx = labels.indexOf(ssAge);
           if (ssIdx >= 0) {
-            const ssX = xScale.getPixelForValue(ssIdx);
-            ctx.save();
-            ctx.strokeStyle = '#00a550';
-            ctx.lineWidth   = 1.5;
-            ctx.setLineDash([4, 4]);
-            ctx.beginPath();
-            ctx.moveTo(ssX, chartArea.top);
-            ctx.lineTo(ssX, chartArea.bottom);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            const ssLabel = `SS ${ssAge}`;
-            ctx.font = '600 10px system-ui,sans-serif';
-            const stw = ctx.measureText(ssLabel).width;
-            const sbw = stw + _pillPx * 2, sbh = _pillH;
-            const sbx = ssX - stw / 2 - _pillPx;
-            const sRow = _topPillY(sbx);
-            const sby = _pillRow0 + sRow * _pillRowH;
-            _topPillRights[sRow] = sbx + sbw;
-            ctx.fillStyle = '#00a550';
-            ctx.beginPath();
-            ctx.roundRect(sbx, sby, sbw, sbh, 4);
-            ctx.fill();
-            ctx.fillStyle = '#fff';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(ssLabel, ssX, sby + sbh / 2);
-            ctx.restore();
+            const sx = xScale.getPixelForValue(ssIdx);
+            const sl = `SS ${ssAge}`;
+            const sw = ctx.measureText(sl).width;
+            _botItems.push({ x: sx, bx: sx - sw/2 - _bPX, bw: sw + _bPX*2, label: sl, color: '#00a550', lineDash: [4,4] });
           }
         }
 
-        // ── Portfolio depletion marker ──
+        // Depletes
         if (r.depleteAge !== null) {
-          const depleteFloor = Math.floor(r.depleteAge);
-          const depleteIdx = labels.indexOf(depleteFloor);
-          if (depleteIdx >= 0) {
-            const dx = xScale.getPixelForValue(depleteIdx);
-            ctx.save();
-            ctx.strokeStyle = '#ef4444';
-            ctx.lineWidth   = 1.5;
-            ctx.setLineDash([4, 3]);
-            ctx.beginPath();
-            ctx.moveTo(dx, chartArea.top);
-            ctx.lineTo(dx, chartArea.bottom);
-            ctx.stroke();
-            ctx.setLineDash([]);
-            const dLabel = `Depletes ${depleteFloor}`;
-            ctx.font = '600 10px system-ui,sans-serif';
-            const dtw = ctx.measureText(dLabel).width;
-            const dpx = 6, dbh = 16, dbw = dtw + dpx * 2;
-            const dbx = dx - dtw / 2 - dpx;
-            const dby = chartArea.bottom - dbh - 6;
-            ctx.fillStyle = '#ef4444';
-            ctx.beginPath();
-            ctx.roundRect(dbx, dby, dbw, dbh, 4);
-            ctx.fill();
-            ctx.fillStyle = '#fff';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'middle';
-            ctx.fillText(dLabel, dx, dby + dbh / 2);
-            ctx.restore();
+          const dFloor = Math.floor(r.depleteAge);
+          const dIdx = labels.indexOf(dFloor);
+          if (dIdx >= 0) {
+            const dx = xScale.getPixelForValue(dIdx);
+            const dl = `Depletes ${dFloor}`;
+            const dw = ctx.measureText(dl).width;
+            _botItems.push({ x: dx, bx: dx - dw/2 - _bPX, bw: dw + _bPX*2, label: dl, color: '#ef4444', lineDash: [4,3] });
           }
         }
 
-        // ── Life events ──
-        const curYear = new Date().getFullYear();
-        const ebh = 16, epx = 6;
-        ctx.font = '600 10px system-ui,sans-serif';
-        // First pass: compute pill positions
-        const evtItems = [];
+        // Life events
         for (const evt of lifeEvents) {
           const evtAge = S.age + (evt.year - curYear);
           const evtIdx = labels.indexOf(evtAge);
           if (evtIdx < 0) continue;
           const ex = xScale.getPixelForValue(evtIdx);
-          const etw = ctx.measureText(evt.label).width;
-          const ebw = etw + epx * 2;
-          const ebx = ex - etw / 2 - epx;
-          evtItems.push({ evt, ex, ebx, ebw });
+          const ew = ctx.measureText(evt.label).width;
+          _botItems.push({ x: ex, bx: ex - ew/2 - _bPX, bw: ew + _bPX*2, label: evt.label, color: '#8b5cf6', lineDash: [3,3] });
         }
-        // Greedy row assignment to avoid horizontal overlap
-        const rowRights = [];
-        for (const item of evtItems) {
+
+        // Greedy row assignment (left-to-right, rows stack upward)
+        _botItems.sort((a, b) => a.bx - b.bx);
+        const _botRowR = [];
+        for (const item of _botItems) {
           let row = 0;
-          while (rowRights[row] !== undefined && rowRights[row] > item.ebx - 4) row++;
+          while (_botRowR[row] !== undefined && _botRowR[row] > item.bx - 4) row++;
           item.row = row;
-          rowRights[row] = item.ebx + item.ebw;
+          _botRowR[row] = item.bx + item.bw;
         }
-        // Second pass: draw lines then pills
-        const baseEby = chartArea.bottom - ebh - 6;
-        for (const { evt, ex, ebx, ebw, row } of evtItems) {
-          const eby = baseEby - row * (ebh + 4);
+
+        // Draw vertical lines first
+        for (const item of _botItems) {
           ctx.save();
-          ctx.strokeStyle = '#8b5cf6';
+          ctx.strokeStyle = item.color;
           ctx.lineWidth = 1.5;
-          ctx.setLineDash([3, 3]);
+          ctx.setLineDash(item.lineDash);
           ctx.beginPath();
-          ctx.moveTo(ex, chartArea.top);
-          ctx.lineTo(ex, chartArea.bottom);
+          ctx.moveTo(item.x, chartArea.top);
+          ctx.lineTo(item.x, chartArea.bottom);
           ctx.stroke();
+          ctx.restore();
+        }
+
+        // Draw pills
+        const _botBase = chartArea.bottom - _bPH - 6;
+        for (const item of _botItems) {
+          const iby = _botBase - item.row * (_bPH + 4);
+          ctx.save();
           ctx.setLineDash([]);
-          ctx.fillStyle = '#8b5cf6';
+          ctx.fillStyle = item.color;
           ctx.beginPath();
-          ctx.roundRect(ebx, eby, ebw, ebh, 4);
+          ctx.roundRect(item.bx, iby, item.bw, _bPH, 4);
           ctx.fill();
           ctx.fillStyle = '#fff';
           ctx.font = '600 10px system-ui,sans-serif';
           ctx.textAlign = 'center';
           ctx.textBaseline = 'middle';
-          ctx.fillText(evt.label, ex, eby + ebh / 2);
+          ctx.fillText(item.label, item.x, iby + _bPH / 2);
           ctx.restore();
         }
       }
