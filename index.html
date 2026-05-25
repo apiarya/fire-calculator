@@ -353,7 +353,7 @@
         <div class="field-subdesc">Sets the start of your accumulation timeline and where your chart begins.</div>
         <div class="input-group" style="max-width:160px;">
           <input type="text" inputmode="numeric" class="form-control" id="inp-age"
-            value="43" data-min="18" data-max="79"
+            value="41" data-min="18" data-max="79"
             oninput="onAgeInput(this)" onblur="onBlurAge(this)"
             onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           <span class="input-group-text">yrs</span>
@@ -373,11 +373,11 @@
              onclick="return false;">Learn more &rarr;</a>
         </div>
         <div class="btn-group btn-group-sm" role="group" aria-label="Filing status">
-          <input type="radio" class="btn-check" name="filing" id="filing-married" onchange="update()" checked autocomplete="off">
+          <input type="radio" class="btn-check" name="filing" id="filing-married" onchange="update()" autocomplete="off">
           <label class="btn btn-outline-primary" for="filing-married">
             <i class="bi bi-people-fill me-1"></i>Married
           </label>
-          <input type="radio" class="btn-check" name="filing" id="filing-single" onchange="update()" autocomplete="off">
+          <input type="radio" class="btn-check" name="filing" id="filing-single" onchange="update()" checked autocomplete="off">
           <label class="btn btn-outline-primary" for="filing-single">
             <i class="bi bi-person-fill me-1"></i>Single
           </label>
@@ -403,7 +403,7 @@
         </div>
         <div class="input-group">
           <span class="input-group-text">$</span>
-          <input type="text" inputmode="numeric" class="form-control" id="inp-income" value="480,000" data-min="0" data-max="10000000" oninput="formatNumLive(this)" onblur="onBlurNum(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          <input type="text" inputmode="numeric" class="form-control" id="inp-income" value="95,000" data-min="0" data-max="10000000" oninput="formatNumLive(this)" onblur="onBlurNum(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         </div>
         <div class="equiv-hint mt-1" id="income-hint"></div>
       </div>
@@ -422,7 +422,7 @@
         </div>
         <div class="input-group">
           <span class="input-group-text">$</span>
-          <input type="text" inputmode="numeric" class="form-control" id="inp-savings" value="500,000" data-min="0" data-max="100000000" oninput="formatNumLive(this)" onblur="onBlurNum(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          <input type="text" inputmode="numeric" class="form-control" id="inp-savings" value="42,000" data-min="0" data-max="100000000" oninput="formatNumLive(this)" onblur="onBlurNum(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         </div>
         <div class="equiv-hint mt-1" id="savings-hint"></div>
       </div>
@@ -443,7 +443,7 @@
         </div>
         <div class="input-group">
           <span class="input-group-text">$</span>
-          <input type="text" inputmode="numeric" class="form-control" id="inp-retire-contrib" value="10,000" data-min="0" data-max="100000" oninput="formatNumLive(this)" onblur="onBlurNum(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          <input type="text" inputmode="numeric" class="form-control" id="inp-retire-contrib" value="1,200" data-min="0" data-max="100000" oninput="formatNumLive(this)" onblur="onBlurNum(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           <span class="input-group-text">/mo</span>
         </div>
         <div class="equiv-hint mt-1" id="retire-contrib-hint"></div>
@@ -464,7 +464,7 @@
         </div>
         <div class="input-group">
           <span class="input-group-text">$</span>
-          <input type="text" inputmode="numeric" class="form-control" id="inp-brokerage" value="5,000" data-min="0" data-max="500000" oninput="formatNumLive(this)" onblur="onBlurNum(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          <input type="text" inputmode="numeric" class="form-control" id="inp-brokerage" value="300" data-min="0" data-max="500000" oninput="formatNumLive(this)" onblur="onBlurNum(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           <span class="input-group-text">/mo</span>
         </div>
         <div class="equiv-hint mt-1" id="brokerage-hint"></div>
@@ -486,7 +486,7 @@
         </div>
         <div class="input-group">
           <span class="input-group-text">$</span>
-          <input type="text" inputmode="numeric" class="form-control" id="inp-budget" value="15,000" data-min="0" data-max="500000" oninput="formatNumLive(this)" onblur="onBlurNum(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          <input type="text" inputmode="numeric" class="form-control" id="inp-budget" value="5,500" data-min="0" data-max="500000" oninput="formatNumLive(this)" onblur="onBlurNum(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           <span class="input-group-text">/mo</span>
         </div>
         <div class="equiv-hint mt-1" id="budget-hint"></div>
@@ -672,7 +672,7 @@
           <div class="triple-track"></div>
           <div class="triple-seg" id="seg-working" style="background:#1d4ed8;opacity:.55;"></div>
           <div class="triple-seg" id="seg-retired" style="background:#d97706;opacity:.6;"></div>
-          <input type="range" id="slider-age"    min="30" max="100" value="43" oninput="onTripleSlider('age')">
+          <input type="range" id="slider-age"    min="30" max="100" value="41" oninput="onTripleSlider('age')">
           <input type="range" id="slider-retire" min="30" max="100" value="60" oninput="onTripleSlider('retire')">
           <input type="range" id="slider-life"   min="30" max="100" value="90" oninput="onTripleSlider('life')">
           <div class="thumb-label thumb-label-below" id="lbl-age"    style="background:#1d4ed8;">Now 43</div>
@@ -715,13 +715,13 @@
 // STATE
 // ═══════════════════════════════════════════════════
 const S = {
-  married:     true,
-  age:         43,
-  income:      480000,
-  savings:     500000,
-  contribRetire:    10000,
-  contribBrokerage: 5000,
-  budgetVal:   15000,
+  married:     false,
+  age:         41,
+  income:      95000,
+  savings:     42000,
+  contribRetire:    1200,
+  contribBrokerage: 300,
+  budgetVal:   5500,
   otherIncome: 0,
   ssIncome:    3500,
   // Advanced
@@ -1078,9 +1078,9 @@ function render(r) {
       </div>
       <div style="font-size:.82rem;line-height:1.7;color:#475569;">
         <ul class="mb-0 ps-3" style="line-height:1.8;">
-          <li>On track to retire at <strong>${S.retireAge}</strong> with <strong>${fmtFull(r.willHave)}</strong> — <strong class="text-success">${fmtFull(r.gap)} more than you need</strong>. 🎉</li>
-          <li>That cushion is worth roughly <strong>$${_gapMonthly.toLocaleString()}/month</strong> in today's dollars — spend more freely, gift to family, or hold as a buffer against bad market years.</li>
-          <li>Room for about <strong>${_extraYears} additional years</strong> of spending beyond your target — so even if life runs longer than expected, you're in good shape.</li>
+          <li>Retire at <strong>${S.retireAge}</strong> with <strong>${fmtFull(r.willHave)}</strong> — <strong class="text-success">${fmtFull(r.gap)} surplus</strong>. 🎉</li>
+          <li>Cushion worth <strong>$${_gapMonthly.toLocaleString()}/month</strong> in today's dollars to spend, gift, or hold as buffer.</li>
+          <li><strong>${_extraYears} extra years</strong> of runway beyond your target — safe even if life runs long.</li>
         </ul>
       </div>`;
   } else {
@@ -1097,7 +1097,6 @@ function render(r) {
       </div>
       <div style="font-size:.82rem;line-height:1.7;color:#475569;">
         <ul class="mb-0 ps-3" style="line-height:1.8;">
-          <li>At <strong>${S.retireAge}</strong> you're on track for <strong>${fmtFull(r.willHave)}</strong>, but your plan needs <strong>${fmtFull(r.willNeed)}</strong>.</li>
           <li>Save an extra <strong>$${_extraSave.toLocaleString()}/month</strong> starting today.</li>
           <li>Retire a few years later to give your portfolio more time to grow.</li>
           <li>Trim your monthly retirement budget by about <strong>$${_gapMonthly.toLocaleString()}</strong> (in today's dollars).</li>

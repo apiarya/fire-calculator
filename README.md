@@ -14,7 +14,7 @@ Found a bug or have a question? [Open an issue](https://github.com/apiarya/fire-
 
 ---
 
-![FIRE Retirement Calculator](image.png)
+![FIRE Retirement Calculator demo](demo.gif)
 
 ---
 
