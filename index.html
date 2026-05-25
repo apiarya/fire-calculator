@@ -641,6 +641,7 @@
             <div class="text-muted mb-1" style="font-size:.8rem;">
               Retirement savings at age <strong id="res-retire-age">67</strong>
             </div>
+            <div id="res-years-to-fire" style="font-size:.85rem;font-weight:700;color:#1d4ed8;"></div>
           </div>
           <div class="d-flex align-items-center gap-2">
             <div id="res-badge"></div>
@@ -1122,6 +1123,9 @@ function render(r) {
 
   // Header
   $id('res-retire-age').textContent = S.retireAge;
+  const _yrs = S.retireAge - S.age;
+  const _retireYear = new Date().getFullYear() + _yrs;
+  $id('res-years-to-fire').textContent = _yrs > 0 ? `${_yrs} yr${_yrs !== 1 ? 's' : ''} to go · ${_retireYear}` : 'Retirement age reached';
   $id('budget-retire-age-inline').textContent = S.retireAge;
 
   // Cards
