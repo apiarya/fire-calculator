@@ -865,6 +865,7 @@ function calc(retireAge) {
   let grossW    = monthlyBudgetNominal;
   let ssW       = otherNominal;
   let drawMonth = 0;
+  let depleteAge = null;
 
   for (let y = 0; y < yearsRetire; y++) {
     for (let m = 0; m < 12; m++) {
@@ -872,6 +873,7 @@ function calc(retireAge) {
       drawBal = drawBal * (1 + mPostRate) - netW;
       grossW *= (1 + mInfl);
       ssW    *= (1 + mInfl);
+      if (drawBal < 0 && depleteAge === null) depleteAge = retire + y + (m + 1) / 12;
       if (drawBal < 0) drawBal = 0;
       drawMonth++;
     }
@@ -883,7 +885,7 @@ function calc(retireAge) {
 
   return {
     willHave, willNeed, gap, pct,
-    yearsAccum, yearsRetire, ssDelay,
+    yearsAccum, yearsRetire, ssDelay, depleteAge,
     growthSeries, drawSeries,
     monthlyBudgetNow, monthlyBudgetNominal, netWithdrawal
   };
@@ -1618,6 +1620,41 @@ function renderChart(r) {
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
             ctx.fillText(ssLabel, ssX, sby + sbh / 2);
+            ctx.restore();
+          }
+        }
+
+        // ── Portfolio depletion marker ──
+        if (r.depleteAge !== null) {
+          const depleteFloor = Math.floor(r.depleteAge);
+          const depleteIdx = labels.indexOf(depleteFloor);
+          if (depleteIdx >= 0) {
+            const dx = xScale.getPixelForValue(depleteIdx);
+            ctx.save();
+            // Red dashed vertical line
+            ctx.strokeStyle = '#ef4444';
+            ctx.lineWidth   = 1.5;
+            ctx.setLineDash([4, 3]);
+            ctx.beginPath();
+            ctx.moveTo(dx, chartArea.top);
+            ctx.lineTo(dx, chartArea.bottom);
+            ctx.stroke();
+            ctx.setLineDash([]);
+            // Pill at bottom of chart area
+            const dLabel = `Depletes ${depleteFloor}`;
+            ctx.font = '600 10px system-ui,sans-serif';
+            const dtw = ctx.measureText(dLabel).width;
+            const dpx = 6, dbh = 16, dbw = dtw + dpx * 2;
+            const dbx = dx - dtw / 2 - dpx;
+            const dby = chartArea.bottom - dbh - 6;
+            ctx.fillStyle = '#ef4444';
+            ctx.beginPath();
+            ctx.roundRect(dbx, dby, dbw, dbh, 4);
+            ctx.fill();
+            ctx.fillStyle = '#fff';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText(dLabel, dx, dby + dbh / 2);
             ctx.restore();
           }
         }
