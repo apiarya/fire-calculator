@@ -164,7 +164,7 @@
     .triple-wrap {
       position: relative;
       height: 1.5rem;
-      margin-top: 2.2rem;
+      margin-top: 1.8rem;
     }
     .thumb-label {
       position: absolute;
@@ -218,7 +218,6 @@
       background: transparent;
       height: 4px;
     }
-    .triple-labels { font-size: .78rem; }
     .triple-dot {
       display: inline-block; width: 9px; height: 9px;
       border-radius: 50%; margin-right: 4px; vertical-align: middle;
@@ -605,7 +604,7 @@
       <!-- Result cards -->
       <div class="calc-card mb-3">
 
-        <div class="d-flex align-items-start justify-content-between mb-3 flex-wrap gap-2">
+        <div class="d-flex align-items-start justify-content-between mb-2 flex-wrap gap-2">
           <div>
             <div class="text-muted mb-1" style="font-size:.8rem;">
               Retirement savings at age <strong id="res-retire-age">67</strong>
@@ -622,7 +621,7 @@
           </div>
         </div>
 
-        <div class="row g-3 mb-4">
+        <div class="row g-2 mb-3">
           <div class="col-6">
             <div class="res-card have">
               <div class="res-label d-flex align-items-center gap-1">
@@ -648,17 +647,16 @@
           <span class="small text-muted">Progress toward goal</span>
           <span class="small fw-bold" id="res-pct">0%</span>
         </div>
-        <div class="prog-track mb-3">
+        <div class="prog-track mb-2">
           <div class="prog-fill" id="res-bar" style="width:0%;"></div>
         </div>
-        <div class="small mb-4" id="res-gap-msg"></div>
+        <div class="small mb-3" id="res-gap-msg"></div>
 
         <!-- Chart -->
         <div id="chart-area">
           <canvas id="ret-chart"></canvas>
         </div>
-        <hr style="margin:1.5rem 0 .75rem;border-color:#e2e8f0;">
-        <div class="field-label">Adjust your timeline</div>
+        <div class="field-label mt-3">Adjust your timeline</div>
         <div class="field-subdesc">
           Drag the handles to change ages — the chart above updates instantly.
           <a href="#" class="learn-more-link" tabindex="-1"
@@ -683,7 +681,7 @@
           <span>30</span><span>40</span><span>50</span><span>60</span>
           <span>70</span><span>80</span><span>90</span><span>100</span>
         </div>
-        <div class="d-flex align-items-center justify-content-center gap-2 mt-3">
+        <div class="d-flex align-items-center justify-content-center gap-2 mt-2">
           <button onclick="stepRetire(-1)" style="width:2.2rem;height:2.2rem;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;font-size:1.1rem;line-height:1;cursor:pointer;color:#475569;">−</button>
           <span style="font-size:.82rem;color:#475569;min-width:7rem;text-align:center;">Retire age: <strong id="retire-stepper-label">60</strong></span>
           <button onclick="stepRetire(1)"  style="width:2.2rem;height:2.2rem;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;font-size:1.1rem;line-height:1;cursor:pointer;color:#475569;">+</button>
@@ -749,9 +747,9 @@ function fmtFull(n) {
 
 function fmtShort(n) {
   const abs = Math.abs(n);
-  if (abs >= 1e6) return '$' + (abs / 1e6).toFixed(2).replace(/\.?0+$/, '') + 'M';
-  if (abs >= 1e3) return '$' + Math.round(abs / 1e3) + 'K';
-  return '$' + Math.round(abs);
+  if (abs >= 1e6) return '$ ' + (abs / 1e6).toFixed(2).replace(/\.?0+$/, '') + 'M';
+  if (abs >= 1e3) return '$ ' + Math.round(abs / 1e3) + 'K';
+  return '$ ' + Math.round(abs);
 }
 
 // ═══════════════════════════════════════════════════
@@ -1464,7 +1462,8 @@ function renderChart(r) {
         y: {
           grid: { color: '#f1f5f9' },
           ticks: { callback: v => fmtShort(v) },
-          grace: '15%'
+          grace: '18%',
+          min: 0
         }
       }
     }
