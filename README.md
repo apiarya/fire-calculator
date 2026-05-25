@@ -38,7 +38,7 @@ Pure HTML/CSS/JS. No framework, no build step, no server, no tracking. Everythin
 
 - No taxes modeled (accumulation or drawdown)
 - No sequence-of-returns risk
-- Social Security is user-entered, not calculated from earnings history
+- Social Security is estimated from current income (not your actual SSA earnings record)
 - Single blended portfolio (no 401k vs Roth vs brokerage distinction)
 
 > Educational only — not financial advice.
