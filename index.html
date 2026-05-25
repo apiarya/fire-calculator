@@ -1013,17 +1013,56 @@ function render(r) {
       <i class="bi bi-exclamation-triangle-fill me-1"></i>Shortfall</span>`;
   }
 
-  // Gap message
-  if (r.gap >= 0) {
-    $id('res-gap-msg').innerHTML =
-      `<i class="bi bi-arrow-up-right-circle-fill text-success me-1"></i>
-       <strong class="text-success">Surplus of ${fmtFull(r.gap)}</strong>
-       — You're on track to exceed your retirement goal.`;
+  // Gap message — expanded friendly explanation
+  const _mPost    = S.postRate  / 12;
+  const _mInfl    = S.inflation / 12;
+  const _nRetMo   = r.yearsRetire * 12;
+  // Convert the gap into today's-dollar monthly budget equivalent
+  let _gapMonthly;
+  if (Math.abs(_mPost - _mInfl) < 0.000001) {
+    _gapMonthly = Math.abs(r.gap) / _nRetMo;
   } else {
-    $id('res-gap-msg').innerHTML =
-      `<i class="bi bi-arrow-down-right-circle-fill me-1" style="color:var(--amber)"></i>
-       <strong style="color:var(--amber)">Shortfall of ${fmtFull(Math.abs(r.gap))}</strong>
-       — Consider increasing contributions, retiring later, or adjusting your budget.`;
+    _gapMonthly = Math.abs(r.gap) * (_mPost - _mInfl) /
+      (1 - Math.pow((1 + _mInfl) / (1 + _mPost), _nRetMo));
+  }
+  _gapMonthly = Math.round(_gapMonthly / Math.pow(1 + S.inflation, r.yearsAccum));
+  // How many extra years of net spending the surplus/shortfall represents
+  const _extraYears = r.netWithdrawal > 0
+    ? (Math.abs(r.gap) / (r.netWithdrawal * 12)).toFixed(1) : '0';
+
+  if (r.gap >= 0) {
+    $id('res-gap-msg').innerHTML = `
+      <div class="mb-1">
+        <i class="bi bi-arrow-up-right-circle-fill text-success me-1"></i>
+        <strong class="text-success">Surplus of ${fmtFull(r.gap)}</strong>
+      </div>
+      <div style="font-size:.82rem;line-height:1.7;color:#475569;">
+        You're on track to retire at <strong>${S.retireAge}</strong> with <strong>${fmtFull(r.willHave)}</strong> —
+        <strong class="text-success">${fmtFull(r.gap)} more than you need</strong>. 🎉<br>
+        That extra cushion is worth roughly <strong>$${_gapMonthly.toLocaleString()}/month</strong> in today's dollars —
+        money you could spend more freely, gift to family, or simply hold as a buffer against bad market years.
+        Your plan also has room for about <strong>${_extraYears} additional years</strong> of retirement spending
+        beyond your target — so even if life runs longer than expected, you're in good shape.
+      </div>`;
+  } else {
+    // Extra monthly savings that would close the gap by retirement
+    const _nAccumMo  = r.yearsAccum * 12;
+    const _mPre      = S.preRate / 12;
+    const _extraSave = _nAccumMo > 0 && _mPre > 0
+      ? Math.round(Math.abs(r.gap) * _mPre / (Math.pow(1 + _mPre, _nAccumMo) - 1))
+      : 0;
+    $id('res-gap-msg').innerHTML = `
+      <div class="mb-1">
+        <i class="bi bi-arrow-down-right-circle-fill me-1" style="color:var(--amber)"></i>
+        <strong style="color:var(--amber)">Shortfall of ${fmtFull(Math.abs(r.gap))}</strong>
+      </div>
+      <div style="font-size:.82rem;line-height:1.7;color:#475569;">
+        At <strong>${S.retireAge}</strong> you're on track for <strong>${fmtFull(r.willHave)}</strong>,
+        but your plan needs <strong>${fmtFull(r.willNeed)}</strong>. Here are three ways to close the gap:<br>
+        <span class="me-1">💰</span> Save an extra <strong>$${_extraSave.toLocaleString()}/month</strong> starting today.<br>
+        <span class="me-1">📅</span> Retire a few years later to give your portfolio more time to grow.<br>
+        <span class="me-1">✂️</span> Trim your monthly retirement budget by about <strong>$${_gapMonthly.toLocaleString()}</strong> (in today's dollars).
+      </div>`;
   }
 
   // Equiv hints
