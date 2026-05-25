@@ -164,7 +164,7 @@
     .triple-wrap {
       position: relative;
       height: 1.5rem;
-      margin-top: 1.6rem;
+      margin-top: 2.2rem;
     }
     .thumb-label {
       position: absolute;
@@ -186,14 +186,14 @@
     .triple-track {
       position: absolute;
       top: 50%; transform: translateY(-50%);
-      height: 7px; border-radius: 4px;
+      height: 10px; border-radius: 5px;
       background: #cbd5e1;
       left: 0; right: 0; pointer-events: none;
     }
     .triple-seg {
       position: absolute;
       top: 50%; transform: translateY(-50%);
-      height: 7px; border-radius: 2px;
+      height: 10px; border-radius: 3px;
       pointer-events: none;
     }
     .triple-wrap input[type=range] {
@@ -206,13 +206,13 @@
     .triple-wrap input[type=range]::-webkit-slider-thumb {
       pointer-events: all; cursor: pointer;
       -webkit-appearance: none; appearance: none;
-      width: 1.1rem; height: 1.1rem;
-      border-radius: 50%; border: 2.5px solid #fff;
-      margin-top: -6px;
-      box-shadow: 0 2px 6px rgba(0,0,0,.30);
+      width: 1.7rem; height: 1.7rem;
+      border-radius: 50%; border: 3px solid #fff;
+      margin-top: -10px;
+      box-shadow: 0 2px 8px rgba(0,0,0,.30);
     }
     #slider-age::-webkit-slider-thumb    { background: #1d4ed8; }
-    #slider-retire::-webkit-slider-thumb { background: #d97706; }
+    #slider-retire::-webkit-slider-thumb { background: var(--retire-thumb-color, #d97706); }
     #slider-life::-webkit-slider-thumb   { background: #334155; }
     .triple-wrap input[type=range]::-webkit-slider-runnable-track {
       background: transparent;
@@ -657,11 +657,7 @@
         <div id="chart-area">
           <canvas id="ret-chart"></canvas>
         </div>
-        <div class="text-center mt-1" style="font-size:.72rem;color:#94a3b8;">Peak balance → draws down to zero at life expectancy</div>
-      </div>
-
-
-      <div class="input-card mb-2">
+        <hr style="margin:1.5rem 0 .75rem;border-color:#e2e8f0;">
         <div class="field-label">Adjust your timeline</div>
         <div class="field-subdesc">
           Drag the handles to change ages — the chart above updates instantly.
@@ -677,11 +673,11 @@
           <div class="triple-seg" id="seg-working" style="background:#1d4ed8;opacity:.55;"></div>
           <div class="triple-seg" id="seg-retired" style="background:#d97706;opacity:.6;"></div>
           <input type="range" id="slider-age"    min="30" max="100" value="43" oninput="onTripleSlider('age')">
-          <input type="range" id="slider-retire" min="30" max="100" value="58" oninput="onTripleSlider('retire')">
+          <input type="range" id="slider-retire" min="30" max="100" value="60" oninput="onTripleSlider('retire')">
           <input type="range" id="slider-life"   min="30" max="100" value="90" oninput="onTripleSlider('life')">
-          <div class="thumb-label" id="lbl-age"    style="background:#1d4ed8;">Now 43</div>
-          <div class="thumb-label thumb-label-below" id="lbl-retire" style="background:#d97706;">Retire 58</div>
-          <div class="thumb-label" id="lbl-life"   style="background:#334155;">Until 90</div>
+          <div class="thumb-label thumb-label-below" id="lbl-age"    style="background:#1d4ed8;">Now 43</div>
+          <div class="thumb-label" id="lbl-retire" style="background:#d97706;">Retire 58</div>
+          <div class="thumb-label thumb-label-below" id="lbl-life"   style="background:#334155;">Until 90</div>
         </div>
         <div class="age-ticks">
           <span>30</span><span>40</span><span>50</span><span>60</span>
@@ -724,7 +720,7 @@ const S = {
   otherIncome: 0,
   ssIncome:    3500,
   // Advanced
-  retireAge:   58,
+  retireAge:   60,
   lifeExpect:  90,
   preRate:     0.06,
   postRate:    0.05,
@@ -1032,10 +1028,16 @@ function render(r) {
     $id('res-badge').innerHTML = `<span class="badge rounded-pill px-3 py-2"
       style="background:#e6f7ef;color:var(--green);font-size:.78rem;">
       <i class="bi bi-check-circle-fill me-1"></i>On track</span>`;
+    $id('slider-retire').style.setProperty('--retire-thumb-color', 'var(--green)');
+    $id('seg-retired').style.background = 'var(--green)';
+    $id('lbl-retire').style.background = 'var(--green)';
   } else {
     $id('res-badge').innerHTML = `<span class="badge rounded-pill px-3 py-2"
       style="background:#fffbeb;color:var(--amber);font-size:.78rem;">
       <i class="bi bi-exclamation-triangle-fill me-1"></i>Shortfall</span>`;
+    $id('slider-retire').style.setProperty('--retire-thumb-color', '#d97706');
+    $id('seg-retired').style.background = '#d97706';
+    $id('lbl-retire').style.background = '#d97706';
   }
 
   // Gap message — expanded friendly explanation
@@ -1062,12 +1064,11 @@ function render(r) {
         <strong class="text-success">Surplus of ${fmtFull(r.gap)}</strong>
       </div>
       <div style="font-size:.82rem;line-height:1.7;color:#475569;">
-        You're on track to retire at <strong>${S.retireAge}</strong> with <strong>${fmtFull(r.willHave)}</strong> —
-        <strong class="text-success">${fmtFull(r.gap)} more than you need</strong>. 🎉<br>
-        That extra cushion is worth roughly <strong>$${_gapMonthly.toLocaleString()}/month</strong> in today's dollars —
-        money you could spend more freely, gift to family, or simply hold as a buffer against bad market years.
-        Your plan also has room for about <strong>${_extraYears} additional years</strong> of retirement spending
-        beyond your target — so even if life runs longer than expected, you're in good shape.
+        <ul class="mb-0 ps-3" style="line-height:1.8;">
+          <li>On track to retire at <strong>${S.retireAge}</strong> with <strong>${fmtFull(r.willHave)}</strong> — <strong class="text-success">${fmtFull(r.gap)} more than you need</strong>. 🎉</li>
+          <li>That cushion is worth roughly <strong>$${_gapMonthly.toLocaleString()}/month</strong> in today's dollars — spend more freely, gift to family, or hold as a buffer against bad market years.</li>
+          <li>Room for about <strong>${_extraYears} additional years</strong> of spending beyond your target — so even if life runs longer than expected, you're in good shape.</li>
+        </ul>
       </div>`;
   } else {
     // Extra monthly savings that would close the gap by retirement
@@ -1082,11 +1083,12 @@ function render(r) {
         <strong style="color:var(--amber)">Shortfall of ${fmtFull(Math.abs(r.gap))}</strong>
       </div>
       <div style="font-size:.82rem;line-height:1.7;color:#475569;">
-        At <strong>${S.retireAge}</strong> you're on track for <strong>${fmtFull(r.willHave)}</strong>,
-        but your plan needs <strong>${fmtFull(r.willNeed)}</strong>. Here are three ways to close the gap:<br>
-        <span class="me-1">💰</span> Save an extra <strong>$${_extraSave.toLocaleString()}/month</strong> starting today.<br>
-        <span class="me-1">📅</span> Retire a few years later to give your portfolio more time to grow.<br>
-        <span class="me-1">✂️</span> Trim your monthly retirement budget by about <strong>$${_gapMonthly.toLocaleString()}</strong> (in today's dollars).
+        <ul class="mb-0 ps-3" style="line-height:1.8;">
+          <li>At <strong>${S.retireAge}</strong> you're on track for <strong>${fmtFull(r.willHave)}</strong>, but your plan needs <strong>${fmtFull(r.willNeed)}</strong>.</li>
+          <li>Save an extra <strong>$${_extraSave.toLocaleString()}/month</strong> starting today.</li>
+          <li>Retire a few years later to give your portfolio more time to grow.</li>
+          <li>Trim your monthly retirement budget by about <strong>$${_gapMonthly.toLocaleString()}</strong> (in today's dollars).</li>
+        </ul>
       </div>`;
   }
 
@@ -1449,7 +1451,8 @@ function renderChart(r) {
         },
         y: {
           grid: { color: '#f1f5f9' },
-          ticks: { callback: v => fmtShort(v) }
+          ticks: { callback: v => fmtShort(v) },
+          grace: '15%'
         }
       }
     }
