@@ -345,6 +345,21 @@
     <!-- ╚═════════════════════╝ -->
     <div class="col-lg-5">
 
+      <div class="section-title">About you</div>
+
+      <!-- Current Age -->
+      <div class="input-card mb-2">
+        <div class="field-label">Your current age</div>
+        <div class="field-subdesc">Sets the start of your accumulation timeline and where your chart begins.</div>
+        <div class="input-group" style="max-width:160px;">
+          <input type="text" inputmode="numeric" class="form-control" id="inp-age"
+            value="43" data-min="18" data-max="79"
+            oninput="onAgeInput(this)" onblur="onBlurAge(this)"
+            onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          <span class="input-group-text">yrs</span>
+        </div>
+      </div>
+
       <!-- Filing status -->
       <div class="input-card mb-2">
         <div class="field-label">Filing status</div>
@@ -872,6 +887,26 @@ function formatNumLive(el) {
   update();
 }
 
+function onAgeInput(el) {
+  const v = parseInt(el.value.replace(/[^0-9]/g, ''));
+  if (isNaN(v) || v < 18) return;
+  const sliderVal = Math.min(Math.max(v, 30), 79);
+  $id('slider-age').value = sliderVal;
+  onTripleSlider('age');
+}
+
+function onBlurAge(el) {
+  let v = parseInt(el.value.replace(/[^0-9]/g, ''));
+  if (isNaN(v)) v = 43;
+  const min = parseInt(el.dataset.min) || 18;
+  const max = parseInt(el.dataset.max) || 79;
+  const clamped = Math.min(Math.max(v, min), max);
+  if (clamped !== v) flashClamped(el);
+  el.value = clamped;
+  $id('slider-age').value = Math.min(Math.max(clamped, 30), 79);
+  onTripleSlider('age');
+}
+
 function onBlurNum(el) {
   let n = parseFloat((el.value || '').replace(/,/g, ''));
   if (isNaN(n)) n = 0;
@@ -967,6 +1002,8 @@ function onTripleSlider(moved) {
   $id('disp-age').textContent    = a;
   $id('disp-retire').textContent = r;
   $id('disp-life').textContent   = l;
+  const ageInp = $id('inp-age');
+  if (ageInp) ageInp.value = a;
   const yrs = r - a;
   setThumbLabel('lbl-age',    a, `Now ${a}`);
   setThumbLabel('lbl-retire', r, `Retire at ${r} in ${yrs} yr${yrs !== 1 ? 's' : ''}`);
