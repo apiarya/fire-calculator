@@ -7,7 +7,8 @@ A **single-file, client-side HTML retirement calculator** — interactive, anony
 
 ## Locked Decisions (Do Not Change Without Asking)
 - **Single file**: Everything lives in `index.html` — HTML, CSS, JS
-- **No server**: No fetch calls, no localStorage, no cookies, no analytics
+- **No server**: No fetch calls, no localStorage, no cookies
+- **Analytics**: Cloudflare Web Analytics (cookie-free, no PII, aggregate page views only) — do not add any other analytics or tracking
 - **No PII**: Never ask for name, DOB, email, SSN. Use age (not DOB), anonymous inputs only
 - **US-focused**: 401(k), Roth IRA, HSA, Social Security, US tax context
 - **Theme**: Bootstrap 5, light theme, blue/amber accent palette

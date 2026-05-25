@@ -1,5 +1,9 @@
 # FIRE Retirement Calculator
 
+[![Live](https://img.shields.io/badge/live-GitHub%20Pages-blue?style=flat-square)](https://apiarya.github.io/fire-calculator/)
+[![License: MIT](https://img.shields.io/badge/license-MIT-green?style=flat-square)](LICENSE)
+[![Last commit](https://img.shields.io/github/last-commit/apiarya/fire-calculator?style=flat-square)](https://github.com/apiarya/fire-calculator/commits/main)
+
 An interactive, single-page retirement calculator that helps you answer one question: **are you on track to retire early?**
 
 Enter your income, savings, monthly contributions, and spending. The calculator models your portfolio growth through retirement and shows whether your money outlasts you — updated live as you type.
