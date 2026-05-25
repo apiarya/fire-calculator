@@ -501,8 +501,8 @@
 
   <!-- Row 2: Input columns -->
   <div class="row g-4 align-items-start mt-3">
-    <!-- 2A: About · Income · Contributions -->
-    <div class="col-lg-6">
+    <!-- Col 1: About · Income & savings -->
+    <div class="col-lg-4">
       <div class="calc-card">
       <div class="section-title">About you</div>
 
@@ -585,7 +585,12 @@
         </div>
         <div class="equiv-hint mt-1" id="savings-hint"></div>
       </div>
+      </div>
+    </div>
 
+    <!-- Col 2: Contributions · Budget -->
+    <div class="col-lg-4">
+      <div class="calc-card">
       <div class="section-title">Monthly contributions</div>
 
       <!-- Retirement accounts -->
@@ -628,12 +633,6 @@
         </div>
         <div class="equiv-hint mt-1" id="brokerage-hint"></div>
       </div>
-      </div>
-    </div>
-
-    <!-- 2B: Budget · Guaranteed income · Advanced -->
-    <div class="col-lg-6">
-      <div class="calc-card">
       <div class="section-title">Monthly budget in retirement</div>
 
       <!-- Monthly expenses -->
@@ -655,7 +654,12 @@
         </div>
         <div class="equiv-hint mt-1" id="budget-hint"></div>
       </div>
+      </div>
+    </div>
 
+    <!-- Col 3: Guaranteed income · Advanced -->
+    <div class="col-lg-4">
+      <div class="calc-card">
       <div class="section-title">Guaranteed income</div>
 
       <!-- Social Security -->
@@ -757,11 +761,11 @@
         </div>
         <div class="equiv-hint mt-1">↑ Higher = larger required portfolio. Prices double every 24 yrs at 3%.</div>
       </div>
-
       </div>
     </div>
   </div>
   <!-- /row 2 -->
+
 
 
   <div class="mt-4 text-center disclaimer">
@@ -1557,6 +1561,15 @@ function renderChart(r) {
     needLine.push(needMap.has(age) ? needMap.get(age) : null);
   }
 
+  // All ages that have a vertical marker line on the chart → color
+  const curYear = new Date().getFullYear();
+  const markerAges = new Map();
+  markerAges.set(S.age, '#1d4ed8');
+  markerAges.set(S.retireAge, '#d97706');
+  if (r.ssDelay > 0 && S.ssIncome > 0) markerAges.set(S.retireAge + r.ssDelay, '#00a550');
+  if (r.depleteAge !== null) markerAges.set(Math.floor(r.depleteAge), '#ef4444');
+  for (const evt of lifeEvents) markerAges.set(S.age + (evt.year - curYear), '#8b5cf6');
+
   if (_chart) { _chart.destroy(); _chart = null; }
 
   _chart = new Chart($id('ret-chart'), {
@@ -1846,6 +1859,14 @@ function renderChart(r) {
               const age = parseInt(this.getLabelForValue(v));
               const year = new Date().getFullYear() + (age - S.age);
               return [age, `'${String(year).slice(2)}`];
+            },
+            color: function(ctx) {
+              const age = parseInt(ctx.scale.getLabelForValue(ctx.tick.value));
+              return markerAges.has(age) ? markerAges.get(age) : '#6b7280';
+            },
+            font: function(ctx) {
+              const age = parseInt(ctx.scale.getLabelForValue(ctx.tick.value));
+              return markerAges.has(age) ? { weight: '700' } : {};
             }
           },
           title: { display: false }
