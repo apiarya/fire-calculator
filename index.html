@@ -545,8 +545,9 @@
 
   <!-- Row 2: Input columns -->
   <div class="row g-4 align-items-start mt-3">
-    <!-- Col 1: About · Income & savings -->
-    <div class="col-lg-4">
+
+    <!-- Col 1: About you -->
+    <div class="col-lg-3">
       <div class="section-title">About you</div>
 
       <!-- Current Age -->
@@ -571,7 +572,7 @@
              data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="right"
              data-bs-custom-class="popover-rich" data-bs-html="true"
              data-bs-title="Filing status"
-             data-bs-content="&lt;p&gt;Are you filing taxes as married or single?&lt;/p&gt;&lt;p&gt;Married filing jointly gets wider tax brackets and higher standard deductions. It also doubles most contribution limits — e.g., two spouses can each max a 401(k) and IRA.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;If married:&lt;/strong&gt; enter all income and savings as household combined totals throughout the calculator.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.irs.gov/newsroom/choose-the-right-filing-status' target='_blank' rel='noopener'&gt;Filing status guide &amp;rarr; IRS&lt;/a&gt;&lt;/p&gt;"
+             data-bs-content="&lt;p&gt;Are you filing taxes as married or single?&lt;/p&gt;&lt;p&gt;Married filing jointly gets wider tax brackets and higher standard deductions. It also doubles most contribution limits &mdash; e.g., two spouses can each max a 401(k) and IRA.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;If married:&lt;/strong&gt; enter all income and savings as household combined totals throughout the calculator.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.irs.gov/newsroom/choose-the-right-filing-status' target='_blank' rel='noopener'&gt;Filing status guide &amp;rarr; IRS&lt;/a&gt;&lt;/p&gt;"
              onclick="return false;">Learn more &rarr;</a>
         </div>
         <div class="btn-group btn-group-sm" role="group" aria-label="Filing status">
@@ -588,9 +589,10 @@
         </div>
         <div class="equiv-hint mt-2" id="filing-note">All inputs are household combined totals.</div>
       </div>
+    </div>
 
-
-
+    <!-- Col 2: Income & savings · Monthly contributions -->
+    <div class="col-lg-3">
       <div class="input-section-green">
       <div class="section-title st-green">Income &amp; savings</div>
 
@@ -598,12 +600,12 @@
       <div class="input-card mb-2">
         <div class="field-label">Annual pre-tax income</div>
         <div class="field-subdesc">
-          Gross household salary, bonus, and RSU — before taxes.
+          Gross household salary, bonus, and RSU &mdash; before taxes.
           <a href="#" class="learn-more-link" tabindex="-1"
              data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="right"
              data-bs-custom-class="popover-rich" data-bs-html="true"
              data-bs-title="Annual pre-tax income"
-             data-bs-content="&lt;p&gt;What is your total household income before taxes?&lt;/p&gt;&lt;p&gt;Enter your gross (pre-tax) salary including bonus and RSU income you expect to continue. If married, enter your combined household total.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Why it matters:&lt;/strong&gt;&lt;br&gt;Savings rate matters more than raw income — a $500k earner saving 10% reaches FIRE slower than a $200k earner saving 50%.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.nerdwallet.com/article/investing/what-is-fire-financial-independence-retire-early' target='_blank' rel='noopener'&gt;Savings rate &amp; FIRE &amp;rarr; NerdWallet&lt;/a&gt;&lt;/p&gt;"
+             data-bs-content="&lt;p&gt;What is your total household income before taxes?&lt;/p&gt;&lt;p&gt;Enter your gross (pre-tax) salary including bonus and RSU income you expect to continue. If married, enter your combined household total.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Why it matters:&lt;/strong&gt;&lt;br&gt;Savings rate matters more than raw income &mdash; a $500k earner saving 10% reaches FIRE slower than a $200k earner saving 50%.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.nerdwallet.com/article/investing/what-is-fire-financial-independence-retire-early' target='_blank' rel='noopener'&gt;Savings rate &amp; FIRE &amp;rarr; NerdWallet&lt;/a&gt;&lt;/p&gt;"
              onclick="return false;">Learn more &rarr;</a>
         </div>
         <div class="input-group">
@@ -617,12 +619,12 @@
       <div class="input-card mb-2">
         <div class="field-label">Current retirement savings</div>
         <div class="field-subdesc">
-          401(k), IRA, Roth, and brokerage — not home equity or cars.
+          401(k), IRA, Roth, and brokerage &mdash; not home equity or cars.
           <a href="#" class="learn-more-link" tabindex="-1"
              data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="right"
              data-bs-custom-class="popover-rich" data-bs-html="true"
              data-bs-title="Current retirement savings"
-             data-bs-content="&lt;p&gt;How much have you already saved and invested across all accounts?&lt;/p&gt;&lt;p&gt;&lt;strong&gt;What to include:&lt;/strong&gt;&lt;br&gt;401(k), traditional IRA, Roth IRA, and taxable brokerage accounts — Fidelity, Schwab, Vanguard, Robinhood, etc.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;What to leave out:&lt;/strong&gt;&lt;br&gt;Home equity, cars, illiquid real estate, or anything you can&amp;rsquo;t sell in a few days.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Why it matters:&lt;/strong&gt;&lt;br&gt;$1M at age 47 grows to ~$2.4M by 60 at 6% — with zero additional contributions. Your existing balance is your most powerful compounding asset.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.investopedia.com/terms/c/compoundinterest.asp' target='_blank' rel='noopener'&gt;How compounding works &amp;rarr; Investopedia&lt;/a&gt;&lt;/p&gt;"
+             data-bs-content="&lt;p&gt;How much have you already saved and invested across all accounts?&lt;/p&gt;&lt;p&gt;&lt;strong&gt;What to include:&lt;/strong&gt;&lt;br&gt;401(k), traditional IRA, Roth IRA, and taxable brokerage accounts &mdash; Fidelity, Schwab, Vanguard, Robinhood, etc.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;What to leave out:&lt;/strong&gt;&lt;br&gt;Home equity, cars, illiquid real estate, or anything you can&amp;rsquo;t sell in a few days.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Why it matters:&lt;/strong&gt;&lt;br&gt;$1M at age 47 grows to ~$2.4M by 60 at 6% &mdash; with zero additional contributions. Your existing balance is your most powerful compounding asset.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.investopedia.com/terms/c/compoundinterest.asp' target='_blank' rel='noopener'&gt;How compounding works &amp;rarr; Investopedia&lt;/a&gt;&lt;/p&gt;"
              onclick="return false;">Learn more &rarr;</a>
         </div>
         <div class="input-group">
@@ -631,24 +633,19 @@
         </div>
         <div class="equiv-hint mt-1" id="savings-hint"></div>
       </div>
-      </div><!-- /input-section-green -->
-    </div>
 
-    <!-- Col 2: Contributions · Budget -->
-    <div class="col-lg-4">
-      <div class="input-section-green">
       <div class="section-title st-green">Monthly contributions</div>
 
       <!-- Retirement accounts -->
       <div class="input-card mb-2">
         <div class="field-label">Retirement accounts</div>
         <div class="field-subdesc">
-          401(k), IRA, Roth, HSA, and backdoor Roth — monthly contributions.
+          401(k), IRA, Roth, HSA, and backdoor Roth &mdash; monthly contributions.
           <a href="#" class="learn-more-link" tabindex="-1"
              data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="right"
              data-bs-custom-class="popover-rich" data-bs-html="true"
              data-bs-title="Retirement account contributions"
-             data-bs-content="&lt;p&gt;How much do you contribute each month to tax-advantaged retirement accounts?&lt;/p&gt;&lt;p&gt;&lt;strong&gt;2026 limits per person:&lt;/strong&gt;&lt;br&gt;401(k): $23,500 &amp;middot; IRA: $7,000 &amp;middot; HSA: $4,300 (single) or $8,550 (family). Married couples can contribute per spouse.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Mega Backdoor Roth:&lt;/strong&gt;&lt;br&gt;If your employer allows after-tax 401(k) contributions, you can contribute up to $46,500 more per plan — then convert to Roth tax-free.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.investopedia.com/terms/b/backdoor-roth-ira.asp' target='_blank' rel='noopener'&gt;Backdoor Roth IRA &amp;rarr; Investopedia&lt;/a&gt;&lt;/p&gt;"
+             data-bs-content="&lt;p&gt;How much do you contribute each month to tax-advantaged retirement accounts?&lt;/p&gt;&lt;p&gt;&lt;strong&gt;2026 limits per person:&lt;/strong&gt;&lt;br&gt;401(k): $23,500 &amp;middot; IRA: $7,000 &amp;middot; HSA: $4,300 (single) or $8,550 (family). Married couples can contribute per spouse.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Mega Backdoor Roth:&lt;/strong&gt;&lt;br&gt;If your employer allows after-tax 401(k) contributions, you can contribute up to $46,500 more per plan &mdash; then convert to Roth tax-free.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.investopedia.com/terms/b/backdoor-roth-ira.asp' target='_blank' rel='noopener'&gt;Backdoor Roth IRA &amp;rarr; Investopedia&lt;/a&gt;&lt;/p&gt;"
              onclick="return false;">Learn more &rarr;</a>
         </div>
         <div class="input-group">
@@ -664,12 +661,12 @@
       <div class="input-card mb-2">
         <div class="field-label">Brokerage</div>
         <div class="field-subdesc">
-          Taxable account (Fidelity, Schwab, Vanguard, Robinhood) — monthly investments.
+          Taxable account (Fidelity, Schwab, Vanguard, Robinhood) &mdash; monthly investments.
           <a href="#" class="learn-more-link" tabindex="-1"
              data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="right"
              data-bs-custom-class="popover-rich" data-bs-html="true"
              data-bs-title="Brokerage contributions"
-             data-bs-content="&lt;p&gt;How much do you invest each month in a taxable brokerage account?&lt;/p&gt;&lt;p&gt;Include every recurring transfer to Fidelity, Schwab, Vanguard, Robinhood, or similar — stocks, ETFs, index funds. There is no contribution cap.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Early retirement superpower:&lt;/strong&gt;&lt;br&gt;No penalty for withdrawals before age 59½, making this essential for early retirees who need income before retirement accounts unlock.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.investopedia.com/articles/personal-finance/101515/comparing-longterm-vs-shortterm-capital-gain-tax-rates.asp' target='_blank' rel='noopener'&gt;Capital gains tax rates &amp;rarr; Investopedia&lt;/a&gt;&lt;/p&gt;"
+             data-bs-content="&lt;p&gt;How much do you invest each month in a taxable brokerage account?&lt;/p&gt;&lt;p&gt;Include every recurring transfer to Fidelity, Schwab, Vanguard, Robinhood, or similar &mdash; stocks, ETFs, index funds. There is no contribution cap.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Early retirement superpower:&lt;/strong&gt;&lt;br&gt;No penalty for withdrawals before age 59&amp;frac12;, making this essential for early retirees who need income before retirement accounts unlock.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.investopedia.com/articles/personal-finance/101515/comparing-longterm-vs-shortterm-capital-gain-tax-rates.asp' target='_blank' rel='noopener'&gt;Capital gains tax rates &amp;rarr; Investopedia&lt;/a&gt;&lt;/p&gt;"
              onclick="return false;">Learn more &rarr;</a>
         </div>
         <div class="input-group">
@@ -680,6 +677,10 @@
         <div class="equiv-hint mt-1" id="brokerage-hint"></div>
       </div>
       </div><!-- /input-section-green -->
+    </div>
+
+    <!-- Col 3: Monthly budget · Guaranteed income -->
+    <div class="col-lg-3">
       <div class="input-section-amber">
       <div class="section-title st-amber">Monthly budget in retirement</div>
 
@@ -687,12 +688,12 @@
       <div class="input-card mb-2">
         <div class="field-label"><span id="budget-field-label">Monthly expenses starting at 55</span></div>
         <div class="field-subdesc">
-          In today’s dollars — automatically inflated to your retirement date. Mortgage still running at age <span id="budget-retire-age-inline">55</span>? Include it here. Paid off by then? Leave it out.
+          In today's dollars &mdash; automatically inflated to your retirement date. Mortgage still running at age <span id="budget-retire-age-inline">55</span>? Include it here. Paid off by then? Leave it out.
           <a href="#" class="learn-more-link" tabindex="-1"
              data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="right"
              data-bs-custom-class="popover-rich" data-bs-html="true"
              data-bs-title="Monthly expenses in retirement"
-             data-bs-content="&lt;p&gt;How much do you plan to spend each month in retirement?&lt;/p&gt;&lt;p&gt;Enter in today&amp;rsquo;s dollars — the calculator automatically inflates this to your retirement date. A common starting point is 70–80% of your current income.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Mortgage:&lt;/strong&gt;&lt;br&gt;Will it be paid off by your retirement age? If not, include it. A $3,000/mo payment adds ~$720K to your required portfolio.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Also budget for:&lt;/strong&gt;&lt;br&gt;Healthcare ($1,000–2,000/mo pre-Medicare), travel, and hobbies. Every $1,000/mo less here cuts your required portfolio by ~$240K.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.investopedia.com/terms/f/four-percent-rule.asp' target='_blank' rel='noopener'&gt;The 4% rule explained &amp;rarr; Investopedia&lt;/a&gt;&lt;/p&gt;"
+             data-bs-content="&lt;p&gt;How much do you plan to spend each month in retirement?&lt;/p&gt;&lt;p&gt;Enter in today&amp;rsquo;s dollars &mdash; the calculator automatically inflates this to your retirement date. A common starting point is 70&ndash;80% of your current income.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Mortgage:&lt;/strong&gt;&lt;br&gt;Will it be paid off by your retirement age? If not, include it. A $3,000/mo payment adds ~$720K to your required portfolio.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Also budget for:&lt;/strong&gt;&lt;br&gt;Healthcare ($1,000&ndash;2,000/mo pre-Medicare), travel, and hobbies. Every $1,000/mo less here cuts your required portfolio by ~$240K.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.investopedia.com/terms/f/four-percent-rule.asp' target='_blank' rel='noopener'&gt;The 4% rule explained &amp;rarr; Investopedia&lt;/a&gt;&lt;/p&gt;"
              onclick="return false;">Learn more &rarr;</a>
         </div>
         <div class="input-group">
@@ -702,19 +703,14 @@
         </div>
         <div class="equiv-hint mt-1" id="budget-hint"></div>
       </div>
-      </div><!-- /input-section-amber -->
-    </div>
 
-    <!-- Col 3: Guaranteed income · Advanced -->
-    <div class="col-lg-4">
-      <div class="input-section-amber">
       <div class="section-title st-amber">Guaranteed income</div>
 
       <!-- Social Security -->
       <div class="input-card mb-2">
         <div class="field-label">Social Security</div>
         <div class="field-subdesc">
-          Auto-estimated from income and retirement age — or enter your actual SSA amount.
+          Auto-estimated from income and retirement age &mdash; or enter your actual SSA amount.
           <a href="#" class="learn-more-link" tabindex="-1"
              data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="right"
              data-bs-custom-class="popover-rich" data-bs-html="true"
@@ -735,12 +731,12 @@
       <div class="input-card mb-2">
         <div class="field-label">Other income</div>
         <div class="field-subdesc">
-          Pension, rental, or annuity — guaranteed monthly income beyond Social Security.
+          Pension, rental, or annuity &mdash; guaranteed monthly income beyond Social Security.
           <a href="#" class="learn-more-link" tabindex="-1"
              data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="right"
              data-bs-custom-class="popover-rich" data-bs-html="true"
              data-bs-title="Other guaranteed income"
-             data-bs-content="&lt;p&gt;Do you have other guaranteed income in retirement beyond Social Security?&lt;/p&gt;&lt;p&gt;Include pensions (employer-defined benefit), rental income, or annuities. Pension amounts depend on your employer and years vested.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Why it matters:&lt;/strong&gt;&lt;br&gt;Every $1,000/mo of guaranteed income reduces your required portfolio by ~$240K at a 4% withdrawal rate — it directly offsets how much you need saved.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.nerdwallet.com/article/investing/retirement-income-strategies' target='_blank' rel='noopener'&gt;Retirement income strategies &amp;rarr; NerdWallet&lt;/a&gt;&lt;/p&gt;"
+             data-bs-content="&lt;p&gt;Do you have other guaranteed income in retirement beyond Social Security?&lt;/p&gt;&lt;p&gt;Include pensions (employer-defined benefit), rental income, or annuities. Pension amounts depend on your employer and years vested.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Why it matters:&lt;/strong&gt;&lt;br&gt;Every $1,000/mo of guaranteed income reduces your required portfolio by ~$240K at a 4% withdrawal rate &mdash; it directly offsets how much you need saved.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.nerdwallet.com/article/investing/retirement-income-strategies' target='_blank' rel='noopener'&gt;Retirement income strategies &amp;rarr; NerdWallet&lt;/a&gt;&lt;/p&gt;"
              onclick="return false;">Learn more &rarr;</a>
         </div>
         <div class="input-group">
@@ -751,7 +747,10 @@
         <div class="equiv-hint mt-1" id="other-income-hint"></div>
       </div>
       </div><!-- /input-section-amber -->
+    </div>
 
+    <!-- Col 4: Advanced details -->
+    <div class="col-lg-3">
       <div class="section-title">Advanced details</div>
 
       <!-- Pre-retirement return -->
@@ -763,54 +762,55 @@
              data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="right"
              data-bs-custom-class="popover-rich" data-bs-html="true"
              data-bs-title="Pre-retirement rate of return"
-             data-bs-content="&lt;p&gt;What annual return do you expect on your investments before retirement?&lt;/p&gt;&lt;p&gt;US stocks have averaged ~10% historically, but a diversified portfolio realistically returns 6–8% after fees. Every 1% higher return can boost your final balance by 15–20% over 13 years.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Caution:&lt;/strong&gt;&lt;br&gt;Avoid going above 8% — overly optimistic assumptions mask real risk and give a false sense of security.&lt;/p&gt;&lt;p&gt;&lt;a href='https://investor.vanguard.com/investor-resources-education/education/model-portfolio-allocation' target='_blank' rel='noopener'&gt;Portfolio allocation models &amp;rarr; Vanguard&lt;/a&gt;&lt;/p&gt;"
+             data-bs-content="&lt;p&gt;What annual return do you expect on your investments before retirement?&lt;/p&gt;&lt;p&gt;US stocks have averaged ~10% historically, but a diversified portfolio realistically returns 6&ndash;8% after fees. Every 1% higher return can boost your final balance by 15&ndash;20% over 13 years.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Caution:&lt;/strong&gt;&lt;br&gt;Avoid going above 8% &mdash; overly optimistic assumptions mask real risk and give a false sense of security.&lt;/p&gt;&lt;p&gt;&lt;a href='https://investor.vanguard.com/investor-resources-education/education/model-portfolio-allocation' target='_blank' rel='noopener'&gt;Portfolio allocation models &amp;rarr; Vanguard&lt;/a&gt;&lt;/p&gt;"
              onclick="return false;">Learn more &rarr;</a>
         </div>
         <div class="input-group">
           <input type="number" class="form-control" id="inp-pre-rate" value="6" min="0" max="20" step="0.1" data-min="0" data-max="20" oninput="update()" onblur="onBlurRate(this)" onfocus="this.select()" autocomplete="off">
           <span class="input-group-text">%</span>
         </div>
-        <div class="equiv-hint mt-1">↑ Higher = larger projected balance. Use 6–7% for a balanced portfolio.</div>
+        <div class="equiv-hint mt-1">&#x2191; Higher = larger projected balance. Use 6&ndash;7% for a balanced portfolio.</div>
       </div>
 
       <!-- Post-retirement return -->
       <div class="input-card mb-2">
         <div class="field-label">Post-retirement return</div>
         <div class="field-subdesc">
-          Annual return in retirement — typically lower due to bonds. Default 5%.
+          Annual return in retirement &mdash; typically lower due to bonds. Default 5%.
           <a href="#" class="learn-more-link" tabindex="-1"
              data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="right"
              data-bs-custom-class="popover-rich" data-bs-html="true"
              data-bs-title="Post-retirement rate of return"
-             data-bs-content="&lt;p&gt;What annual return do you expect after you retire?&lt;/p&gt;&lt;p&gt;Retirees typically shift toward bonds and stable assets, which lowers overall returns. A lower rate means you need a larger nest egg — but it&amp;rsquo;s the safer assumption.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Sequence of returns risk:&lt;/strong&gt;&lt;br&gt;Bad markets in your first 5–10 retirement years can permanently damage your portfolio, even if long-term averages recover. This is why retirees hold more bonds.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.investopedia.com/terms/s/sequence-risk.asp' target='_blank' rel='noopener'&gt;Sequence of returns risk &amp;rarr; Investopedia&lt;/a&gt;&lt;/p&gt;"
+             data-bs-content="&lt;p&gt;What annual return do you expect after you retire?&lt;/p&gt;&lt;p&gt;Retirees typically shift toward bonds and stable assets, which lowers overall returns. A lower rate means you need a larger nest egg &mdash; but it&amp;rsquo;s the safer assumption.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Sequence of returns risk:&lt;/strong&gt;&lt;br&gt;Bad markets in your first 5&ndash;10 retirement years can permanently damage your portfolio, even if long-term averages recover. This is why retirees hold more bonds.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.investopedia.com/terms/s/sequence-risk.asp' target='_blank' rel='noopener'&gt;Sequence of returns risk &amp;rarr; Investopedia&lt;/a&gt;&lt;/p&gt;"
              onclick="return false;">Learn more &rarr;</a>
         </div>
         <div class="input-group">
           <input type="number" class="form-control" id="inp-post-rate" value="5" min="0" max="20" step="0.1" data-min="0" data-max="20" oninput="update()" onblur="onBlurRate(this)" onfocus="this.select()" autocomplete="off">
           <span class="input-group-text">%</span>
         </div>
-        <div class="equiv-hint mt-1">↓ Lower = safer but requires a larger portfolio. Default 5%.</div>
+        <div class="equiv-hint mt-1">&#x2193; Lower = safer but requires a larger portfolio. Default 5%.</div>
       </div>
 
       <!-- Inflation -->
       <div class="input-card mb-2">
         <div class="field-label">Inflation rate</div>
         <div class="field-subdesc">
-          How fast prices rise each year — affects how big your nest egg needs to be. Default 3%.
+          How fast prices rise each year &mdash; affects how big your nest egg needs to be. Default 3%.
           <a href="#" class="learn-more-link" tabindex="-1"
              data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="right"
              data-bs-custom-class="popover-rich" data-bs-html="true"
              data-bs-title="Inflation rate"
-             data-bs-content="&lt;p&gt;How fast do you expect prices to rise each year?&lt;/p&gt;&lt;p&gt;Inflation silently erodes purchasing power. At 3%, prices double every 24 years — your $15K/month budget today needs ~$21K/month at age 65.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Why it matters:&lt;/strong&gt;&lt;br&gt;Higher inflation means a larger required portfolio AND faster-growing withdrawals. 3% is a reasonable long-term assumption.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.investopedia.com/terms/r/ruleof72.asp' target='_blank' rel='noopener'&gt;Rule of 72 &amp;rarr; Investopedia&lt;/a&gt;&lt;/p&gt;"
+             data-bs-content="&lt;p&gt;How fast do you expect prices to rise each year?&lt;/p&gt;&lt;p&gt;Inflation silently erodes purchasing power. At 3%, prices double every 24 years &mdash; your $15K/month budget today needs ~$21K/month at age 65.&lt;/p&gt;&lt;p&gt;&lt;strong&gt;Why it matters:&lt;/strong&gt;&lt;br&gt;Higher inflation means a larger required portfolio AND faster-growing withdrawals. 3% is a reasonable long-term assumption.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.investopedia.com/terms/r/ruleof72.asp' target='_blank' rel='noopener'&gt;Rule of 72 &amp;rarr; Investopedia&lt;/a&gt;&lt;/p&gt;"
              onclick="return false;">Learn more &rarr;</a>
         </div>
         <div class="input-group">
           <input type="number" class="form-control" id="inp-inflation" value="3" min="0" max="15" step="0.1" data-min="0" data-max="15" oninput="update()" onblur="onBlurRate(this)" onfocus="this.select()" autocomplete="off">
           <span class="input-group-text">%</span>
         </div>
-        <div class="equiv-hint mt-1">↑ Higher = larger required portfolio. Prices double every 24 yrs at 3%.</div>
+        <div class="equiv-hint mt-1">&#x2191; Higher = larger required portfolio. Prices double every 24 yrs at 3%.</div>
       </div>
     </div>
+
   </div>
   <!-- /row 2 -->
 
