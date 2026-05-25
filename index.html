@@ -88,6 +88,13 @@
     }
     .mode-btn.active { background: var(--blue); color: #fff; }
 
+    /* ── Override Bootstrap primary to match app --blue ── */
+    .btn-outline-primary { color: var(--blue); border-color: var(--blue); }
+    .btn-outline-primary:hover,
+    .btn-check:checked + .btn-outline-primary,
+    .btn-check:active + .btn-outline-primary { background: var(--blue); border-color: var(--blue); color: #fff; }
+    .btn-outline-primary:focus-visible { box-shadow: 0 0 0 .2rem rgba(26,111,232,.25); }
+
     /* ── Result cards ── */
     .res-card {
       border-radius: 12px;
@@ -284,7 +291,8 @@
       font-weight: 700;
       letter-spacing: .09em;
       text-transform: uppercase;
-      color: #94a3b8;
+      color: var(--blue);
+      opacity: .6;
       margin: 1rem 0 .4rem;
     }
 
@@ -373,7 +381,9 @@
   <div class="row g-4">
     <div class="col-12">
       <div class="calc-card mb-3">
-
+        <div class="row g-0">
+          <!-- Stats sidebar -->
+          <div class="col-lg-3 pe-4" style="border-right:1px solid #f1f5f9;">
         <div class="d-flex align-items-start justify-content-between mb-2 gap-2">
           <div class="d-flex align-items-center gap-2 flex-wrap">
             <div id="res-years-to-fire" style="font-size:1.1rem;font-weight:700;color:#334155;"></div>
@@ -395,9 +405,7 @@
           </div>
         </div>
 
-        <div class="row g-2 mb-3">
-          <div class="col-6">
-            <div class="res-card have" onclick="toggleBreakdown('have')" title="Click for breakdown">
+        <div class="res-card have mb-2" onclick="toggleBreakdown('have')" title="Click for breakdown">
               <div class="res-label d-flex align-items-center justify-content-between gap-1">
                 <div class="d-flex align-items-center gap-1">
                   <span style="display:inline-block;width:18px;height:0;border-top:2.5px solid #1a6fe8;flex-shrink:0;"></span>
@@ -407,9 +415,7 @@
               </div>
               <div class="res-amount" id="res-have">—</div>
             </div>
-          </div>
-          <div class="col-6">
-            <div class="res-card need" onclick="toggleBreakdown('need')" title="Click for breakdown">
+        <div class="res-card need mb-3" onclick="toggleBreakdown('need')" title="Click for breakdown">
               <div class="res-label d-flex align-items-center justify-content-between gap-1">
                 <div class="d-flex align-items-center gap-1">
                   <span style="display:inline-block;width:18px;height:0;border-top:2px dashed #d97706;flex-shrink:0;"></span>
@@ -419,8 +425,6 @@
               </div>
               <div class="res-amount" id="res-need">—</div>
             </div>
-          </div>
-        </div>
         <div id="res-breakdown" class="mb-2 px-1"></div>
 
         <!-- Progress bar -->
@@ -431,8 +435,11 @@
         <div class="prog-track mb-2">
           <div class="prog-fill" id="res-bar" style="width:0%;"></div>
         </div>
-        <div class="small mb-3" id="res-gap-msg"></div>
+        <div class="small mb-2" id="res-gap-msg"></div>
+          </div><!-- /sidebar -->
 
+          <!-- Chart + timeline -->
+          <div class="col-lg-9 ps-4">
         <!-- Chart -->
         <div id="chart-area">
           <canvas id="ret-chart"></canvas>
@@ -495,6 +502,8 @@
         </div>
         <div id="evt-list" style="display:flex;flex-wrap:wrap;gap:6px;min-height:4px;"></div>
         </div>
+          </div><!-- /col-lg-9 -->
+        </div><!-- /row g-0 -->
       </div>
     </div>
   </div>
@@ -503,7 +512,6 @@
   <div class="row g-4 align-items-start mt-3">
     <!-- Col 1: About · Income & savings -->
     <div class="col-lg-4">
-      <div class="calc-card">
       <div class="section-title">About you</div>
 
       <!-- Current Age -->
@@ -585,12 +593,10 @@
         </div>
         <div class="equiv-hint mt-1" id="savings-hint"></div>
       </div>
-      </div>
     </div>
 
     <!-- Col 2: Contributions · Budget -->
     <div class="col-lg-4">
-      <div class="calc-card">
       <div class="section-title">Monthly contributions</div>
 
       <!-- Retirement accounts -->
@@ -654,12 +660,10 @@
         </div>
         <div class="equiv-hint mt-1" id="budget-hint"></div>
       </div>
-      </div>
     </div>
 
     <!-- Col 3: Guaranteed income · Advanced -->
     <div class="col-lg-4">
-      <div class="calc-card">
       <div class="section-title">Guaranteed income</div>
 
       <!-- Social Security -->
@@ -760,7 +764,6 @@
           <span class="input-group-text">%</span>
         </div>
         <div class="equiv-hint mt-1">↑ Higher = larger required portfolio. Prices double every 24 yrs at 3%.</div>
-      </div>
       </div>
     </div>
   </div>
@@ -1857,6 +1860,7 @@ function renderChart(r) {
             autoSkip: false,
             callback: function(v) {
               const age = parseInt(this.getLabelForValue(v));
+              if (!markerAges.has(age) && age % 5 !== 0) return null;
               const year = new Date().getFullYear() + (age - S.age);
               return [age, `'${String(year).slice(2)}`];
             },
