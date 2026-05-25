@@ -13,7 +13,7 @@ Thanks for your interest in improving this calculator!
 
 1. Fork the repo and create a branch from `main`
 2. Make changes to `index.html` (everything lives there)
-3. Run `node verify-calc.mjs` to confirm math is intact (18/18 must pass)
+3. Run `node verify-calc.mjs` to confirm math is intact (21/21 must pass)
 4. Open a pull request with a clear description of what changed and why
 
 ## Reporting issues

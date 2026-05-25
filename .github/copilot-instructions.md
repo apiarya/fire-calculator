@@ -21,7 +21,7 @@ A **single-file, client-side HTML retirement calculator** — interactive, anony
 ```
 Bootstrap 5.3      https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css
 Bootstrap Icons    https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css
-Chart.js 4.x       https://cdn.jsdelivr.net/npm/chart.js
+Chart.js 4.5.1     https://cdn.jsdelivr.net/npm/chart.js@4.5.1/dist/chart.umd.min.js
 Bootstrap JS       https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js
 ```
 All loaded from CDN. No npm, no build step, no bundler.
@@ -30,7 +30,7 @@ All loaded from CDN. No npm, no build step, no bundler.
 
 ## File Structure
 ```
-fat-fire/
+fire-calculator/
   index.html                    <- The entire app (published to GitHub Pages)
   verify-calc.mjs               <- Node.js math verification suite (node verify-calc.mjs)
   README.md                     <- Project readme
@@ -72,13 +72,14 @@ fat-fire/
 
 ---
 
-## Default Values (Bay Area high-tech, married, dual income)
+## Default Values (single, mid-career)
 ```js
 const S = {
-  married: true, age: 46, income: 480000, savings: 1500000,
-  contribRetire: 10000, contribBrokerage: 5000, budgetVal: 18000,
+  married: false, age: 41, income: 95000, savings: 42000,
+  contribRetire: 1500, contribBrokerage: 300, budgetVal: 5500,
   otherIncome: 0, ssIncome: 3500,
-  retireAge: 58, lifeExpect: 90,
+  retireAge: 0,  // set from slider on first update()
+  lifeExpect: 90,
   preRate: 0.06, postRate: 0.05, inflation: 0.03, raise: 0.00
 };
 ```
@@ -86,7 +87,7 @@ const S = {
 ---
 
 ## Math Verification
-Run `node verify-calc.mjs` from the project root. 18 tests covering accumulation, inflation, SS offset, PV growing annuity, 25x rule, drawdown, and edge cases.
+Run `node verify-calc.mjs` from the project root. 21 tests covering accumulation, inflation, SS offset, PV growing annuity, 25x rule, drawdown, and edge cases.
 
 ---
 
