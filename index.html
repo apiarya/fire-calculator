@@ -122,11 +122,9 @@
       padding: 1.1rem 1.25rem;
       cursor: pointer;
       transition: box-shadow .15s, transform .15s;
+      position: relative;
     }
-    .res-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,.1); transform: translateY(-1px); }
-    .res-card.have.active-breakdown { box-shadow: 0 0 0 2px #22c55e; }
-    .res-card.need.active-breakdown { box-shadow: 0 0 0 2px var(--amber); }
-    .expand-hint { font-size: .65rem; color: #64748b; letter-spacing: .02em; }
+    .expand-hint { position: absolute; bottom: .1rem; right: .75rem; font-size: .65rem; color: #64748b; letter-spacing: .02em; }
     .res-card.have .expand-hint { color: #4b7a5c; }
     .res-card.need .expand-hint { color: #92600a; }
     .expand-hint .bi { transition: transform .2s; display: inline-block; }
@@ -427,24 +425,24 @@
           <div class="col-lg-3 pe-lg-4 d-flex flex-column sidebar-stats">
 
         <div class="res-card have mb-2" onclick="toggleBreakdown('have')" title="Click for breakdown">
-              <div class="res-label d-flex align-items-center justify-content-between gap-1">
+              <div class="res-label d-flex align-items-center gap-1">
                 <div class="d-flex align-items-center gap-1">
                   <span style="display:inline-block;width:18px;height:0;border-top:2.5px solid #1a6fe8;flex-shrink:0;"></span>
                   What you'll have
                 </div>
-                <div class="expand-hint">breakdown <i class="bi bi-chevron-down"></i></div>
               </div>
               <div class="res-amount" id="res-have">—</div>
+              <div class="expand-hint">breakdown <i class="bi bi-chevron-down"></i></div>
             </div>
         <div class="res-card need mb-3" onclick="toggleBreakdown('need')" title="Click for breakdown">
-              <div class="res-label d-flex align-items-center justify-content-between gap-1">
+              <div class="res-label d-flex align-items-center gap-1">
                 <div class="d-flex align-items-center gap-1">
                   <span style="display:inline-block;width:18px;height:0;border-top:2px dashed #d97706;flex-shrink:0;"></span>
                   What you'll need
                 </div>
-                <div class="expand-hint">breakdown <i class="bi bi-chevron-down"></i></div>
               </div>
               <div class="res-amount" id="res-need">—</div>
+              <div class="expand-hint">breakdown <i class="bi bi-chevron-down"></i></div>
             </div>
         <div id="res-breakdown" class="mb-2 px-1"></div>
 
@@ -544,10 +542,10 @@
         <div class="field-label">Your current age</div>
         <div class="field-subdesc">Sets the start of your accumulation timeline and where your chart begins.</div>
         <div class="input-group" style="max-width:160px;">
-          <input type="text" inputmode="numeric" class="form-control" id="inp-age"
-            value="41" data-min="18" data-max="79"
+          <input type="number" class="form-control" id="inp-age"
+            value="41" min="18" max="79" step="1" data-min="18" data-max="79"
             oninput="onAgeInput(this)" onblur="onBlurAge(this)"
-            onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+            onfocus="this.select()" autocomplete="off">
           <span class="input-group-text">yrs</span>
         </div>
       </div>
@@ -565,12 +563,14 @@
              onclick="return false;">Learn more &rarr;</a>
         </div>
         <div class="btn-group btn-group-sm" role="group" aria-label="Filing status">
-          <input type="radio" class="btn-check" name="filing" id="filing-married" onchange="update()" autocomplete="off">
-          <label class="btn btn-outline-primary" for="filing-married">
+          <input type="radio" class="btn-check" name="filing" id="filing-married" onchange="update()" autocomplete="off" tabindex="-1">
+          <label class="btn btn-outline-primary" for="filing-married" tabindex="0"
+            onkeydown="if(event.key===' '||event.key==='Enter'){this.click();event.preventDefault()}">
             <i class="bi bi-people-fill me-1"></i>Married
           </label>
-          <input type="radio" class="btn-check" name="filing" id="filing-single" onchange="update()" checked autocomplete="off">
-          <label class="btn btn-outline-primary" for="filing-single">
+          <input type="radio" class="btn-check" name="filing" id="filing-single" onchange="update()" checked autocomplete="off" tabindex="-1">
+          <label class="btn btn-outline-primary" for="filing-single" tabindex="0"
+            onkeydown="if(event.key===' '||event.key==='Enter'){this.click();event.preventDefault()}">
             <i class="bi bi-person-fill me-1"></i>Single
           </label>
         </div>
@@ -747,7 +747,7 @@
              onclick="return false;">Learn more &rarr;</a>
         </div>
         <div class="input-group">
-          <input type="text" inputmode="numeric" class="form-control" id="inp-pre-rate" value="6" data-min="0" data-max="20" oninput="update()" onblur="onBlurRate(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          <input type="number" class="form-control" id="inp-pre-rate" value="6" min="0" max="20" step="0.1" data-min="0" data-max="20" oninput="update()" onblur="onBlurRate(this)" onfocus="this.select()" autocomplete="off">
           <span class="input-group-text">%</span>
         </div>
         <div class="equiv-hint mt-1">↑ Higher = larger projected balance. Use 6–7% for a balanced portfolio.</div>
@@ -766,7 +766,7 @@
              onclick="return false;">Learn more &rarr;</a>
         </div>
         <div class="input-group">
-          <input type="text" inputmode="numeric" class="form-control" id="inp-post-rate" value="5" data-min="0" data-max="20" oninput="update()" onblur="onBlurRate(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          <input type="number" class="form-control" id="inp-post-rate" value="5" min="0" max="20" step="0.1" data-min="0" data-max="20" oninput="update()" onblur="onBlurRate(this)" onfocus="this.select()" autocomplete="off">
           <span class="input-group-text">%</span>
         </div>
         <div class="equiv-hint mt-1">↓ Lower = safer but requires a larger portfolio. Default 5%.</div>
@@ -785,7 +785,7 @@
              onclick="return false;">Learn more &rarr;</a>
         </div>
         <div class="input-group">
-          <input type="text" inputmode="numeric" class="form-control" id="inp-inflation" value="3" data-min="0" data-max="15" oninput="update()" onblur="onBlurRate(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          <input type="number" class="form-control" id="inp-inflation" value="3" min="0" max="15" step="0.1" data-min="0" data-max="15" oninput="update()" onblur="onBlurRate(this)" onfocus="this.select()" autocomplete="off">
           <span class="input-group-text">%</span>
         </div>
         <div class="equiv-hint mt-1">↑ Higher = larger required portfolio. Prices double every 24 yrs at 3%.</div>
