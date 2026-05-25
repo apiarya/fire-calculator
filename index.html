@@ -364,16 +364,16 @@
   </style>
 </head>
 <body>
-<div class="container-fluid py-4 py-lg-5" style="max-width:1400px;">
+<div class="container-fluid py-3" style="max-width:1400px;">
 
   <!-- Header -->
-  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-4">
+  <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
     <div>
-      <div style="font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);opacity:.7;">Retirement Calculator</div>
-      <h1 class="fw-bold mb-0" style="font-size:1.45rem;line-height:1.2;">Find Your FIRE Date <span class="fw-normal text-muted" style="font-size:.85rem;">— Put in your numbers. Pull the retirement slider. That's it.</span></h1>
+      <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);opacity:.7;margin-bottom:1px;">FIRE Calculator</div>
+      <h1 class="fw-bold mb-0" style="font-size:1.15rem;line-height:1.2;">Find Your FIRE Date</h1>
     </div>
-    <p class="mb-0 text-end" style="font-size:.73rem;color:#94a3b8;">
-      <i class="bi bi-shield-lock me-1"></i>Your inputs stay in your browser &nbsp;·&nbsp; <i class="bi bi-graph-up me-1"></i><a href="https://www.cloudflare.com/web-analytics/" target="_blank" rel="noopener" style="color:inherit;">Cookie-free analytics</a> &nbsp;·&nbsp; <a href="https://github.com/apiarya/fire-calculator" target="_blank" rel="noopener" style="color:inherit;"><i class="bi bi-github me-1"></i>Open source</a> &nbsp;·&nbsp; <i class="bi bi-shield-check me-1"></i>Not financial advice &nbsp;·&nbsp; <a href="https://github.com/apiarya/fire-calculator/issues" target="_blank" rel="noopener" style="color:inherit;"><i class="bi bi-chat-dots me-1"></i>Questions or feedback</a>
+    <p class="mb-0" style="font-size:.7rem;color:#94a3b8;">
+      <i class="bi bi-shield-lock me-1"></i>Inputs stay in your browser &nbsp;·&nbsp; <i class="bi bi-shield-check me-1"></i>Not financial advice &nbsp;·&nbsp; <a href="https://github.com/apiarya/fire-calculator" target="_blank" rel="noopener" style="color:inherit;"><i class="bi bi-github me-1"></i>Open source</a>
     </p>
   </div>
 
@@ -381,10 +381,7 @@
   <div class="row g-4">
     <div class="col-12">
       <div class="calc-card mb-3">
-        <div class="row g-0">
-          <!-- Stats sidebar -->
-          <div class="col-lg-3 pe-4" style="border-right:1px solid #f1f5f9;">
-        <div class="d-flex align-items-start justify-content-between mb-2 gap-2">
+        <div class="d-flex align-items-center justify-content-between mb-3 gap-2 pb-3" style="border-bottom:1px solid #f1f5f9;">
           <div class="d-flex align-items-center gap-2 flex-wrap">
             <div id="res-years-to-fire" style="font-size:1.1rem;font-weight:700;color:#334155;"></div>
             <div id="res-badge"></div>
@@ -404,6 +401,9 @@
             </button>
           </div>
         </div>
+        <div class="row g-0">
+          <!-- Stats sidebar -->
+          <div class="col-lg-3 pe-4 d-flex flex-column" style="border-right:1px solid #f1f5f9;">
 
         <div class="res-card have mb-2" onclick="toggleBreakdown('have')" title="Click for breakdown">
               <div class="res-label d-flex align-items-center justify-content-between gap-1">
@@ -436,6 +436,8 @@
           <div class="prog-fill" id="res-bar" style="width:0%;"></div>
         </div>
         <div class="small mb-2" id="res-gap-msg"></div>
+        <div id="res-coast" style="display:none;"></div>
+        <div class="mt-auto pt-3" id="res-assumptions" style="border-top:1px solid #f1f5f9;font-size:.75rem;color:#94a3b8;line-height:1.9;"></div>
           </div><!-- /sidebar -->
 
           <!-- Chart + timeline -->
@@ -1303,11 +1305,54 @@ function render(r) {
       </div>`;
   }
 
+  // Coast FI
+  const _coastAge = calcCoastAge(r);
+  const _coastEl = $id('res-coast');
+  if (_coastAge !== null) {
+    const _coastYear = new Date().getFullYear() + (_coastAge - S.age);
+    const _coastMsg = _coastAge <= S.age
+      ? 'You\'ve already reached Coast FI — your savings grow to your goal without another dollar contributed.'
+      : `Stop contributing at <strong>age ${_coastAge}</strong> (${_coastYear}) and your portfolio reaches your goal on its own.`;
+    _coastEl.style.display = '';
+    _coastEl.innerHTML = `<div style="background:#f5f3ff;border:1px solid #ddd6fe;border-radius:8px;padding:8px 10px;margin-bottom:.5rem;">
+      <div style="font-size:.72rem;font-weight:700;color:#7c3aed;letter-spacing:.05em;text-transform:uppercase;margin-bottom:3px;">Coast FI</div>
+      <div style="font-size:.82rem;color:#334155;line-height:1.5;">${_coastMsg}</div>
+    </div>`;
+  } else {
+    _coastEl.style.display = 'none';
+  }
+
+  // Key assumptions
+  $id('res-assumptions').innerHTML =
+    `<div><span style="font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;">Assumptions</span></div>` +
+    `<div>Pre-ret. return <strong>${(S.preRate*100).toFixed(1)}%</strong> &nbsp;·&nbsp; Post-ret. <strong>${(S.postRate*100).toFixed(1)}%</strong></div>` +
+    `<div>Inflation <strong>${(S.inflation*100).toFixed(1)}%</strong> &nbsp;·&nbsp; Safe withdrawal <strong>4%</strong></div>`;
+
   // Equiv hints
   renderHints(r);
 
   // Chart
   renderChart(r);
+}
+
+function calcCoastAge(r) {
+  if (S.retireAge <= S.age || r.willNeed <= 0) return null;
+  const monthlyRate = S.preRate / 12;
+  const contribMonth = S.contribRetire + S.contribBrokerage;
+  let portfolio = S.savings;
+  for (let age = S.age; age <= S.retireAge; age++) {
+    const months = 12 * (S.retireAge - age);
+    const coastThreshold = months > 0
+      ? r.willNeed / Math.pow(1 + monthlyRate, months)
+      : r.willNeed;
+    if (portfolio >= coastThreshold) return age;
+    if (age < S.retireAge) {
+      for (let m = 0; m < 12; m++) {
+        portfolio = portfolio * (1 + monthlyRate) + contribMonth;
+      }
+    }
+  }
+  return null;
 }
 
 function renderHints(r) {
@@ -1773,7 +1818,7 @@ function renderChart(r) {
           rowRights[row] = item.ebx + item.ebw;
         }
         // Second pass: draw lines then pills
-        const baseEby = chartArea.bottom - ebh - 6 - ebh - 4;
+        const baseEby = chartArea.bottom - ebh - 6;
         for (const { evt, ex, ebx, ebw, row } of evtItems) {
           const eby = baseEby - row * (ebh + 4);
           ctx.save();
