@@ -474,7 +474,7 @@
         </div>
         <div class="input-group">
           <span class="input-group-text">$</span>
-          <input type="text" inputmode="numeric" class="form-control" id="inp-retire-contrib" value="1,200" data-min="0" data-max="100000" oninput="formatNumLive(this)" onblur="onBlurNum(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          <input type="text" inputmode="numeric" class="form-control" id="inp-retire-contrib" value="1,500" data-min="0" data-max="100000" oninput="formatNumLive(this)" onblur="onBlurNum(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           <span class="input-group-text">/mo</span>
         </div>
         <div class="equiv-hint mt-1" id="retire-contrib-hint"></div>
@@ -712,7 +712,7 @@
           <div class="triple-seg" id="seg-working" style="background:#1d4ed8;opacity:.55;"></div>
           <div class="triple-seg" id="seg-retired" style="background:#d97706;opacity:.6;"></div>
           <input type="range" id="slider-age"    min="30" max="100" value="41" oninput="onTripleSlider('age')">
-          <input type="range" id="slider-retire" min="30" max="100" value="60" oninput="onTripleSlider('retire')">
+          <input type="range" id="slider-retire" min="30" max="100" value="63" oninput="onTripleSlider('retire')">
           <input type="range" id="slider-life"   min="30" max="100" value="90" oninput="onTripleSlider('life')">
           <div class="thumb-label thumb-label-below" id="lbl-age"    style="background:#1d4ed8;">Now 43</div>
           <div class="thumb-label" id="lbl-retire" style="background:#d97706;">Retire 58</div>
@@ -758,13 +758,13 @@ const S = {
   age:         41,
   income:      95000,
   savings:     42000,
-  contribRetire:    1200,
+  contribRetire:    1500,
   contribBrokerage: 300,
   budgetVal:   5500,
   otherIncome: 0,
   ssIncome:    3500,
-  // Advanced
-  retireAge:   60,
+  // Advanced — retireAge set from slider on first update()
+  retireAge:   0,
   lifeExpect:  90,
   preRate:     0.06,
   postRate:    0.05,
@@ -1409,9 +1409,11 @@ function resetToDefaults() {
   history.replaceState(null, '', location.pathname);
   const DEFAULTS = {
     'filing': 'single', 'inp-age': '41', 'inp-income': '95,000', 'inp-savings': '42,000',
-    'inp-retire-contrib': '1,200', 'inp-brokerage': '300', 'inp-budget': '5,500',
+    'inp-retire-contrib': '1,500', 'inp-brokerage': '300', 'inp-budget': '5,500',
     'inp-other': '', 'inp-ss': '',
-    'slider-age': '41', 'slider-retire': '60', 'slider-life': '90',
+    'slider-age': $id('slider-age').defaultValue,
+    'slider-retire': $id('slider-retire').defaultValue,
+    'slider-life': $id('slider-life').defaultValue,
     'inp-pre-rate': '6', 'inp-post-rate': '5', 'inp-inflation': '3', 'inp-raise': '0'
   };
   restoreInputs(DEFAULTS);
@@ -1603,8 +1605,11 @@ function renderChart(r) {
             const ssLabel = `SS ${ssAge}`;
             ctx.font = '600 10px system-ui,sans-serif';
             const stw = ctx.measureText(ssLabel).width;
-            const spx = 6, sby = chartArea.top + 6, sbw = stw + spx * 2, sbh = 16;
+            const spx = 6, sbw = stw + spx * 2, sbh = 16;
             const sbx = ssX - stw / 2 - spx;
+            // Drop to second row if pill would overlap the Retire pill
+            const retirePillRight = retireX + ctx.measureText(`Retire ${S.retireAge}`).width / 2 + spx + 2;
+            const sby = (sbx < retirePillRight) ? chartArea.top + 6 + sbh + 4 : chartArea.top + 6;
             ctx.fillStyle = '#00a550';
             ctx.beginPath();
             ctx.roundRect(sbx, sby, sbw, sbh, 4);
@@ -1656,7 +1661,7 @@ function renderChart(r) {
         legend: { display: false },
         tooltip: {
           callbacks: {
-            title: ctx => `Age ${ctx[0].label}`,
+            title: ctx => { const age = parseInt(ctx[0].label); const year = new Date().getFullYear() + (age - S.age); return `Age ${age} (${year})`; },
             label: ctx => {
               if (ctx.raw === null) return null;
               return ` ${ctx.dataset.label}: $${Math.round(ctx.raw).toLocaleString()}`;
@@ -1680,10 +1685,12 @@ function renderChart(r) {
             autoSkip: false,
             callback: function(v) {
               const age = parseInt(this.getLabelForValue(v));
-              return age % 5 === 0 ? age : '';
+              if (age % 5 !== 0) return '';
+              const year = new Date().getFullYear() + (age - S.age);
+              return [age, year];
             }
           },
-          title: { display: true, text: 'Age', color: '#94a3b8', font: { size: 11 } }
+          title: { display: false }
         },
         y: {
           grid: { color: '#f1f5f9' },
