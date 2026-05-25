@@ -648,7 +648,7 @@
               onmouseout="this.style.background='#f0f7ff';this.style.borderColor='#bfdbfe'">
               <i class="bi bi-share me-1"></i>Share
             </button>
-            <button id="btn-snapshot" onclick="saveSnapshot()" title="Save chart snapshot as image"
+            <button id="btn-snapshot" onclick="openSnapshot()" title="View fullscreen summary snapshot"
               style="background:#f0fdf4;border:1px solid #bbf7d0;color:#15803d;padding:.25rem .6rem;border-radius:20px;cursor:pointer;font-size:.78rem;font-weight:600;line-height:1.4;transition:background .15s,border-color .15s;"
               onmouseover="this.style.background='#dcfce7';this.style.borderColor='#86efac'"
               onmouseout="this.style.background='#f0fdf4';this.style.borderColor='#bbf7d0'">
@@ -1413,62 +1413,366 @@ function copyCurrentLink() {
   });
 }
 
-function saveSnapshot() {
-  const chartCanvas = $id('ret-chart');
+let _snapEscHandler = null;
+let _snapChart      = null;
+
+function _snapSidebarHTML(r) {
+  const fmtMo  = n => '$' + Math.round(n).toLocaleString() + '/mo';
+  const fmtDlr = n => '$' + Math.round(n).toLocaleString();
+  const fmtPct = n => (n * 100).toFixed(1) + '%/yr';
+  const yrs = S.retireAge - S.age;
+  const yr  = new Date().getFullYear() + yrs;
+  function row(lbl, val, col) {
+    return `<div style="display:flex;justify-content:space-between;align-items:baseline;padding:2px 0;gap:4px;">
+      <span style="color:#94a3b8;">${lbl}</span>
+      <span style="font-weight:600;color:${col||'#f1f5f9'};white-space:nowrap;">${val}</span>
+    </div>`;
+  }
+  function sec(t) {
+    return `<div style="font:700 9px system-ui;color:#475569;text-transform:uppercase;letter-spacing:.08em;margin:10px 0 4px;">${t}</div>
+    <div style="height:1px;background:#1e3a5f;margin-bottom:4px;"></div>`;
+  }
+  const gapCol  = r.gap  >= 0 ? '#4ade80' : '#f87171';
+  const pctCol  = r.pct >= 100 ? '#4ade80' : r.pct >= 80 ? '#facc15' : '#f87171';
+  // Pre-SS monthly draw = full budget nominal; post-SS = net withdrawal
+  const preSSDraw  = r.monthlyBudgetNominal;
+  const postSSDraw = r.netWithdrawal;
+  return `
+    ${sec('Profile')}
+    ${row('Status', S.married ? 'Married' : 'Single')}
+    ${row('Current age', S.age)}
+    ${row('Retire age', S.retireAge + ' (' + yr + ')')}
+    ${row('Years to FIRE', yrs > 0 ? yrs : '— Now')}
+    ${row('Life expectancy', S.lifeExpect)}
+    ${sec('Finances')}
+    ${row('Annual income', '$' + S.income.toLocaleString())}
+    ${row('Current savings', fmtDlr(S.savings))}
+    ${row('Retire contrib', fmtMo(S.contribRetire))}
+    ${S.contribBrokerage > 0 ? row('Brokerage', fmtMo(S.contribBrokerage)) : ''}
+    ${sec('Retirement')}
+    ${row('Monthly budget', fmtMo(S.budgetVal))}
+    ${row('Social Security', S.ssIncome > 0 ? fmtMo(S.ssIncome) + ' @ 67' : 'None')}
+    ${S.otherIncome > 0 ? row('Other income', fmtMo(S.otherIncome)) : ''}
+    ${sec('Assumptions')}
+    ${row('Pre-ret return', fmtPct(S.preRate))}
+    ${row('Post-ret return', fmtPct(S.postRate))}
+    ${row('Inflation', fmtPct(S.inflation))}
+    ${sec('At Retirement (' + S.retireAge + ')')}
+    ${row('Portfolio', fmtFull(r.willHave))}
+    ${row('Need (PV)', fmtFull(r.willNeed))}
+    ${row(r.gap >= 0 ? 'Surplus ✓' : 'Gap ⚠', fmtFull(Math.abs(r.gap)), gapCol)}
+    ${row('Funded', r.pct.toFixed(0) + '%', pctCol)}
+    ${sec('Monthly Draws')}
+    ${r.ssDelay > 0 ? row('Pre-SS (to 67)', fmtMo(preSSDraw)) : row('Net withdrawal', fmtMo(postSSDraw))}
+    ${r.ssDelay > 0 && S.ssIncome > 0 ? row('Post-SS (67+)', fmtMo(postSSDraw)) : ''}
+    ${r.depleteAge !== null
+      ? `<div style="margin-top:10px;padding:7px 8px;border-radius:5px;background:rgba(239,68,68,0.12);border:1px solid rgba(239,68,68,0.3);">
+           <div style="color:#f87171;font-weight:700;font-size:11px;">⚠ Depletes at ${Math.floor(r.depleteAge)}</div>
+           <div style="color:#94a3b8;font-size:10px;margin-top:1px;">${S.lifeExpect - Math.floor(r.depleteAge)} yrs before life expect.</div>
+         </div>`
+      : `<div style="margin-top:10px;padding:7px 8px;border-radius:5px;background:rgba(74,222,128,0.09);border:1px solid rgba(74,222,128,0.25);">
+           <div style="color:#4ade80;font-weight:700;font-size:11px;">✓ Survives to ${S.lifeExpect}</div>
+         </div>`}
+  `;
+}
+
+function renderSnapshotChart(canvasEl, r) {
+  if (_snapChart) { _snapChart.destroy(); _snapChart = null; }
+
+  // Build haveMap and needMap (same logic as renderChart)
+  const mPostRate = S.postRate / 12;
+  const mInfl     = S.inflation / 12;
+  const haveMap = new Map();
+  const needMap = new Map();
+  for (const p of r.growthSeries) {
+    haveMap.set(p.age, p.bal);
+    const yearsRemain = S.retireAge - p.age;
+    needMap.set(p.age, Math.round(r.willNeed / Math.pow(1 + S.preRate, yearsRemain)));
+  }
+  for (let i = 1; i < r.drawSeries.length; i++) {
+    const p = r.drawSeries[i];
+    haveMap.set(p.age, p.bal);
+    const nRemaining = (S.lifeExpect - p.age) * 12;
+    if (nRemaining <= 0) { needMap.set(p.age, 0); continue; }
+    const SS_CLAIM_AGE = 67;
+    const monthsSinceRetire = (p.age - S.retireAge) * 12;
+    const otherNominalAtRetire = r.monthlyBudgetNominal - r.netWithdrawal;
+    const budgetNow = r.monthlyBudgetNominal * Math.pow(1 + mInfl, monthsSinceRetire);
+    const ssNow     = otherNominalAtRetire * Math.pow(1 + mInfl, monthsSinceRetire);
+    function pvGA2(pmt, r2, g, n) {
+      if (n <= 0) return 0;
+      if (Math.abs(r2 - g) < 0.000001) return pmt * n;
+      return pmt * (1 - Math.pow((1 + g) / (1 + r2), n)) / (r2 - g);
+    }
+    let remainNeed;
+    if (p.age < SS_CLAIM_AGE && r.ssDelay > 0) {
+      const n1r = (SS_CLAIM_AGE - p.age) * 12;
+      const n2r = nRemaining - n1r;
+      const pvFull = pvGA2(budgetNow, mPostRate, mInfl, nRemaining);
+      let pvSSr = 0;
+      if (n2r > 0 && ssNow > 0) {
+        const ssAtClaim = ssNow * Math.pow(1 + mInfl, n1r);
+        pvSSr = pvGA2(ssAtClaim, mPostRate, mInfl, n2r) / Math.pow(1 + mPostRate, n1r);
+      }
+      remainNeed = pvFull - pvSSr;
+    } else {
+      const netNow = Math.max(0, budgetNow - ssNow);
+      remainNeed = pvGA2(netNow, mPostRate, mInfl, nRemaining);
+    }
+    needMap.set(p.age, Math.max(0, Math.round(remainNeed)));
+  }
+
+  const axisStart = Math.floor(S.age / 5) * 5;
+  const axisEnd   = Math.ceil(S.lifeExpect / 5) * 5;
+  const labels = [], haveData = [], needLine = [];
+  for (let age = axisStart; age <= axisEnd; age++) {
+    labels.push(age);
+    haveData.push(haveMap.has(age) ? haveMap.get(age) : null);
+    needLine.push(needMap.has(age) ? needMap.get(age) : null);
+  }
+
+  const peakHave = haveMap.get(S.retireAge) || 0;
+  const DPR = window.devicePixelRatio || 1;
+
+  _snapChart = new Chart(canvasEl, {
+    type: 'line',
+    plugins: [{
+      id: 'snapBands',
+      beforeDatasetsDraw(chart) {
+        const { ctx, chartArea, scales } = chart;
+        if (!chartArea) return;
+        const xs = scales.x;
+        const nowIdx    = labels.indexOf(S.age);
+        const retireIdx = labels.indexOf(S.retireAge);
+        const lifeIdx   = labels.indexOf(S.lifeExpect);
+        if (nowIdx < 0 || retireIdx < 0) return;
+        const nowX    = xs.getPixelForValue(nowIdx);
+        const retireX = xs.getPixelForValue(retireIdx);
+        const lifeX   = lifeIdx >= 0 ? xs.getPixelForValue(lifeIdx) : chartArea.right;
+        const accYrs  = S.retireAge - S.age;
+        const drawYrs = S.lifeExpect - S.retireAge;
+
+        ctx.save();
+        // Accumulation band
+        ctx.fillStyle = 'rgba(26,111,232,0.07)';
+        ctx.fillRect(nowX, chartArea.top, retireX - nowX, chartArea.height);
+        // Drawdown band
+        ctx.fillStyle = 'rgba(217,119,6,0.09)';
+        ctx.fillRect(retireX, chartArea.top, lifeX - retireX, chartArea.height);
+
+        // Phase duration labels
+        const midY = chartArea.top + chartArea.height * 0.54;
+        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+        if (retireX - nowX > 70) {
+          const mx = (nowX + retireX) / 2;
+          ctx.fillStyle = 'rgba(26,111,232,0.22)';
+          ctx.font = `700 ${Math.round(20 * DPR)}px system-ui,sans-serif`;
+          ctx.fillText(accYrs + ' yrs', mx, midY - Math.round(13 * DPR));
+          ctx.font = `400 ${Math.round(12 * DPR)}px system-ui,sans-serif`;
+          ctx.fillText('Accumulation', mx, midY + Math.round(12 * DPR));
+        }
+        if (lifeX - retireX > 70) {
+          const mx = (retireX + lifeX) / 2;
+          ctx.fillStyle = 'rgba(217,119,6,0.25)';
+          ctx.font = `700 ${Math.round(20 * DPR)}px system-ui,sans-serif`;
+          ctx.fillText(drawYrs + ' yrs', mx, midY - Math.round(13 * DPR));
+          ctx.font = `400 ${Math.round(12 * DPR)}px system-ui,sans-serif`;
+          ctx.fillText('Retirement', mx, midY + Math.round(12 * DPR));
+        }
+        ctx.restore();
+      },
+      afterDatasetsDraw(chart) {
+        const { ctx, chartArea, scales } = chart;
+        if (!chartArea) return;
+        const xs = scales.x, ys = scales.y;
+        function vline(x, color) {
+          ctx.save(); ctx.strokeStyle = color; ctx.lineWidth = 1.5 * DPR;
+          ctx.setLineDash([5 * DPR, 4 * DPR]);
+          ctx.beginPath(); ctx.moveTo(x, chartArea.top); ctx.lineTo(x, chartArea.bottom); ctx.stroke();
+          ctx.setLineDash([]); ctx.restore();
+        }
+        function pill(x, y, text, color) {
+          ctx.save(); ctx.font = `600 ${Math.round(10 * DPR)}px system-ui,sans-serif`;
+          const tw = ctx.measureText(text).width;
+          const px = 6 * DPR, ph = 16 * DPR, pr = 4 * DPR;
+          ctx.fillStyle = color;
+          ctx.beginPath(); ctx.roundRect(x - tw/2 - px, y, tw + px*2, ph, pr); ctx.fill();
+          ctx.fillStyle = '#fff'; ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
+          ctx.fillText(text, x, y + ph/2); ctx.restore();
+        }
+        const nowIdx    = labels.indexOf(S.age);
+        const retireIdx = labels.indexOf(S.retireAge);
+        if (retireIdx < 0) return;
+        // Now
+        if (nowIdx >= 0) {
+          const nx = xs.getPixelForValue(nowIdx);
+          vline(nx, '#1d4ed8'); pill(nx, chartArea.top + 6 * DPR, `Now ${S.age}`, '#1d4ed8');
+        }
+        // Retire
+        const rx = xs.getPixelForValue(retireIdx);
+        vline(rx, '#d97706'); pill(rx, chartArea.top + 6 * DPR, `Retire ${S.retireAge}`, '#d97706');
+        // Peak value
+        if (peakHave > 0) {
+          const peakY = ys.getPixelForValue(peakHave);
+          ctx.save(); ctx.font = `600 ${Math.round(10 * DPR)}px system-ui,sans-serif`;
+          ctx.fillStyle = '#1a6fe8'; ctx.textAlign = 'left'; ctx.textBaseline = 'bottom';
+          ctx.fillText('Peak: ' + fmtFull(peakHave), rx + 8 * DPR, peakY - 4 * DPR);
+          ctx.restore();
+        }
+        // SS
+        if (r.ssDelay > 0 && S.ssIncome > 0) {
+          const ssAge = S.retireAge + r.ssDelay;
+          const ssIdx = labels.indexOf(ssAge);
+          if (ssIdx >= 0) {
+            const sx = xs.getPixelForValue(ssIdx);
+            vline(sx, '#00a550');
+            ctx.font = `600 ${Math.round(10 * DPR)}px system-ui,sans-serif`;
+            const retirePillRight = rx + ctx.measureText(`Retire ${S.retireAge}`).width/2 + 6 * DPR + 2;
+            const sby = sx - ctx.measureText(`SS ${ssAge}`).width/2 - 6 * DPR < retirePillRight
+              ? chartArea.top + (6 + 16 + 4) * DPR : chartArea.top + 6 * DPR;
+            pill(sx, sby, `SS ${ssAge}`, '#00a550');
+          }
+        }
+        // Depletes
+        if (r.depleteAge !== null) {
+          const df = Math.floor(r.depleteAge);
+          const di = labels.indexOf(df);
+          if (di >= 0) {
+            const dx = xs.getPixelForValue(di);
+            vline(dx, '#ef4444');
+            pill(dx, chartArea.bottom - (18 + 6) * DPR, `Depletes ${df}`, '#ef4444');
+          }
+        }
+      }
+    }],
+    data: {
+      labels,
+      datasets: [
+        { label: "What you'll have", data: haveData,
+          borderColor: '#1a6fe8', backgroundColor: 'rgba(26,111,232,.08)',
+          fill: true, tension: 0.35, pointRadius: 0, pointHoverRadius: 5, borderWidth: 2.5, order: 2 },
+        { label: "What you'll need", data: needLine,
+          borderColor: '#f59e0b', backgroundColor: 'transparent', borderDash: [7, 4],
+          tension: 0, pointRadius: 0, pointHoverRadius: 0, borderWidth: 2, fill: false, order: 1 }
+      ]
+    },
+    options: {
+      responsive: false,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          callbacks: {
+            title: ctx => { const age = parseInt(ctx[0].label); const year = new Date().getFullYear() + (age - S.age); return `Age ${age} (${year})`; },
+            label: ctx => ctx.raw === null ? null : ` ${ctx.dataset.label}: $${Math.round(ctx.raw).toLocaleString()}`,
+            afterBody: ctx => {
+              const have = ctx.find(c => c.datasetIndex === 0)?.raw;
+              const need = ctx.find(c => c.datasetIndex === 1)?.raw;
+              if (have == null || need == null) return [];
+              const diff = Math.round(have - need);
+              return [``, ` ${diff >= 0 ? 'Surplus' : 'Deficit'}: ${diff >= 0 ? '+' : ''}$${Math.abs(diff).toLocaleString()}`];
+            }
+          }
+        }
+      },
+      scales: {
+        x: {
+          grid: { display: false },
+          ticks: {
+            autoSkip: false,
+            maxRotation: 0,
+            callback: function(v) {
+              const age = parseInt(this.getLabelForValue(v));
+              // Every 2 years in snapshot (every year if range ≤ 30)
+              const step = (axisEnd - axisStart) <= 30 ? 1 : 2;
+              if (age % step !== 0) return '';
+              const year = new Date().getFullYear() + (age - S.age);
+              return [age, String(year)];
+            }
+          }
+        },
+        y: {
+          grid: { color: '#f1f5f9' },
+          ticks: { callback: v => fmtShort(v) },
+          grace: '18%',
+          min: 0
+        }
+      }
+    }
+  });
+}
+
+function openSnapshot() {
   const r = _lastResult;
   if (!r) return;
 
-  const DPR    = window.devicePixelRatio || 1;
-  const cw     = chartCanvas.width;   // actual px (already DPR-scaled by Chart.js)
-  const ch     = chartCanvas.height;
-  const PAD    = 32 * DPR;
-  const HDR    = 100 * DPR;
-  const FTR    = 72 * DPR;
-  const W      = cw + PAD * 2;
-  const H      = HDR + ch + FTR + PAD;
-
-  const snap = document.createElement('canvas');
-  snap.width  = W;
-  snap.height = H;
-  const ctx = snap.getContext('2d');
-
-  // ── Background ──
-  ctx.fillStyle = '#ffffff';
-  ctx.fillRect(0, 0, W, H);
-
-  // ── Header bar ──
-  ctx.fillStyle = '#f8fafc';
-  ctx.fillRect(0, 0, W, HDR);
-  ctx.strokeStyle = '#e2e8f0';
-  ctx.lineWidth = DPR;
-  ctx.beginPath(); ctx.moveTo(0, HDR); ctx.lineTo(W, HDR); ctx.stroke();
-
-  // Title
-  ctx.fillStyle = '#0f172a';
-  ctx.font = `700 ${20 * DPR}px system-ui, -apple-system, sans-serif`;
-  ctx.textBaseline = 'middle';
-  ctx.fillText('FIRE Retirement Snapshot', PAD, HDR * 0.28);
-
-  // Subtitle
-  const yrs   = S.retireAge - S.age;
-  const yr    = new Date().getFullYear() + yrs;
-  const sub   = `Retire at ${S.retireAge} · ${yrs} yrs to go · ${yr}  ·  Have ${fmtFull(r.willHave)}  ·  Need ${fmtFull(r.willNeed)}  ·  ${r.gap >= 0 ? '+' : ''}${fmtFull(r.gap)} ${r.gap >= 0 ? '✓' : '⚠'}`;
-  ctx.font = `500 ${12 * DPR}px system-ui, -apple-system, sans-serif`;
-  ctx.fillStyle = '#64748b';
-  ctx.fillText(sub, PAD, HDR * 0.72);
-
-  // ── Chart ──
-  ctx.drawImage(chartCanvas, PAD, HDR);
-
-  // ── Footer ──
-  const fy = HDR + ch + PAD / 2;
-  ctx.fillStyle = '#94a3b8';
-  ctx.font = `400 ${10 * DPR}px system-ui, -apple-system, sans-serif`;
-  ctx.textBaseline = 'middle';
+  const yrs = S.retireAge - S.age;
+  const yr  = new Date().getFullYear() + yrs;
+  $id('snap-title').textContent = `FIRE Retirement Snapshot  ·  Retire at ${S.retireAge}  ·  ${yrs > 0 ? yrs + ' yrs to go' : 'Now!'}  ·  ${yr}`;
+  $id('snap-sub').textContent   = `Have ${fmtFull(r.willHave)}  ·  Need ${fmtFull(r.willNeed)}  ·  ${r.gap >= 0 ? '+' : ''}${fmtFull(r.gap)} ${r.gap >= 0 ? '✓' : '⚠'}  ·  ${r.pct.toFixed(0)}% funded`;
   const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
-  ctx.fillText(`Generated ${date} · apiarya.github.io/fire-calculator · Not financial advice`, PAD, fy + FTR / 2);
+  $id('snap-ftr').textContent   = `Generated ${date}  ·  apiarya.github.io/fire-calculator  ·  Not financial advice`;
+  $id('snap-sidebar').innerHTML = _snapSidebarHTML(r);
 
-  // ── Download ──
+  const ov = $id('snap-overlay');
+  ov.style.display = 'flex';
+  document.body.style.overflow = 'hidden';
+
+  // Size canvas explicitly then render — use rAF so overlay layout is computed
+  requestAnimationFrame(() => {
+    const body = $id('snap-body');
+    const DPR  = window.devicePixelRatio || 1;
+    const sc   = $id('snap-canvas');
+    const w    = Math.max(body.clientWidth  - 24, 300);
+    const h    = Math.max(body.clientHeight - 24, 200);
+    sc.width        = Math.round(w * DPR);
+    sc.height       = Math.round(h * DPR);
+    sc.style.width  = w + 'px';
+    sc.style.height = h + 'px';
+    renderSnapshotChart(sc, r);
+  });
+
+  if (_snapEscHandler) document.removeEventListener('keydown', _snapEscHandler);
+  _snapEscHandler = e => { if (e.key === 'Escape') closeSnapshot(); };
+  document.addEventListener('keydown', _snapEscHandler);
+}
+
+function closeSnapshot() {
+  if (_snapChart) { _snapChart.destroy(); _snapChart = null; }
+  $id('snap-overlay').style.display = 'none';
+  document.body.style.overflow = '';
+  if (_snapEscHandler) { document.removeEventListener('keydown', _snapEscHandler); _snapEscHandler = null; }
+}
+
+function downloadSnapshot() {
+  const sc = $id('snap-canvas');
+  if (!sc || sc.width < 10) return;
+  const r = _lastResult;
+  if (!r) return;
+  const DPR = window.devicePixelRatio || 1;
+  const PAD = Math.round(28 * DPR);
+  const HDR = Math.round(90 * DPR);
+  const FTR = Math.round(48 * DPR);
+  const W   = sc.width + PAD * 2;
+  const H   = HDR + sc.height + FTR + PAD;
+  const snap = document.createElement('canvas');
+  snap.width = W; snap.height = H;
+  const ctx = snap.getContext('2d');
+  ctx.fillStyle = '#ffffff'; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = '#f8fafc'; ctx.fillRect(0, 0, W, HDR);
+  ctx.strokeStyle = '#e2e8f0'; ctx.lineWidth = DPR;
+  ctx.beginPath(); ctx.moveTo(0, HDR); ctx.lineTo(W, HDR); ctx.stroke();
+  const yrs = S.retireAge - S.age;
+  const yr  = new Date().getFullYear() + yrs;
+  ctx.fillStyle = '#0f172a'; ctx.font = `700 ${Math.round(18 * DPR)}px system-ui,sans-serif`; ctx.textBaseline = 'middle';
+  ctx.fillText(`FIRE Retirement Snapshot  ·  Retire at ${S.retireAge}  ·  ${yrs > 0 ? yrs + ' yrs to go' : 'Now!'}  ·  ${yr}`, PAD, HDR * 0.3);
+  ctx.fillStyle = '#64748b'; ctx.font = `400 ${Math.round(12 * DPR)}px system-ui,sans-serif`;
+  ctx.fillText(`Have ${fmtFull(r.willHave)}  ·  Need ${fmtFull(r.willNeed)}  ·  ${r.gap >= 0 ? '+' : ''}${fmtFull(r.gap)} ${r.gap >= 0 ? '✓' : '⚠'}  ·  ${r.pct.toFixed(0)}% funded`, PAD, HDR * 0.72);
+  ctx.drawImage(sc, PAD, HDR, sc.width, sc.height);
+  const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+  ctx.fillStyle = '#94a3b8'; ctx.font = `400 ${Math.round(10 * DPR)}px system-ui,sans-serif`;
+  ctx.fillText(`Generated ${date}  ·  apiarya.github.io/fire-calculator  ·  Not financial advice`, PAD, HDR + sc.height + PAD / 2 + FTR / 2);
   const link = document.createElement('a');
   link.download = `fire-snapshot-retire${S.retireAge}-${yr}.png`;
   link.href = snap.toDataURL('image/png');
@@ -1851,6 +2155,35 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
+<!-- Snapshot fullscreen overlay -->
+<div id="snap-overlay" style="display:none;position:fixed;inset:0;z-index:9999;background:#0a0f1e;flex-direction:column;">
+  <!-- Header -->
+  <div style="flex:0 0 auto;display:flex;align-items:center;justify-content:space-between;padding:10px 18px;background:#0f172a;border-bottom:1px solid #1e3a5f;gap:12px;">
+    <div style="min-width:0;">
+      <div id="snap-title" style="color:#f1f5f9;font:700 15px/1.2 system-ui,sans-serif;margin-bottom:3px;"></div>
+      <div id="snap-sub"   style="color:#64748b;font:400 12px/1 system-ui,sans-serif;"></div>
+    </div>
+    <div style="display:flex;gap:6px;flex-shrink:0;">
+      <button onclick="downloadSnapshot()" style="background:#14532d;border:1px solid #16a34a;color:#86efac;padding:.3rem .65rem;border-radius:20px;cursor:pointer;font:.75rem/1.4 system-ui,sans-serif;font-weight:600;white-space:nowrap;">
+        <i class="bi bi-download me-1"></i>Download PNG
+      </button>
+      <button onclick="closeSnapshot()" style="background:#1e293b;border:1px solid #334155;color:#94a3b8;padding:.3rem .65rem;border-radius:20px;cursor:pointer;font:.75rem/1.4 system-ui,sans-serif;font-weight:600;">
+        <i class="bi bi-x-lg me-1"></i>Close
+      </button>
+    </div>
+  </div>
+  <!-- Body: sidebar + chart -->
+  <div style="flex:1;display:flex;overflow:hidden;">
+    <!-- Sidebar: all inputs + metrics -->
+    <div id="snap-sidebar" style="flex:0 0 200px;overflow-y:auto;padding:12px;background:#0d1829;border-right:1px solid #1e3a5f;font:12px/1.5 system-ui,sans-serif;color:#cbd5e1;"></div>
+    <!-- Chart -->
+    <div id="snap-body" style="flex:1;display:flex;align-items:center;justify-content:center;padding:12px;overflow:hidden;">
+      <canvas id="snap-canvas" style="border-radius:8px;background:#fff;box-shadow:0 8px 32px rgba(0,0,0,.5);"></canvas>
+    </div>
+  </div>
+  <!-- Footer -->
+  <div id="snap-ftr" style="flex:0 0 auto;text-align:center;padding:5px 18px;color:#334155;font:400 11px/1.4 system-ui,sans-serif;background:#0f172a;border-top:1px solid #1e3a5f;"></div>
+</div>
 <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "66e8a9f6a3464e249598684c105ae08c"}'></script><!-- End Cloudflare Web Analytics --> <!-- gitleaks:allow -->
 </body>
 </html>
