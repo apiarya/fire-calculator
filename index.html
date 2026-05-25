@@ -113,6 +113,7 @@
       font-size: 1.9rem;
       font-weight: 800;
       line-height: 1.1;
+      transition: color .35s ease;
     }
     .res-card.have .res-amount { color: #1a6fe8; }
     .res-card.need .res-amount { color: #d97706; }
@@ -241,6 +242,11 @@
       padding: .9rem 1rem;
       box-shadow: 0 1px 4px rgba(0,0,0,.06);
       border: 1px solid #f1f5f9;
+      transition: box-shadow .2s ease, transform .2s ease;
+    }
+    .input-card:hover {
+      box-shadow: 0 4px 14px rgba(0,0,0,.1);
+      transform: translateY(-1px);
     }
     .section-title {
       font-size: .68rem;
@@ -262,6 +268,7 @@
     .form-control {
       border-color: #cbd5e0;
       font-size: .9rem;
+      transition: border-color .15s ease, box-shadow .15s ease;
     }
     .form-control:focus {
       border-color: var(--blue);
@@ -272,6 +279,22 @@
       background: #f8fafc;
       color: #718096;
       font-size: .85rem;
+      transition: border-color .15s ease;
+    }
+    .input-group:focus-within .input-group-text {
+      border-color: var(--blue);
+    }
+    @keyframes clampedShake {
+      0%,100% { transform: translateX(0); border-color: #f59e0b; box-shadow: 0 0 0 3px rgba(245,158,11,.2); }
+      20%      { transform: translateX(-4px); }
+      40%      { transform: translateX(4px); }
+      60%      { transform: translateX(-3px); }
+      80%      { transform: translateX(3px); }
+    }
+    .input-clamped {
+      animation: clampedShake .4s ease;
+      border-color: #f59e0b !important;
+      box-shadow: 0 0 0 3px rgba(245,158,11,.2) !important;
     }
 
     /* ── Disclaimer ── */
@@ -293,6 +316,12 @@
       .res-amount  { font-size: 1.5rem; }
       .calc-card   { padding: 1.25rem; }
     }
+
+    /* ── Scrollbar ── */
+    ::-webkit-scrollbar { width: 6px; height: 6px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+    ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
   </style>
 </head>
 <body>
@@ -359,7 +388,7 @@
         </div>
         <div class="input-group">
           <span class="input-group-text">$</span>
-          <input type="text" inputmode="numeric" class="form-control" id="inp-income" value="480,000" oninput="formatNumLive(this)" onblur="onBlurNum(this)">
+          <input type="text" inputmode="numeric" class="form-control" id="inp-income" value="480,000" data-min="0" data-max="10000000" oninput="formatNumLive(this)" onblur="onBlurNum(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         </div>
         <div class="equiv-hint mt-1" id="income-hint"></div>
       </div>
@@ -378,7 +407,7 @@
         </div>
         <div class="input-group">
           <span class="input-group-text">$</span>
-          <input type="text" inputmode="numeric" class="form-control" id="inp-savings" value="500,000" oninput="formatNumLive(this)" onblur="onBlurNum(this)">
+          <input type="text" inputmode="numeric" class="form-control" id="inp-savings" value="500,000" data-min="0" data-max="100000000" oninput="formatNumLive(this)" onblur="onBlurNum(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
         </div>
         <div class="equiv-hint mt-1" id="savings-hint"></div>
       </div>
@@ -399,7 +428,7 @@
         </div>
         <div class="input-group">
           <span class="input-group-text">$</span>
-          <input type="text" inputmode="numeric" class="form-control" id="inp-retire-contrib" value="10,000" oninput="formatNumLive(this)" onblur="onBlurNum(this)">
+          <input type="text" inputmode="numeric" class="form-control" id="inp-retire-contrib" value="10,000" data-min="0" data-max="100000" oninput="formatNumLive(this)" onblur="onBlurNum(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           <span class="input-group-text">/mo</span>
         </div>
         <div class="equiv-hint mt-1" id="retire-contrib-hint"></div>
@@ -420,7 +449,7 @@
         </div>
         <div class="input-group">
           <span class="input-group-text">$</span>
-          <input type="text" inputmode="numeric" class="form-control" id="inp-brokerage" value="5,000" oninput="formatNumLive(this)" onblur="onBlurNum(this)">
+          <input type="text" inputmode="numeric" class="form-control" id="inp-brokerage" value="5,000" data-min="0" data-max="500000" oninput="formatNumLive(this)" onblur="onBlurNum(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           <span class="input-group-text">/mo</span>
         </div>
         <div class="equiv-hint mt-1" id="brokerage-hint"></div>
@@ -442,7 +471,7 @@
         </div>
         <div class="input-group">
           <span class="input-group-text">$</span>
-          <input type="text" inputmode="numeric" class="form-control" id="inp-budget" value="15,000" oninput="formatNumLive(this)" onblur="onBlurNum(this)">
+          <input type="text" inputmode="numeric" class="form-control" id="inp-budget" value="15,000" data-min="0" data-max="500000" oninput="formatNumLive(this)" onblur="onBlurNum(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           <span class="input-group-text">/mo</span>
         </div>
         <div class="equiv-hint mt-1" id="budget-hint"></div>
@@ -464,7 +493,7 @@
         </div>
         <div class="input-group">
           <span class="input-group-text">$</span>
-          <input type="text" inputmode="numeric" class="form-control" id="inp-ss" value="3,500" oninput="formatNumLive(this)" onblur="onBlurNum(this)">
+          <input type="text" inputmode="numeric" class="form-control" id="inp-ss" value="3,500" data-min="0" data-max="10000" oninput="formatNumLive(this)" onblur="onBlurNum(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           <span class="input-group-text">/mo</span>
         </div>
         <div class="equiv-hint mt-1" id="ss-hint"></div>
@@ -485,7 +514,7 @@
         </div>
         <div class="input-group">
           <span class="input-group-text">$</span>
-          <input type="text" inputmode="numeric" class="form-control" id="inp-other" value="" placeholder="0" oninput="formatNumLive(this)" onblur="onBlurNum(this)">
+          <input type="text" inputmode="numeric" class="form-control" id="inp-other" value="" placeholder="0" data-min="0" data-max="500000" oninput="formatNumLive(this)" onblur="onBlurNum(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           <span class="input-group-text">/mo</span>
         </div>
         <div class="equiv-hint mt-1" id="other-income-hint"></div>
@@ -506,7 +535,7 @@
              onclick="return false;">Learn more &rarr;</a>
         </div>
         <div class="input-group">
-          <input type="text" inputmode="numeric" class="form-control" id="inp-pre-rate" value="6" oninput="update()">
+          <input type="text" inputmode="numeric" class="form-control" id="inp-pre-rate" value="6" data-min="0" data-max="20" oninput="update()" onblur="onBlurRate(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           <span class="input-group-text">%</span>
         </div>
         <div class="equiv-hint mt-1">↑ Higher = larger projected balance. Use 6–7% for a balanced portfolio.</div>
@@ -525,7 +554,7 @@
              onclick="return false;">Learn more &rarr;</a>
         </div>
         <div class="input-group">
-          <input type="text" inputmode="numeric" class="form-control" id="inp-post-rate" value="5" oninput="update()">
+          <input type="text" inputmode="numeric" class="form-control" id="inp-post-rate" value="5" data-min="0" data-max="20" oninput="update()" onblur="onBlurRate(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           <span class="input-group-text">%</span>
         </div>
         <div class="equiv-hint mt-1">↓ Lower = safer but requires a larger portfolio. Default 5%.</div>
@@ -544,7 +573,7 @@
              onclick="return false;">Learn more &rarr;</a>
         </div>
         <div class="input-group">
-          <input type="text" inputmode="numeric" class="form-control" id="inp-inflation" value="3" oninput="update()">
+          <input type="text" inputmode="numeric" class="form-control" id="inp-inflation" value="3" data-min="0" data-max="15" oninput="update()" onblur="onBlurRate(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           <span class="input-group-text">%</span>
         </div>
         <div class="equiv-hint mt-1">↑ Higher = larger required portfolio. Prices double every 24 yrs at 3%.</div>
@@ -844,9 +873,32 @@ function formatNumLive(el) {
 }
 
 function onBlurNum(el) {
-  const n = parseFloat((el.value || '').replace(/,/g, ''));
-  if (!isNaN(n) && n > 0) el.value = n.toLocaleString();
+  let n = parseFloat((el.value || '').replace(/,/g, ''));
+  if (isNaN(n)) n = 0;
+  const min = el.dataset.min !== undefined ? parseFloat(el.dataset.min) : 0;
+  const max = el.dataset.max !== undefined ? parseFloat(el.dataset.max) : Infinity;
+  const clamped = Math.min(Math.max(n, min), max);
+  if (clamped !== n) flashClamped(el);
+  el.value = clamped > 0 ? clamped.toLocaleString() : (clamped === 0 && el.placeholder ? '' : '0');
   update();
+}
+
+function onBlurRate(el) {
+  let n = parseFloat(el.value);
+  if (isNaN(n)) n = parseFloat(el.defaultValue) || 0;
+  const min = el.dataset.min !== undefined ? parseFloat(el.dataset.min) : 0;
+  const max = el.dataset.max !== undefined ? parseFloat(el.dataset.max) : Infinity;
+  const clamped = Math.min(Math.max(n, min), max);
+  if (clamped !== n) flashClamped(el);
+  el.value = clamped;
+  update();
+}
+
+function flashClamped(el) {
+  el.classList.remove('input-clamped');
+  void el.offsetWidth; // force reflow to restart animation
+  el.classList.add('input-clamped');
+  setTimeout(() => el.classList.remove('input-clamped'), 1500);
 }
 
 // ═══════════════════════════════════════════════════
