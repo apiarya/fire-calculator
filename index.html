@@ -683,6 +683,11 @@
           <span>30</span><span>40</span><span>50</span><span>60</span>
           <span>70</span><span>80</span><span>90</span><span>100</span>
         </div>
+        <div class="d-flex align-items-center justify-content-center gap-2 mt-3">
+          <button onclick="stepRetire(-1)" style="width:2.2rem;height:2.2rem;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;font-size:1.1rem;line-height:1;cursor:pointer;color:#475569;">−</button>
+          <span style="font-size:.82rem;color:#475569;min-width:7rem;text-align:center;">Retire age: <strong id="retire-stepper-label">60</strong></span>
+          <button onclick="stepRetire(1)"  style="width:2.2rem;height:2.2rem;border-radius:50%;border:1.5px solid #cbd5e1;background:#f8fafc;font-size:1.1rem;line-height:1;cursor:pointer;color:#475569;">+</button>
+        </div>
         <span id="disp-age" class="d-none">47</span>
         <span id="disp-retire" class="d-none">55</span>
         <span id="disp-life" class="d-none">90</span>
@@ -971,6 +976,12 @@ function setThumbLabel(id, val, text) {
   el.style.left = `calc(${pct}% + ${8 - pct * 0.16}px)`;
 }
 
+function stepRetire(delta) {
+  const sl = $id('slider-retire');
+  sl.value = Math.min(Math.max(parseInt(sl.value) + delta, parseInt(sl.min)), parseInt(sl.max));
+  onTripleSlider('retire');
+}
+
 function onTripleSlider(moved) {
   let a = parseInt($id('slider-age').value);
   let r = parseInt($id('slider-retire').value);
@@ -986,6 +997,8 @@ function onTripleSlider(moved) {
   $id('disp-age').textContent    = a;
   $id('disp-retire').textContent = r;
   $id('disp-life').textContent   = l;
+  const stepLbl = $id('retire-stepper-label');
+  if (stepLbl) stepLbl.textContent = r;
   const ageInp = $id('inp-age');
   if (ageInp) ageInp.value = a;
   const yrs = r - a;
