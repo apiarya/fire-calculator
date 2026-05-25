@@ -92,7 +92,14 @@
     .res-card {
       border-radius: 12px;
       padding: 1.1rem 1.25rem;
+      cursor: pointer;
+      transition: box-shadow .15s, transform .15s;
     }
+    .res-card:hover { box-shadow: 0 4px 14px rgba(0,0,0,.1); transform: translateY(-1px); }
+    .res-card.active-breakdown { box-shadow: 0 0 0 2px var(--blue); }
+    .expand-hint { font-size: .65rem; color: #94a3b8; text-align: center; margin-top: .35rem; letter-spacing: .02em; }
+    .expand-hint .bi { transition: transform .2s; display: inline-block; }
+    .res-card.active-breakdown .expand-hint .bi { transform: rotate(180deg); }
     .res-card.have {
       background: var(--green-light);
       border: 1.5px solid #b7e4c7;
@@ -223,7 +230,22 @@
       border-radius: 50%; margin-right: 4px; vertical-align: middle;
     }
 
-    /* ── Mini stats ── */
+    #res-breakdown {
+      overflow: hidden;
+      max-height: 0;
+      transition: max-height .35s ease, opacity .35s ease;
+      opacity: 0;
+    }
+    #res-breakdown.open { max-height: 600px; opacity: 1; }
+    .breakdown-row { display: flex; justify-content: space-between; align-items: flex-start; gap: .5rem; padding: .45rem 0; border-bottom: 1px solid #f1f5f9; }
+    .breakdown-row:last-child { border-bottom: none; }
+    .breakdown-label { font-size: .8rem; font-weight: 600; color: #1e293b; }
+    .breakdown-sub { font-size: .72rem; color: #94a3b8; line-height: 1.4; }
+    .breakdown-val { font-size: .82rem; font-weight: 600; color: #475569; white-space: nowrap; padding-top: .1rem; font-variant-numeric: tabular-nums; }
+    .breakdown-total .breakdown-label { font-size: .82rem; }
+    .breakdown-total .breakdown-val { font-size: .9rem; color: #1e293b; }
+    .breakdown-formula { font-size: .7rem; color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 1px 5px; font-family: 'SF Mono', 'Fira Code', monospace; white-space: nowrap; }
+    .input-highlight { outline: 2px solid #f59e0b !important; outline-offset: 3px; background-color: #fffbeb !important; border-radius: 6px; }
     .mini-stat-card {
       background: #fff;
       border-radius: 10px;
@@ -623,24 +645,27 @@
 
         <div class="row g-2 mb-3">
           <div class="col-6">
-            <div class="res-card have">
+            <div class="res-card have" onclick="toggleBreakdown('have')" title="Click for breakdown">
               <div class="res-label d-flex align-items-center gap-1">
                 <span style="display:inline-block;width:18px;height:0;border-top:2.5px solid #1a6fe8;flex-shrink:0;"></span>
                 What you'll have
               </div>
               <div class="res-amount" id="res-have">—</div>
+              <div class="expand-hint">breakdown <i class="bi bi-chevron-down"></i></div>
             </div>
           </div>
           <div class="col-6">
-            <div class="res-card need">
+            <div class="res-card need" onclick="toggleBreakdown('need')" title="Click for breakdown">
               <div class="res-label d-flex align-items-center gap-1">
                 <span style="display:inline-block;width:18px;height:0;border-top:2px dashed #d97706;flex-shrink:0;"></span>
                 What you'll need
               </div>
               <div class="res-amount" id="res-need">—</div>
+              <div class="expand-hint">breakdown <i class="bi bi-chevron-down"></i></div>
             </div>
           </div>
         </div>
+        <div id="res-breakdown" class="mb-2 px-1"></div>
 
         <!-- Progress bar -->
         <div class="d-flex justify-content-between mb-1">
@@ -732,6 +757,8 @@ const S = {
 };
 
 let _chart = null;
+let _breakdown = {};
+let _breakdownOpen = null; // 'have' | 'need' | null
 
 
 // ═══════════════════════════════════════════════════
@@ -974,6 +1001,45 @@ function setThumbLabel(id, val, text) {
   el.style.left = `calc(${pct}% + ${8 - pct * 0.16}px)`;
 }
 
+function renderBreakdownPanel(which) {
+  const rows = (_breakdown[which] || []).map(({ label, sub, formula, val, total, inputs }) =>
+    `<div class="breakdown-row${total ? ' breakdown-total' : ''}" data-inputs="${(inputs||[]).join(',')}">
+      <span>
+        <span class="breakdown-label">${label}</span><br>
+        <span class="breakdown-sub">${sub}</span>
+        ${formula ? formula.split('\n').map(l => `<br><code class="breakdown-formula">${l}</code>`).join('') : ''}
+      </span>
+      <span class="breakdown-val">${val}</span>
+    </div>`
+  ).join('');
+  $id('res-breakdown').innerHTML = rows;
+  $id('res-breakdown').querySelectorAll('.breakdown-row').forEach(row => {
+    const ids = (row.dataset.inputs || '').split(',').filter(Boolean);
+    row.addEventListener('mouseenter', () => ids.forEach(id => { const el = $id(id); if (el) el.classList.add('input-highlight'); }));
+    row.addEventListener('mouseleave', () => ids.forEach(id => { const el = $id(id); if (el) el.classList.remove('input-highlight'); }));
+  });
+}
+
+function toggleBreakdown(which) {
+  const panel = $id('res-breakdown');
+  const haveCard = document.querySelector('.res-card.have');
+  const needCard = document.querySelector('.res-card.need');
+  if (_breakdownOpen === which) {
+    // collapse
+    panel.classList.remove('open');
+    haveCard.classList.remove('active-breakdown');
+    needCard.classList.remove('active-breakdown');
+    _breakdownOpen = null;
+  } else {
+    // open or switch
+    _breakdownOpen = which;
+    renderBreakdownPanel(which);
+    panel.classList.add('open');
+    haveCard.classList.toggle('active-breakdown', which === 'have');
+    needCard.classList.toggle('active-breakdown', which === 'need');
+  }
+}
+
 function stepRetire(delta) {
   const sl = $id('slider-retire');
   sl.value = Math.min(Math.max(parseInt(sl.value) + delta, parseInt(sl.min)), parseInt(sl.max));
@@ -1026,6 +1092,59 @@ function render(r) {
   // Cards
   $id('res-have').textContent = fmtFull(r.willHave);
   $id('res-need').textContent = fmtFull(r.willNeed);
+
+  // Breakdown data (for click-to-expand)
+  const fvLump   = Math.round(S.savings * Math.pow(1 + S.preRate / 12, r.yearsAccum * 12));
+  const fvContrib = r.willHave - fvLump;
+  const monthlyC  = S.contribRetire + S.contribBrokerage;
+  const netSS     = S.ssIncome + S.otherIncome;
+  const n   = r.yearsAccum * 12;
+  const rm  = (S.preRate / 12).toFixed(5);
+  const gm  = (S.inflation / 12).toFixed(5);
+  const pm  = (S.postRate / 12).toFixed(5);
+  const nR  = r.yearsRetire * 12;
+  _breakdown = {
+    have: [
+      { label: 'Current savings',      sub: 'What you have today',
+        formula: null, inputs: ['inp-savings'],
+        val: fmtFull(S.savings) },
+      { label: 'Investment growth',    sub: `${fmtFull(S.savings)} compounding at ${(S.preRate*100).toFixed(0)}%/yr for ${r.yearsAccum} yrs`,
+        inputs: ['inp-savings', 'inp-pre-rate', 'inp-age'],
+        formula: `r = ${(S.preRate*100).toFixed(1)}% ÷ 12 = ${+(S.preRate/12).toFixed(6)}\nFV = ${fmtFull(S.savings)} × (1 + ${+(S.preRate/12).toFixed(6)})^${n} = ${fmtFull(fvLump)}\nGain = ${fmtFull(fvLump)} − ${fmtFull(S.savings)} = +${fmtFull(fvLump - S.savings)}`,
+
+        val: '+' + fmtFull(fvLump - S.savings) },
+      { label: 'Contributions',        sub: `${fmtFull(monthlyC)}/mo (retire + brokerage) invested for ${r.yearsAccum} yrs at ${(S.preRate*100).toFixed(1)}%/yr`,
+        formula: `r = ${(S.preRate*100).toFixed(1)}% ÷ 12 = ${+(S.preRate/12).toFixed(6)}\nFV = ${fmtFull(monthlyC)} × [(1 + ${+(S.preRate/12).toFixed(6)})^${n} − 1] / ${+(S.preRate/12).toFixed(6)} = ${fmtFull(fvContrib)}`,
+        inputs: ['inp-retire-contrib', 'inp-brokerage', 'inp-pre-rate', 'inp-age'],
+        val: '+' + fmtFull(fvContrib) },
+      { label: 'Total at retirement',  sub: `Savings growth + contributions at age ${S.retireAge}`,
+        formula: `${fmtFull(fvLump)} + ${fmtFull(fvContrib)} = ${fmtFull(r.willHave)}`,
+        inputs: ['inp-savings', 'inp-retire-contrib', 'inp-brokerage', 'inp-pre-rate', 'inp-age'],
+        val: fmtFull(r.willHave), total: true },
+    ],
+    need: [
+      { label: 'Monthly budget (today)',  sub: 'Your spending goal as entered',
+        formula: null, inputs: ['inp-budget'],
+        val: fmtFull(r.monthlyBudgetNow) + '/mo' },
+      { label: 'Inflated to retirement', sub: `${r.yearsAccum} yrs of ${(S.inflation*100).toFixed(0)}% inflation — what $${r.monthlyBudgetNow.toLocaleString()} buys at age ${S.retireAge}`,
+        formula: `${fmtFull(r.monthlyBudgetNow)} × (1 + ${(S.inflation*100).toFixed(0)}%)^${r.yearsAccum} = ${fmtFull(r.monthlyBudgetNominal)}/mo`,
+        inputs: ['inp-budget', 'inp-inflation', 'inp-age'],
+        val: fmtFull(r.monthlyBudgetNominal) + '/mo' },
+      { label: 'Guaranteed income',      sub: `SS + other income — reduces what portfolio must cover`,
+        formula: `${fmtFull(S.ssIncome)}/mo SS${S.otherIncome ? ` + ${fmtFull(S.otherIncome)}/mo other` : ''} = ${fmtFull(netSS)}/mo`,
+        inputs: ['inp-ss', 'inp-other'],
+        val: netSS > 0 ? '−' + fmtFull(netSS) + '/mo' : '$0/mo' },
+      { label: 'Net monthly withdrawal', sub: `Inflated budget minus guaranteed income`,
+        formula: `${fmtFull(r.monthlyBudgetNominal)} − ${fmtFull(netSS)} = ${fmtFull(r.netWithdrawal)}/mo`,
+        inputs: ['inp-budget', 'inp-inflation', 'inp-ss', 'inp-other', 'inp-age'],
+        val: fmtFull(r.netWithdrawal) + '/mo' },
+      { label: 'Lump sum needed',        sub: `PV of inflation-growing annuity over ${r.yearsRetire} yrs at ${(S.postRate*100).toFixed(0)}% post-retirement growth`,
+        formula: `PV = PMT × [1 − ((1+g)/(1+r))^${nR}] / (r−g)`,
+        inputs: ['inp-budget', 'inp-inflation', 'inp-ss', 'inp-other', 'inp-post-rate', 'inp-age'],
+        val: fmtFull(r.willNeed), total: true },
+    ],
+  };
+  if (_breakdownOpen) renderBreakdownPanel(_breakdownOpen);
 
   // Progress bar
   const pct = clamp(r.pct, 0, 200);
