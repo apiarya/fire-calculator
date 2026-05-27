@@ -2018,6 +2018,21 @@ function update() {
 // ═══════════════════════════════════════════════════
 // INIT
 // ═══════════════════════════════════════════════════
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') {
+    // Close custom modals
+    ['how-it-works-modal', 'img-zoom-modal'].forEach(id => {
+      const el = $id(id);
+      if (el && el.style.display !== 'none') el.style.display = 'none';
+    });
+    // Close any open Bootstrap popovers
+    document.querySelectorAll('[data-bs-toggle="popover"]').forEach(el => {
+      const pop = bootstrap.Popover.getInstance(el);
+      if (pop) pop.hide();
+    });
+  }
+});
+
 document.addEventListener('DOMContentLoaded', () => {
   const _defaultYear = new Date().getFullYear() + (65 - S.age);
   const _mortgageYear = new Date().getFullYear() + 15;
