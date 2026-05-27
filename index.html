@@ -71,20 +71,28 @@
       transition: background .15s;
     }
     .scenario-chip:hover { background: #dbeafe; border-color: #93c5fd; color: #1d4ed8; }
-    .scenario-chip .del { opacity:.5; margin-left:.3rem; font-size:.7rem; }
-    .scenario-chip .del:hover { opacity:1; }
+    .scenario-chip .del { margin-left:.3rem; font-size:.7rem; }
     #scenario-input-wrap input:focus { box-shadow: 0 0 0 3px rgba(29,78,216,.15); }
+
+    /* ── Share title ── */
+    #share-title-display[contenteditable]:empty:before {
+      content: attr(data-placeholder);
+      color: #94a3b8;
+      font-weight: 400;
+    }
+    #share-title-display:focus { outline: none; }
+    #share-title-display { cursor: text; }
 
     /* ── Field labels ── */
     .field-label {
-      font-size: .82rem;
+      font-size: .92rem;
       font-weight: 600;
-      color: #4a5568;
+      color: #1e293b;
       margin-bottom: .15rem;
     }
     .field-subdesc {
-      font-size: .76rem;
-      color: #64748b;
+      font-size: .84rem;
+      color: #334155;
       margin-bottom: .45rem;
       line-height: 1.45;
     }
@@ -95,6 +103,7 @@
       white-space: nowrap;
     }
     .learn-more-link:hover { text-decoration: underline; }
+    .text-muted { color: #374151 !important; }
     .popover-rich { max-width: 340px; font-size: .82rem; line-height: 1.55; }
     .popover-rich .popover-header { font-weight: 700; font-size: .85rem; }
     .popover-rich p { margin-bottom: .6rem; }
@@ -105,12 +114,12 @@
     .mode-group { display: flex; border-radius: 6px; overflow: hidden; border: 1px solid #cbd5e0; }
     .mode-btn {
       padding: .2rem .65rem;
-      font-size: .78rem;
+      font-size: .86rem;
       font-weight: 600;
       background: transparent;
       border: none;
       cursor: pointer;
-      color: #718096;
+      color: #374151;
       transition: background .15s, color .15s;
     }
     .mode-btn.active { background: var(--blue); color: #fff; }
@@ -130,7 +139,7 @@
       transition: box-shadow .15s, transform .15s;
       position: relative;
     }
-    .expand-hint { position: absolute; bottom: .1rem; right: .75rem; font-size: .65rem; color: #64748b; letter-spacing: .02em; }
+    .expand-hint { position: absolute; bottom: .1rem; right: .75rem; font-size: .65rem; color: #334155; letter-spacing: .02em; }
     .res-card.have .expand-hint { color: #4b7a5c; }
     .res-card.need .expand-hint { color: #92600a; }
     .expand-hint .bi { transition: transform .2s; display: inline-block; }
@@ -148,7 +157,7 @@
       font-weight: 700;
       text-transform: uppercase;
       letter-spacing: .05em;
-      color: #718096;
+      color: #374151;
       margin-bottom: .2rem;
     }
     .res-card.have .res-label { color: #4b7a5c; }
@@ -200,7 +209,7 @@
       display: flex;
       justify-content: space-between;
       font-size: .7rem;
-      color: #94a3b8;
+      color: #475569;
       margin-top: 2.2rem;
       padding: 0 0.5rem;
     }
@@ -270,23 +279,22 @@
     #res-breakdown {
       overflow: hidden;
       max-height: 0;
-      transition: max-height .35s ease, opacity .35s ease;
-      opacity: 0;
+      transition: max-height .35s ease;
       border-radius: 12px;
       padding: 0;
     }
-    #res-breakdown.open { max-height: 1200px; opacity: 1; padding: .6rem 1rem; }
+    #res-breakdown.open { max-height: 1200px; padding: .6rem 1rem; }
     #res-breakdown.have-bd { background: var(--green-light); border: 1.5px solid #b7e4c7; }
     #res-breakdown.need-bd { background: var(--amber-light); border: 1.5px solid #fde68a; }
     .breakdown-row { display: flex; justify-content: space-between; align-items: flex-start; gap: .5rem; padding: .45rem 0; border-bottom: 1px solid rgba(0,0,0,.06); }
     .breakdown-row:last-child { border-bottom: none; }
     .breakdown-row > span:first-child { flex: 1 1 0; min-width: 0; }
     .breakdown-label { font-size: .8rem; font-weight: 600; color: #1e293b; }
-    .breakdown-sub { font-size: .72rem; color: #475569; line-height: 1.4; }
+    .breakdown-sub { font-size: .72rem; color: #1e293b; line-height: 1.4; }
     .breakdown-val { font-size: .82rem; font-weight: 600; color: #1e293b; white-space: nowrap; padding-top: .1rem; font-variant-numeric: tabular-nums; }
     .breakdown-total .breakdown-label { font-size: .82rem; }
     .breakdown-total .breakdown-val { font-size: .9rem; color: #1e293b; }
-    .breakdown-formula { font-size: .7rem; color: #64748b; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 1px 5px; font-family: 'SF Mono', 'Fira Code', monospace; white-space: normal; word-break: break-word; display: inline-block; max-width: 100%; }
+    .breakdown-formula { font-size: .7rem; color: #334155; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 4px; padding: 1px 5px; font-family: 'SF Mono', 'Fira Code', monospace; white-space: normal; word-break: break-word; display: inline-block; max-width: 100%; }
     .input-highlight { outline: 2px solid #f59e0b !important; outline-offset: 3px; background-color: #fffbeb !important; border-radius: 6px; }
     .mini-stat-card {
       background: #fff;
@@ -295,7 +303,7 @@
       text-align: center;
       box-shadow: 0 1px 4px rgba(0,0,0,.06);
     }
-    .mini-stat-label { font-size: .72rem; color: #718096; margin-bottom: .15rem; }
+    .mini-stat-label { font-size: .72rem; color: #374151; margin-bottom: .15rem; }
     .mini-stat-val   { font-size: 1.15rem; font-weight: 800; }
 
     /* ── Input cards & section titles ── */
@@ -312,24 +320,23 @@
       transform: translateY(-1px);
     }
     .section-title {
-      font-size: .68rem;
+      font-size: .76rem;
       font-weight: 700;
       letter-spacing: .09em;
       text-transform: uppercase;
       color: var(--blue);
-      opacity: .6;
       margin: 1rem 0 .4rem;
     }
-    .section-title.st-green { color: var(--green); opacity: 1; }
-    .section-title.st-amber { color: var(--amber); opacity: 1; }
+    .section-title.st-green { color: var(--green); }
+    .section-title.st-amber { color: var(--amber); }
     .input-section-green,
     .input-section-amber { margin-bottom: .75rem; }
-    .input-section-green .input-card { background: rgba(230,247,239,.55); border-color: #b7e4c7; }
-    .input-section-amber .input-card { background: rgba(255,251,235,.8);  border-color: #fde68a; }
+    .input-section-green .input-card { background: #e6f7ef; border-color: #b7e4c7; }
+    .input-section-amber .input-card { background: #fffbeb;  border-color: #fde68a; }
 
     /* ── Equiv hint ── */
-    .equiv-hint { font-size: .74rem; color: #64748b; min-height: 1.1rem; font-weight: 500; }
-    .field-tip   { font-size: .72rem; color: #94a3b8; font-style: italic; min-height: 1rem; }
+    .equiv-hint { font-size: .82rem; color: #334155; min-height: 1.1rem; font-weight: 500; }
+    .field-tip   { font-size: .80rem; color: #475569; font-style: italic; min-height: 1rem; }
 
     /* ── Chart ── */
     #chart-area { position: relative; height: 360px; }
@@ -337,7 +344,7 @@
     /* ── Inputs ── */
     .form-control {
       border-color: #cbd5e0;
-      font-size: .9rem;
+      font-size: 1rem;
       transition: border-color .15s ease, box-shadow .15s ease;
     }
     .form-control:focus {
@@ -400,12 +407,20 @@
   <!-- Header -->
   <div class="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
     <div>
-      <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);opacity:.7;margin-bottom:1px;">FIRE Calculator</div>
-      <h1 class="fw-bold mb-0" style="font-size:1.15rem;line-height:1.2;">Find Your FIRE Date</h1>
+      <div style="font-size:.65rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--blue);margin-bottom:1px;">FIRE Calculator — Financial Independence, Retire Early</div>
+      <h1 class="fw-bold mb-0" style="font-size:1.15rem;line-height:1.2;">Find out when you can afford to retire early.</h1>
     </div>
-    <p class="mb-0" style="font-size:.7rem;color:#94a3b8;">
-      <i class="bi bi-shield-lock me-1"></i>Inputs stay in your browser &nbsp;·&nbsp; <i class="bi bi-shield-check me-1"></i>Not financial advice &nbsp;·&nbsp; <a href="https://github.com/apiarya/fire-calculator" target="_blank" rel="noopener" style="color:inherit;"><i class="bi bi-github me-1"></i>Open source</a>
-    </p>
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+      <p class="mb-0" style="font-size:.7rem;color:#475569;">
+        <i class="bi bi-shield-lock me-1"></i>Inputs stay in your browser &nbsp;·&nbsp; <i class="bi bi-shield-check me-1"></i>Not financial advice &nbsp;·&nbsp; <a href="https://github.com/apiarya/fire-calculator" target="_blank" rel="noopener" style="color:inherit;"><i class="bi bi-github me-1"></i>Open source</a>
+      </p>
+      <button onclick="document.getElementById('how-it-works-modal').style.display='flex'" title="How this calculator works"
+        style="background:#f0f7ff;border:1px solid #bfdbfe;color:#1d4ed8;padding:.3rem .8rem;border-radius:20px;cursor:pointer;font-size:.78rem;font-weight:600;white-space:nowrap;transition:background .15s,border-color .15s;"
+        onmouseover="this.style.background='#dbeafe';this.style.borderColor='#93c5fd'"
+        onmouseout="this.style.background='#f0f7ff';this.style.borderColor='#bfdbfe'">
+        <i class="bi bi-info-circle me-1"></i>How it works
+      </button>
+    </div>
   </div>
 
   <!-- Row 1: Full-width chart + results -->
@@ -418,6 +433,10 @@
             <div id="res-badge"></div>
           </div>
           <div class="d-flex align-items-center gap-2">
+            <div class="d-flex align-items-center gap-1" style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:.2rem .5rem;" onmouseenter="this.style.borderColor='#93c5fd'" onmouseleave="this.style.borderColor='#e2e8f0'">
+              <i class="bi bi-pencil" style="font-size:.7rem;color:#94a3b8;flex-shrink:0;"></i>
+              <div id="share-title-display" contenteditable="true" data-placeholder="Name this scenario…" style="font-size:.82rem;font-weight:600;color:#334155;min-width:120px;" onfocus="this.parentElement.style.borderColor='#93c5fd'" onblur="this.parentElement.style.borderColor='#e2e8f0'"></div>
+            </div>
             <button id="btn-copy-link" onclick="copyCurrentLink()" title="Copy shareable link"
               style="background:#f0f7ff;border:1px solid #bfdbfe;color:#1d4ed8;padding:.25rem .6rem;border-radius:20px;cursor:pointer;font-size:.78rem;font-weight:600;line-height:1.4;transition:background .15s,border-color .15s;"
               onmouseover="this.style.background='#dbeafe';this.style.borderColor='#93c5fd'"
@@ -454,6 +473,7 @@
                 </div>
               </div>
               <div class="res-amount" id="res-need">—</div>
+              <div class="small mt-1" id="res-swr" style="font-size:.75rem;color:#92600a;"></div>
               <div class="expand-hint">breakdown <i class="bi bi-chevron-down"></i></div>
             </div>
         <div id="res-breakdown" class="mb-2 px-1"></div>
@@ -467,8 +487,8 @@
           <div class="prog-fill" id="res-bar" style="width:0%;"></div>
         </div>
         <div class="small mb-2" id="res-gap-msg"></div>
-        <div id="res-coast" style="display:none;"></div>
-        <div class="mt-auto pt-3" id="res-assumptions" style="border-top:1px solid #f1f5f9;font-size:.75rem;color:#94a3b8;line-height:1.9;"></div>
+
+        <div class="mt-auto pt-3" id="res-assumptions" style="border-top:1px solid #f1f5f9;font-size:.75rem;color:#475569;line-height:1.9;"></div>
           </div><!-- /sidebar -->
 
           <!-- Chart + timeline -->
@@ -491,8 +511,8 @@
         </div>
         <div class="triple-wrap mb-1">
           <div class="triple-track"></div>
-          <div class="triple-seg" id="seg-working" style="background:#1d4ed8;opacity:.55;"></div>
-          <div class="triple-seg" id="seg-retired" style="background:#d97706;opacity:.6;"></div>
+          <div class="triple-seg" id="seg-working" style="background:#839eea;"></div>
+          <div class="triple-seg" id="seg-retired" style="background:#e8ad6a;"></div>
           <input type="range" id="slider-age"    min="30" max="100" value="41" oninput="onTripleSlider('age')">
           <input type="range" id="slider-retire" min="30" max="100" value="63" oninput="onTripleSlider('retire')" autofocus>
           <input type="range" id="slider-life"   min="30" max="100" value="90" oninput="onTripleSlider('life')">
@@ -519,7 +539,7 @@
         <div class="field-label" style="margin-bottom:6px;">Life events</div>
 
         <div style="display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px;">
-          <span style="font-size:11px;color:#9ca3af;align-self:center;margin-right:2px;">Quick add:</span>
+          <span style="font-size:11px;color:#374151;align-self:center;margin-right:2px;">Quick add:</span>
           <button onclick="$id('evt-label').value='Mortgage payoff';$id('evt-label').focus()" style="padding:2px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;font-size:12px;color:#475569;cursor:pointer;">Mortgage payoff</button>
 
           <button onclick="$id('evt-label').value='Kids\' college';$id('evt-label').focus()" style="padding:2px 10px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:20px;font-size:12px;color:#475569;cursor:pointer;">Kids' college</button>
@@ -561,9 +581,8 @@
             onfocus="this.select()" autocomplete="off">
           <span class="input-group-text">yrs</span>
         </div>
+        <div class="equiv-hint mt-1" id="age-hint"></div>
       </div>
-
-      <!-- Filing status -->
       <div class="input-card mb-2">
         <div class="field-label">Filing status</div>
         <div class="field-subdesc">
@@ -702,6 +721,7 @@
           <span class="input-group-text">/mo</span>
         </div>
         <div class="equiv-hint mt-1" id="budget-hint"></div>
+        <div id="budget-hint-extra" class="equiv-hint" style="margin-top:.25rem;line-height:1.7;"></div>
       </div>
 
       <div class="section-title st-amber">Guaranteed income</div>
@@ -720,7 +740,7 @@
         </div>
         <div class="input-group">
           <span class="input-group-text">$</span>
-          <input type="text" inputmode="numeric" class="form-control" id="inp-ss" value="3,500" data-min="0" data-max="10000" oninput="formatNumLive(this)" onblur="onBlurNum(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+          <input type="text" inputmode="numeric" class="form-control" id="inp-ss" data-min="0" data-max="10000" oninput="formatNumLive(this)" onblur="onBlurNum(this)" onfocus="this.select()" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
           <span class="input-group-text">/mo</span>
         </div>
         <div class="equiv-hint mt-1" id="ss-hint"></div>
@@ -769,7 +789,7 @@
           <input type="number" class="form-control" id="inp-pre-rate" value="6" min="0" max="20" step="0.1" data-min="0" data-max="20" oninput="update()" onblur="onBlurRate(this)" onfocus="this.select()" autocomplete="off">
           <span class="input-group-text">%</span>
         </div>
-        <div class="equiv-hint mt-1">&#x2191; Higher = larger projected balance. Use 6&ndash;7% for a balanced portfolio.</div>
+        <div class="equiv-hint mt-1" id="pre-rate-hint"></div>
       </div>
 
       <!-- Post-retirement return -->
@@ -788,7 +808,7 @@
           <input type="number" class="form-control" id="inp-post-rate" value="5" min="0" max="20" step="0.1" data-min="0" data-max="20" oninput="update()" onblur="onBlurRate(this)" onfocus="this.select()" autocomplete="off">
           <span class="input-group-text">%</span>
         </div>
-        <div class="equiv-hint mt-1">&#x2193; Lower = safer but requires a larger portfolio. Default 5%.</div>
+        <div class="equiv-hint mt-1" id="post-rate-hint"></div>
       </div>
 
       <!-- Inflation -->
@@ -807,7 +827,7 @@
           <input type="number" class="form-control" id="inp-inflation" value="3" min="0" max="15" step="0.1" data-min="0" data-max="15" oninput="update()" onblur="onBlurRate(this)" onfocus="this.select()" autocomplete="off">
           <span class="input-group-text">%</span>
         </div>
-        <div class="equiv-hint mt-1">&#x2191; Higher = larger required portfolio. Prices double every 24 yrs at 3%.</div>
+        <div class="equiv-hint mt-1" id="inflation-hint"></div>
       </div>
     </div>
 
@@ -840,7 +860,7 @@ const S = {
   contribBrokerage: 300,
   budgetVal:   5500,
   otherIncome: 0,
-  ssIncome:    3500,
+  ssIncome:    2366,
   // Advanced — retireAge set from slider on first update()
   retireAge:   0,
   lifeExpect:  90,
@@ -1124,7 +1144,12 @@ function renderBreakdownPanel(which) {
       <span class="breakdown-val">${val}</span>
     </div>`
   ).join('');
-  $id('res-breakdown').innerHTML = rows;
+
+  const extra = which === 'need'
+    ? `<div style="margin-top:.6rem;font-size:.8rem;"><a href="#" class="learn-more-link" onclick="event.preventDefault();document.getElementById('how-it-works-modal').style.display='flex';">How is this calculated? &rarr;</a></div>`
+    : '';
+
+  $id('res-breakdown').innerHTML = rows + extra;
   $id('res-breakdown').querySelectorAll('.breakdown-row').forEach(row => {
     const ids = (row.dataset.inputs || '').split(',').filter(Boolean);
     row.addEventListener('mouseenter', () => ids.forEach(id => { const el = $id(id); if (el) el.classList.add('input-highlight'); }));
@@ -1202,7 +1227,10 @@ function render(r) {
   // Header
   const _yrs = S.retireAge - S.age;
   const _retireYear = new Date().getFullYear() + _yrs;
-  $id('res-years-to-fire').textContent = _yrs > 0 ? `Retire at ${S.retireAge} · ${_yrs} yr${_yrs !== 1 ? 's' : ''} to go · ${_retireYear}` : `Retirement age reached · ${_retireYear}`;
+  const _retireYrs = S.lifeExpect - S.retireAge;
+  $id('res-years-to-fire').textContent = _yrs > 0
+    ? `Age ${S.age} → retire at ${S.retireAge} (${_retireYear}) in ${_yrs} yr${_yrs !== 1 ? 's' : ''} · ${_retireYrs} yr${_retireYrs !== 1 ? 's' : ''} in retirement ·`
+    : `Retirement age reached (${_retireYear}) · ${_retireYrs} yr${_retireYrs !== 1 ? 's' : ''} in retirement ·`;
   $id('budget-retire-age-inline').textContent = S.retireAge;
 
   // Cards
@@ -1282,16 +1310,12 @@ function render(r) {
 
   // Status badge
   if (r.gap >= 0) {
-    $id('res-badge').innerHTML = `<span class="badge rounded-pill px-3 py-2"
-      style="background:#e6f7ef;color:var(--green);font-size:.78rem;">
-      <i class="bi bi-check-circle-fill me-1"></i>On track</span>`;
+    $id('res-badge').innerHTML = `<span style="font-size:1.1rem;font-weight:700;color:var(--green);"><i class="bi bi-check-circle-fill me-1"></i>On track</span>`;
     $id('slider-retire').style.setProperty('--retire-thumb-color', 'var(--green)');
     $id('seg-retired').style.background = 'var(--green)';
     $id('lbl-retire').style.background = 'var(--green)';
   } else {
-    $id('res-badge').innerHTML = `<span class="badge rounded-pill px-3 py-2"
-      style="background:#fffbeb;color:var(--amber);font-size:.78rem;">
-      <i class="bi bi-exclamation-triangle-fill me-1"></i>Shortfall</span>`;
+    $id('res-badge').innerHTML = `<span style="font-size:1.1rem;font-weight:700;color:var(--amber);"><i class="bi bi-exclamation-triangle-fill me-1"></i>Shortfall</span>`;
     $id('slider-retire').style.setProperty('--retire-thumb-color', '#d97706');
     $id('seg-retired').style.background = '#d97706';
     $id('lbl-retire').style.background = '#d97706';
@@ -1348,29 +1372,22 @@ function render(r) {
       </div>`;
   }
 
-  // Coast FI
-  const _coastAge = calcCoastAge(r);
-  const _coastEl = $id('res-coast');
-  if (_coastAge !== null) {
-    const _coastYear = new Date().getFullYear() + (_coastAge - S.age);
-    const _coastMsg = _coastAge <= S.age
-      ? 'You\'ve already reached Coast FI — your savings grow to your goal without another dollar contributed.'
-      : `Stop contributing at <strong>age ${_coastAge}</strong> (${_coastYear}) and your portfolio reaches your goal on its own.`;
-    _coastEl.style.display = '';
-    _coastEl.innerHTML = `<div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:8px;padding:8px 10px;margin-bottom:.5rem;">
-      <div style="font-size:.72rem;font-weight:700;color:#15803d;letter-spacing:.05em;text-transform:uppercase;margin-bottom:3px;">Coast FI</div>
-      <div style="font-size:.82rem;color:#334155;line-height:1.5;">${_coastMsg}</div>
-    </div>`;
-  } else {
-    _coastEl.style.display = 'none';
-  }
-
   // Key assumptions
+  const _swrYears = Math.max(0, S.retireAge - S.age);
+  const _netMonthlyRet = Math.max(0, S.budgetVal - S.ssIncome - S.otherIncome) * Math.pow(1 + S.inflation, _swrYears);
+  const _impliedSWR = r.willNeed > 0 ? (_netMonthlyRet * 12 / r.willNeed * 100).toFixed(1) : '4.0';
+  $id('res-swr').innerHTML = `Implied SWR <strong>${_impliedSWR}%</strong> <a href="#" class="learn-more-link" tabindex="-1" data-bs-toggle="popover" data-bs-trigger="click" data-bs-placement="top" data-bs-custom-class="popover-rich" data-bs-html="true" data-bs-title="Implied Safe Withdrawal Rate" data-bs-content="&lt;p&gt;The &lt;strong&gt;Safe Withdrawal Rate (SWR)&lt;/strong&gt; is the percentage of your portfolio you can withdraw each year without running out of money.&lt;/p&gt;&lt;p&gt;The classic &lt;strong&gt;4% rule&lt;/strong&gt; (Trinity Study) says you can safely withdraw 4% of your nest egg each year, adjusted for inflation, over a 30-year retirement.&lt;/p&gt;&lt;p&gt;This calculator shows your &lt;strong&gt;implied SWR&lt;/strong&gt; — the actual rate your plan requires based on your spending, Social Security, and retirement horizon. Early retirees often need a lower SWR (3–3.5%) since their money must last 40+ years.&lt;/p&gt;&lt;p&gt;&lt;a href='https://www.investopedia.com/terms/s/safe-withdrawal-rate-swr.asp' target='_blank' rel='noopener'&gt;Learn about SWR &amp;rarr; Investopedia&lt;/a&gt;&lt;/p&gt;" onclick="event.preventDefault(); bootstrap.Popover.getOrCreateInstance(this).toggle();">Learn more &rarr;</a>`;
+  const _ssLabel = !$id('inp-ss').value.trim() ? `${S.ssIncome.toLocaleString()}/mo (estimated)` : `${S.ssIncome.toLocaleString()}/mo`;
   $id('res-assumptions').innerHTML =
-    `<div><span style="font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;">Assumptions</span></div>` +
-    `<div>Pre-ret. return <strong>${(S.preRate*100).toFixed(1)}%</strong> &nbsp;·&nbsp; Post-ret. <strong>${(S.postRate*100).toFixed(1)}%</strong></div>` +
-    `<div>Inflation <strong>${(S.inflation*100).toFixed(1)}%</strong> &nbsp;·&nbsp; Safe withdrawal <strong>4%</strong></div>`;
-
+    `<div><span style="font-size:.7rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;">Settings</span></div>` +
+    `<div style="margin-top:.35rem;margin-bottom:.1rem;font-size:.68rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">Profile</div>` +
+    `<div>Age <strong>${S.age}</strong> &nbsp;·&nbsp; ${S.married ? 'Married' : 'Single'} &nbsp;·&nbsp; Income <strong>${fmtFull(S.income)}</strong></div>` +
+    `<div>Savings <strong>${fmtFull(S.savings)}</strong> &nbsp;·&nbsp; Contributions <strong>${fmtFull(monthlyC)}/mo</strong></div>` +
+    `<div style="margin-top:.35rem;margin-bottom:.1rem;font-size:.68rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">Retirement</div>` +
+    `<div>Budget <strong>${fmtFull(S.budgetVal)}/mo</strong> &nbsp;·&nbsp; SS <strong>${_ssLabel}</strong></div>` +
+    (S.otherIncome ? `<div>Other income <strong>${fmtFull(S.otherIncome)}/mo</strong></div>` : '') +
+    `<div style="margin-top:.35rem;margin-bottom:.1rem;font-size:.68rem;font-weight:600;color:#94a3b8;text-transform:uppercase;letter-spacing:.05em;">Rates</div>` +
+    `<div>Pre-ret. <strong>${(S.preRate*100).toFixed(1)}%</strong> &nbsp;·&nbsp; Post-ret. <strong>${(S.postRate*100).toFixed(1)}%</strong> &nbsp;·&nbsp; Inflation <strong>${(S.inflation*100).toFixed(1)}%</strong></div>`;
   // Equiv hints
   renderHints(r);
 
@@ -1401,20 +1418,43 @@ function calcCoastAge(r) {
 function renderHints(r) {
   const monthlyIncome = S.income / 12;
 
+  // Age hint — birth year, generation, Medicare
+  const _birthYear = new Date().getFullYear() - S.age;
+  const _gen = _birthYear >= 1997 ? 'Gen Z'
+    : _birthYear >= 1981 ? 'Millennial'
+    : _birthYear >= 1965 ? 'Gen X'
+    : _birthYear >= 1946 ? 'Boomer'
+    : 'Silent Generation';
+  const _medicareYear = _birthYear + 65;
+  const _ssAge = _birthYear >= 1960 ? 67 : _birthYear >= 1955 ? 66.5 : 66;
+  const _ssYear = _birthYear + _ssAge;
+  $id('age-hint').innerHTML = S.age > 0
+    ? `<div>Born ~${_birthYear} &nbsp;·&nbsp; ${_gen}</div><div>Medicare at 65 (${_medicareYear})</div><div>Full SS at ${_ssAge} (${_ssYear})</div>`
+    : '';
+
   // Income
-  $id('income-hint').textContent = monthlyIncome > 0
-    ? `= $${Math.round(monthlyIncome).toLocaleString()}/month gross`
+  const _hourly = monthlyIncome > 0 ? (S.income / 2080).toFixed(0) : 0;
+  const _ltcgRate = S.married
+    ? (S.income > 600050 ? '20%' : S.income > 96700 ? '15%' : '0%')
+    : (S.income > 533400 ? '20%' : S.income > 48350 ? '15%' : '0%');
+  $id('income-hint').innerHTML = monthlyIncome > 0
+    ? `<div>= $${Math.round(monthlyIncome).toLocaleString()}/month gross</div><div>≈ $${_hourly}/hr (2,080 hrs/yr)</div><div>LTCG tax rate: <strong>${_ltcgRate}</strong></div>`
     : '';
 
   // Filing status note
-  $id('filing-note').textContent = S.married
-    ? 'All inputs are household combined totals.'
-    : 'Enter your individual amounts.';
+  $id('filing-note').innerHTML = S.married
+    ? `<div>All inputs are household combined totals.</div><div>2026 std. deduction: <strong>$30,000</strong></div><div>Max 401k+IRA+HSA: <strong>$69,550/yr</strong> (both)</div><div>0% LTCG up to <strong>$96,700</strong>/yr</div>`
+    : `<div>Enter your individual amounts.</div><div>2026 std. deduction: <strong>$15,000</strong></div><div>Max 401k+IRA+HSA: <strong>$34,800/yr</strong></div><div>0% LTCG up to <strong>$48,350</strong>/yr</div>`;
 
-  // Savings — wealth multiple
+  // Savings — wealth multiple + Fidelity benchmark
   const wealthMult = S.income > 0 ? (S.savings / S.income).toFixed(1) : '—';
-  $id('savings-hint').textContent = S.savings > 0
-    ? `= ${wealthMult}× your annual income`
+  const _fidTarget = S.age <= 30 ? 1 : S.age <= 35 ? 2 : S.age <= 40 ? 3
+    : S.age <= 45 ? 4 : S.age <= 50 ? 6 : S.age <= 55 ? 7 : S.age <= 60 ? 8 : 10;
+  const _fidActual = S.income > 0 ? S.savings / S.income : 0;
+  const _fidStatus = _fidActual >= _fidTarget ? '✓ on track' : `target is ${_fidTarget}×`;
+  const _yearsExpenses = (S.budgetVal > 0 && S.savings > 0) ? (S.savings / (S.budgetVal * 12)).toFixed(1) : null;
+  $id('savings-hint').innerHTML = S.savings > 0
+    ? `<div>= ${wealthMult}× your annual income</div><div>Fidelity rule at ${S.age}: <strong>${_fidTarget}×</strong> — ${_fidStatus}</div>${_yearsExpenses ? `<div>= ${_yearsExpenses} yrs of current expenses</div>` : ''}`
     : '';
 
   // Contributions
@@ -1435,28 +1475,35 @@ function renderHints(r) {
     : Math.round((23500 + 46500 + 7000 + 4300) / 12); // $6,775/mo
   const retirePct = monthlyIncome > 0
     ? (S.contribRetire / monthlyIncome * 100).toFixed(1) : '0.0';
-  $id('retire-contrib-hint').textContent = `= ${retirePct}% of monthly income · $${(S.contribRetire * 12).toLocaleString()} annually`;
+  $id('retire-contrib-hint').innerHTML = `<div>= ${retirePct}% of monthly income &nbsp;·&nbsp; $${(S.contribRetire * 12).toLocaleString()}/yr</div>`;
   const overMax  = S.contribRetire > MAX_MEGA;
   const atMega   = S.contribRetire >= MAX_STD && S.contribRetire <= MAX_MEGA;
   const atStd    = S.contribRetire >= MAX_STD * 0.95 && S.contribRetire < MAX_MEGA;
-  $id('retire-contrib-tip').textContent = overMax
+  $id('retire-contrib-tip').innerHTML = overMax
     ? `Exceeds 2026 IRS limits ($${MAX_MEGA.toLocaleString()}/mo max with mega backdoor)`
     : atMega
-    ? '\uD83D\uDD25 Maxed incl. mega backdoor Roth \u2014 top of IRS limits'
+    ? '🔥 Maxed incl. mega backdoor Roth — top of IRS limits'
     : atStd
-    ? '\u2713 Maxed standard limits (401k + IRA + HSA)'
-    : `Standard max: $${MAX_STD.toLocaleString()}/mo \u00b7 Mega backdoor: $${MAX_MEGA.toLocaleString()}/mo`;
+    ? '✓ Maxed standard limits (401k + IRA + HSA)'
+    : `<div>Standard max: $${MAX_STD.toLocaleString()}/mo</div><div>Mega backdoor: $${MAX_MEGA.toLocaleString()}/mo</div>`;
 
   const ltcg0 = S.married ? '$94,050' : '$47,025';
   const brokeragePct = monthlyIncome > 0
     ? (S.contribBrokerage / monthlyIncome * 100).toFixed(1) : '0.0';
-  $id('brokerage-hint').textContent = `= ${brokeragePct}% of monthly income · $${(S.contribBrokerage * 12).toLocaleString()} annually`;
+  $id('brokerage-hint').innerHTML = `<div>= ${brokeragePct}% of monthly income &nbsp;·&nbsp; $${(S.contribBrokerage * 12).toLocaleString()}/yr</div>`;
   // Budget
   const budgetPct = monthlyIncome > 0
     ? (S.budgetVal / monthlyIncome * 100).toFixed(1)
     : '0.0';
   $id('budget-field-label').textContent = `Monthly expenses starting at ${S.retireAge}`;
-  $id('budget-hint').textContent = `= ${budgetPct}% of monthly income · $${(S.budgetVal * 12).toLocaleString()} annually`;
+  $id('budget-hint').innerHTML = `<div>= ${budgetPct}% of monthly income &nbsp;·&nbsp; $${(S.budgetVal * 12).toLocaleString()}/yr</div>`;
+  const _yearsToRet = Math.max(0, S.retireAge - S.age);
+  const _budgetInflated = Math.round(S.budgetVal * Math.pow(1 + S.inflation, _yearsToRet));
+  const _netOfSSInflated = Math.max(0, _budgetInflated - S.ssIncome - S.otherIncome);
+  $id('budget-hint-extra').innerHTML =
+    `<div>Inflation-adjusted &nbsp;<strong>$${_budgetInflated.toLocaleString()}/mo</strong></div>` +
+    `<div>After SS activated &nbsp;<strong>$${_netOfSSInflated.toLocaleString()}/mo</strong></div>` +
+    (r && r.willNeed > 0 ? `<div>Lump sum needed &nbsp;<strong>${fmtFull(r.willNeed)}</strong> &nbsp;<a href="#" class="learn-more-link" onclick="event.preventDefault();document.getElementById('how-it-works-modal').style.display='flex';">How? &rarr;</a></div>` : '');
 
   // SS hint
   const ssEst = S.married
@@ -1465,27 +1512,44 @@ function renderHints(r) {
   const ssFieldBlank = !$id('inp-ss').value.trim();
   $id('inp-ss').placeholder = ssFieldBlank ? `${ssEst.toLocaleString()} (estimated)` : 'auto';
   if (S.married) {
-    $id('ss-hint').textContent = ssFieldBlank
-      ? `\u2248 $${ssEst.toLocaleString()}/mo combined est. (both spouses at \u00bd income each)`
-      : `= $${readNum('inp-ss').toLocaleString()}/mo \u00b7 dual-earner est. was $${ssEst.toLocaleString()}/mo`;
+    $id('ss-hint').innerHTML = ssFieldBlank
+      ? `<div>≈ $${ssEst.toLocaleString()}/mo combined est. (both spouses at ½ income each)</div>`
+      : `<div>= $${readNum('inp-ss').toLocaleString()}/mo</div><div>dual-earner est. was $${ssEst.toLocaleString()}/mo</div>`;
     $id('ss-tip').textContent = ssFieldBlank
       ? 'Assumes both spouses earn equally. Override with your actual combined SSA amounts.'
       : 'Clear to restore auto-estimate.';
   } else {
-    $id('ss-hint').textContent = ssFieldBlank
-      ? `= $${ssEst.toLocaleString()}/mo estimated (SSA bend-point formula)`
-      : `= $${readNum('inp-ss').toLocaleString()}/mo \u00b7 est. was $${ssEst.toLocaleString()}/mo`;
+    $id('ss-hint').innerHTML = ssFieldBlank
+      ? `<div>= $${ssEst.toLocaleString()}/mo estimated (SSA bend-point formula)</div>`
+      : `<div>= $${readNum('inp-ss').toLocaleString()}/mo</div><div>est. was $${ssEst.toLocaleString()}/mo</div>`;
     $id('ss-tip').textContent = ssFieldBlank
-      ? 'Edit to override \u00b7 verify your actual amount at ssa.gov'
+      ? 'Edit to override · verify your actual amount at ssa.gov'
       : 'Clear to restore auto-estimate.';
   }
 
   // Other income
   const totalGuaranteed = S.ssIncome + S.otherIncome;
   const portfolioReduction = Math.round(S.otherIncome * 300);
-  $id('other-income-hint').textContent = S.otherIncome > 0
-    ? `= $${S.otherIncome.toLocaleString()}/mo · reduces portfolio by ~$${portfolioReduction.toLocaleString()}`
+  $id('other-income-hint').innerHTML = S.otherIncome > 0
+    ? `<div>= $${S.otherIncome.toLocaleString()}/mo</div><div>reduces portfolio by ~$${portfolioReduction.toLocaleString()}</div>`
     : '';
+
+  // Rate & inflation hints
+  const _preDouble  = S.preRate  > 0 ? (72 / (S.preRate  * 100)).toFixed(1) : '—';
+  const _postDouble = S.postRate > 0 ? (72 / (S.postRate * 100)).toFixed(1) : '—';
+  const _inflDouble = S.inflation > 0 ? (72 / (S.inflation * 100)).toFixed(1) : '—';
+  const _realPre    = ((S.preRate  - S.inflation) * 100).toFixed(1);
+  const _realPost   = ((S.postRate - S.inflation) * 100).toFixed(1);
+  const _retYrs     = Math.max(0, S.retireAge - S.age);
+  const _budgetFuture = S.budgetVal > 0 && _retYrs > 0
+    ? Math.round(S.budgetVal * Math.pow(1 + S.inflation, _retYrs)) : null;
+  $id('pre-rate-hint').innerHTML =
+    `<div>↑ Higher = larger projected balance</div><div>Doubles every <strong>${_preDouble} yrs</strong> (Rule of 72)</div><div>Real return (after inflation): <strong>${_realPre}%</strong></div>`;
+  $id('post-rate-hint').innerHTML =
+    `<div>↓ Lower = safer but requires a larger portfolio</div><div>Doubles every <strong>${_postDouble} yrs</strong> (Rule of 72)</div><div>Real return (after inflation): <strong>${_realPost}%</strong></div>`;
+  $id('inflation-hint').innerHTML =
+    `<div>Prices double every <strong>${_inflDouble} yrs</strong> at ${(S.inflation*100).toFixed(1)}%</div>` +
+    (_budgetFuture ? `<div>Your $${S.budgetVal.toLocaleString()}/mo budget → <strong>$${_budgetFuture.toLocaleString()}/mo</strong> at ${S.retireAge}</div>` : '');
 }
 
 // ═══════════════════════════════════════════════════
@@ -1518,7 +1582,11 @@ function restoreInputs(v) {
 }
 
 function copyCurrentLink() {
-  const url = buildShareURL(captureInputs());
+  const titleEl = $id('share-title-display');
+  const title = titleEl.textContent.trim() || 'My FIRE Plan';
+  const inputs = captureInputs();
+  if (title) inputs['_title'] = title;
+  const url = buildShareURL(inputs);
   const btn = $id('btn-copy-link');
   const defaultStyle = 'background:#f0f7ff;border:1px solid #bfdbfe;color:#1d4ed8;padding:.25rem .6rem;border-radius:20px;cursor:pointer;font-size:.78rem;font-weight:600;line-height:1.4;transition:background .15s,border-color .15s;';
   navigator.clipboard.writeText(url).then(() => {
@@ -1964,6 +2032,10 @@ document.addEventListener('DOMContentLoaded', () => {
     v['slider-age']    = _params.get('slider-age')    || '43';
     v['slider-retire'] = _params.get('slider-retire') || '58';
     v['slider-life']   = _params.get('slider-life')   || '90';
+    const _sharedTitle = _params.get('_title');
+    if (_sharedTitle) {
+      $id('share-title-display').textContent = _sharedTitle;
+    }
     try {
       const leRaw = _params.get('le');
       if (leRaw) {
@@ -1979,6 +2051,8 @@ document.addEventListener('DOMContentLoaded', () => {
     lifeEvents = [{ label: 'Medicare', year: _defaultYear }];
     renderEvtChips();
     update();
+    // Set default title
+    $id('share-title-display').textContent = 'My FIRE Plan 1';
   }
   // Init all popovers
   document.querySelectorAll('[data-bs-toggle="popover"]').forEach(el => {
@@ -1994,6 +2068,73 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 });
 </script>
+<!-- How it works modal -->
+<div id="how-it-works-modal" style="display:none;position:fixed;inset:0;z-index:9998;background:rgba(0,0,0,.55);align-items:center;justify-content:center;padding:1.5rem;" onclick="if(event.target===this)this.style.display='none';">
+  <div style="position:relative;background:#fff;border-radius:14px;max-width:680px;width:100%;max-height:88vh;overflow-y:auto;box-shadow:0 16px 56px rgba(0,0,0,.35);">
+    <div style="padding:1.5rem 2rem .75rem;border-bottom:1px solid #f1f5f9;position:sticky;top:0;background:#fff;z-index:1;">
+      <div style="font-size:1.15rem;font-weight:700;color:#1e293b;"><i class="bi bi-calculator me-2" style="color:var(--blue);"></i>How this calculator works</div>
+      <button onclick="document.getElementById('how-it-works-modal').style.display='none'" style="position:absolute;top:1rem;right:1.25rem;background:none;border:none;font-size:1.5rem;color:#94a3b8;cursor:pointer;line-height:1;" aria-label="Close">&times;</button>
+    </div>
+    <div style="padding:1.25rem 2rem 2rem;font-size:.88rem;color:#334155;line-height:1.8;">
+
+      <div style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin-bottom:.5rem;">Phase 1 — Accumulation</div>
+      <p>While you work, your savings and monthly contributions compound at your pre-retirement return rate. Each year's contributions grow at your raise rate too.</p>
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:.6rem 1rem;margin-bottom:1rem;font-family:monospace;font-size:.82rem;line-height:1.9;">
+        FV<sub>savings</sub> = Savings × (1 + r/12)<sup>n</sup><br>
+        FV<sub>contributions</sub> = PMT × [(1 + r/12)<sup>n</sup> − 1] / (r/12)<br>
+        <span style="color:#64748b;">r = pre-retirement return &nbsp;·&nbsp; n = months to retirement</span>
+      </div>
+
+      <div style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin-bottom:.5rem;">Phase 2 — How much you'll need</div>
+      <p>This is the central calculation. Instead of the simple <strong>25× rule</strong>, we use the <strong>Present Value of a Growing Annuity</strong> — a formula that accounts for your exact retirement length, your post-retirement return, and inflation-growing withdrawals.</p>
+      <div style="text-align:center;margin:.75rem 0;">
+        <img src="pv.png" alt="PV formula" style="max-width:100%;height:auto;border-radius:6px;cursor:zoom-in;" onclick="(function(){ const m=document.getElementById('img-zoom-modal'); document.getElementById('img-zoom-src').src='pv.png'; document.getElementById('img-zoom-caption').textContent='Present Value of a Growing Annuity'; m.style.display='flex'; })();">
+      </div>
+      <div style="background:#f8fafc;border:1px solid #e2e8f0;border-radius:6px;padding:.6rem 1rem;margin-bottom:1rem;font-family:monospace;font-size:.82rem;line-height:1.9;">
+        PMT = your monthly budget, inflated to retirement day<br>
+        r &nbsp;&nbsp;= post-retirement monthly return<br>
+        g &nbsp;&nbsp;= monthly inflation rate<br>
+        n &nbsp;&nbsp;= months in retirement (life expectancy − retire age)
+      </div>
+
+      <div style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin-bottom:.5rem;">Social Security — two-phase split</div>
+      <p>If you retire <em>before</em> age 67, Social Security hasn't started yet. The calculator handles this with two segments:</p>
+      <ul style="padding-left:1.25rem;">
+        <li><strong>Phase A (retire → 67):</strong> full inflated budget, no SS offset — PV'd over that window.</li>
+        <li><strong>Phase B (67 → life expectancy):</strong> budget minus SS, discounted back to retirement day.</li>
+      </ul>
+      <p>Both phases use the same growing-annuity formula and are combined into a single lump-sum target. This is more accurate than subtracting SS from the monthly budget before multiplying by 25.</p>
+
+      <div style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin-bottom:.5rem;">Why not the 25× rule?</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:.5rem;margin-bottom:1rem;">
+        <div style="background:#fff7ed;border:1px solid #fed7aa;border-radius:6px;padding:.6rem .85rem;">
+          <div style="font-weight:700;color:#92400e;margin-bottom:.25rem;">25× rule</div>
+          <div style="font-size:.8rem;color:#78350f;line-height:1.7;">Fixed 30-yr horizon<br>Ignores inflation growth<br>No SS timing<br>One-size 4% SWR</div>
+        </div>
+        <div style="background:#f0fdf4;border:1px solid #bbf7d0;border-radius:6px;padding:.6rem .85rem;">
+          <div style="font-weight:700;color:#14532d;margin-bottom:.25rem;">This calculator</div>
+          <div style="font-size:.8rem;color:#166534;line-height:1.7;">Your actual lifespan<br>Monthly inflation compounding<br>SS timing baked in<br>Your exact return rates</div>
+        </div>
+      </div>
+
+      <div style="font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:#94a3b8;margin-bottom:.5rem;">Assumptions &amp; limitations</div>
+      <ul style="padding-left:1.25rem;color:#475569;">
+        <li>Returns are nominal (before inflation) and assumed constant throughout each phase.</li>
+        <li>Social Security is claimed at 67 (full retirement age for those born 1960+).</li>
+        <li>All figures are in today's dollars unless labeled otherwise.</li>
+        <li>No taxes, fees, or sequence-of-returns risk are modeled — treat results as a planning estimate, not a guarantee.</li>
+      </ul>
+    </div>
+  </div>
+</div>
+<!-- Image zoom modal -->
+<div id="img-zoom-modal" style="display:none;position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.72);cursor:zoom-out;align-items:center;justify-content:center;padding:2rem;" onclick="document.getElementById('img-zoom-modal').style.display='none';">
+  <div style="position:relative;background:#fff;border-radius:12px;padding:2rem 2.25rem 1.25rem;box-shadow:0 12px 48px rgba(0,0,0,.45);max-width:min(680px,88vw);width:100%;cursor:default;" onclick="event.stopPropagation();">
+    <button onclick="document.getElementById('img-zoom-modal').style.display='none';" style="position:absolute;top:.65rem;right:.85rem;background:none;border:none;font-size:1.5rem;color:#94a3b8;cursor:pointer;line-height:1;" aria-label="Close">&times;</button>
+    <img id="img-zoom-src" src="" alt="" style="width:100%;height:auto;display:block;">
+    <div id="img-zoom-caption" style="margin-top:.75rem;font-size:.8rem;color:#64748b;text-align:center;font-weight:500;"></div>
+  </div>
+</div>
 <!-- Cloudflare Web Analytics --><script defer src='https://static.cloudflareinsights.com/beacon.min.js' data-cf-beacon='{"token": "66e8a9f6a3464e249598684c105ae08c"}'></script><!-- End Cloudflare Web Analytics --> <!-- gitleaks:allow -->
 </body>
 </html>

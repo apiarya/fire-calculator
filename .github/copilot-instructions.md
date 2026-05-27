@@ -77,7 +77,7 @@ fire-calculator/
 const S = {
   married: false, age: 41, income: 95000, savings: 42000,
   contribRetire: 1500, contribBrokerage: 300, budgetVal: 5500,
-  otherIncome: 0, ssIncome: 3500,
+  otherIncome: 0, ssIncome: 2366,
   retireAge: 0,  // set from slider on first update()
   lifeExpect: 90,
   preRate: 0.06, postRate: 0.05, inflation: 0.03, raise: 0.00
